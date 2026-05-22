@@ -1,0 +1,121 @@
+@import url('https://fonts.bunny.net/css?family=poppins:400,500,600,700,800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@layer base {
+    :root {
+        --brand-primary: #0a3d91;
+        --brand-navy: #081f4d;
+        --brand-gold: #f5b400;
+        --ui-bg: #f4f7fb;
+        --ui-secondary: #6b7280;
+        --ui-success: #22c55e;
+        --ui-warning: #f59e0b;
+        --ui-danger: #ef4444;
+        --ui-info: #3b82f6;
+    }
+
+    html {
+        font-family: 'Poppins', 'Inter', system-ui, sans-serif;
+        background: var(--ui-bg);
+    }
+
+    body {
+        background:
+            radial-gradient(circle at top left, rgba(10, 61, 145, 0.08), transparent 34%),
+            radial-gradient(circle at top right, rgba(245, 180, 0, 0.12), transparent 28%),
+            var(--ui-bg);
+        color: #0f172a;
+        min-height: 100vh;
+    }
+
+    input,
+    select,
+    textarea,
+    button {
+        font: inherit;
+    }
+}
+
+@layer components {
+    .brand-shell {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .brand-shell::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background:
+            linear-gradient(135deg, rgba(10, 61, 145, 0.04), transparent 34%),
+            linear-gradient(315deg, rgba(245, 180, 0, 0.08), transparent 24%);
+    }
+
+    .brand-card {
+        border: 1px solid rgba(148, 163, 184, 0.32);
+        border-radius: 1.5rem;
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 18px 40px -30px rgba(8, 31, 77, 0.42);
+        backdrop-filter: blur(12px);
+    }
+
+    .brand-surface {
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        background: rgba(255, 255, 255, 0.96);
+        box-shadow: 0 14px 30px -26px rgba(8, 31, 77, 0.28);
+    }
+
+    .brand-input {
+        border-color: rgb(203 213 225);
+        background-color: rgb(255 255 255);
+        color: #0f172a;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+    }
+
+    .brand-input:focus {
+        border-color: var(--brand-primary);
+        box-shadow: 0 0 0 3px rgba(10, 61, 145, 0.16);
+        outline: none;
+    }
+
+    .brand-btn-primary {
+        @apply inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-medium text-white transition;
+        background: linear-gradient(135deg, var(--brand-primary), #0b4ba9);
+        box-shadow: 0 12px 24px -16px rgba(10, 61, 145, 0.72);
+    }
+
+    .brand-btn-primary:hover {
+        background: linear-gradient(135deg, var(--brand-navy), var(--brand-primary));
+    }
+
+    .brand-btn-secondary {
+        @apply inline-flex items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-medium transition;
+        border-color: rgb(203 213 225);
+        background: rgba(255, 255, 255, 0.9);
+        color: #334155;
+    }
+
+    .brand-btn-secondary:hover {
+        background: rgb(248 250 252);
+        color: #0f172a;
+    }
+
+    .brand-btn-danger {
+        @apply inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-medium text-white transition;
+        background: linear-gradient(135deg, var(--ui-danger), #dc2626);
+        box-shadow: 0 12px 24px -16px rgba(239, 68, 68, 0.7);
+    }
+
+    .brand-badge {
+        @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold;
+    }
+}
+
+[x-cloak] {
+    display: none !important;
+}
