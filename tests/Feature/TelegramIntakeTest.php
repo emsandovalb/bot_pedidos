@@ -5,9 +5,9 @@ namespace Tests\Feature;
 use App\Models\Branch;
 use App\Models\Draw;
 use App\Models\IncomingMessage;
-use App\Models\Order;
 use App\Models\IntakeRequest;
 use App\Models\MessageResponse;
+use App\Models\Order;
 use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -168,7 +168,7 @@ class TelegramIntakeTest extends TestCase
     }
 
     #[DataProvider('telegramCommandProvider')]
-    public function test_telegram_commands_do_not_create_requests_and_send_help(string $command, string $expectedText): void
+    public function test_telegram_commands_do_not_create_requests_and_send_help(string $command, string $expectedNeedle): void
     {
         [, $branch] = $this->makeOrgWithTelegramBranchAndOwner();
         $update = $this->telegramUpdate(9006, 4006, $command, 'botuser', 'Bot User');
@@ -182,15 +182,22 @@ class TelegramIntakeTest extends TestCase
         $this->assertDatabaseCount('requests', 0);
         $this->assertDatabaseCount('message_responses', 0);
 
-        Http::assertSent(function ($request) use ($expectedText): bool {
+        Http::assertSent(function ($request) use ($expectedNeedle): bool {
+            $data = $request->data();
+            $text = $data['text'] ?? null;
+
             return str_contains($request->url(), '/sendMessage')
-                && $request->data()['chat_id'] === '4006'
-            && $request->data()['text'] === $expectedText;
+                && ($data['chat_id'] ?? null) === '4006'
+                && is_string($text)
+                && str_contains($text, $expectedNeedle)
+                && str_contains($text, 'BotPedidos')
+                && ! str_contains($text, '1000 al 28')
+                && ! str_contains($text, 'Sorteo');
         });
     }
 
     #[DataProvider('telegramCommandProvider')]
-    public function test_telegram_commands_still_work_when_order_ingestion_is_enabled(string $command, string $expectedText): void
+    public function test_telegram_commands_still_work_when_order_ingestion_is_enabled(string $command, string $expectedNeedle): void
     {
         [, $branch] = $this->makeOrgWithTelegramBranchAndOwner();
         $update = $this->telegramUpdate(9008, 4008, $command, 'botuser', 'Bot User');
@@ -205,22 +212,29 @@ class TelegramIntakeTest extends TestCase
         $this->assertDatabaseCount('requests', 0);
         $this->assertDatabaseCount('message_responses', 0);
 
-        Http::assertSent(function ($request) use ($expectedText): bool {
+        Http::assertSent(function ($request) use ($expectedNeedle): bool {
+            $data = $request->data();
+            $text = $data['text'] ?? null;
+
             return str_contains($request->url(), '/sendMessage')
-                && $request->data()['chat_id'] === '4008'
-                && $request->data()['text'] === $expectedText;
+                && ($data['chat_id'] ?? null) === '4008'
+                && is_string($text)
+                && str_contains($text, $expectedNeedle)
+                && str_contains($text, 'BotPedidos')
+                && ! str_contains($text, '1000 al 28')
+                && ! str_contains($text, 'Sorteo');
         });
     }
 
     public static function telegramCommandProvider(): array
     {
-        $startHelpText = "Bienvenido al sistema de recepción de solicitudes.\n\nPuedes enviar mensajes como:\n\n• 1000 al 28 2pm\n• 1000 al 25 y 28 5pm\n\nTu solicitud será revisada y confirmada.";
-        $helpText = "Puedo ayudarte a registrar solicitudes de forma simple.\n\nEnvíame mensajes como:\n\n• 1000 al 28 2pm\n• 1000 al 25 y 28 5pm\n\nSi tu mensaje trae una solicitud válida, la procesaré de inmediato.";
+        $startHelpNeedle = '2 bolsas de jardin';
+        $helpNeedle = '2 bolsas de jardin';
 
         return [
-            'start' => ['/start', $startHelpText],
-            'help' => ['/help', $helpText],
-            'menu' => ['/menu', $helpText],
+            'start' => ['/start', $startHelpNeedle],
+            'help' => ['/help', $helpNeedle],
+            'menu' => ['/menu', $helpNeedle],
         ];
     }
 
@@ -242,7 +256,9 @@ class TelegramIntakeTest extends TestCase
             return str_contains($request->url(), '/sendMessage')
                 && $request->data()['chat_id'] === '4007'
                 && str_contains($request->data()['text'], 'Hola.')
-                && str_contains($request->data()['text'], '1000 al 28 2pm');
+                && str_contains($request->data()['text'], '2 bolsas de jardin')
+                && ! str_contains($request->data()['text'], '1000 al 28')
+                && ! str_contains($request->data()['text'], 'Sorteo');
         });
     }
 

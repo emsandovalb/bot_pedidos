@@ -43,7 +43,7 @@ return [
     ],
 
     'order_ingestion' => [
-        'enabled' => (bool) env('ORDER_INGESTION_ENABLED', false),
+        'enabled' => (bool) env('ORDER_INGESTION_ENABLED', true),
     ],
 
 ];

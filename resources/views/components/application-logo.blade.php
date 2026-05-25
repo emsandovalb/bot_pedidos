@@ -1,12 +1,9 @@
 @php
     $logoPath = public_path('images/logo-fondo-blanco.png');
-    $fallbackLogoPath = public_path('images/logo-loteria.png');
 @endphp
 
 @if (file_exists($logoPath))
     <img src="{{ asset('images/logo-fondo-blanco.png') }}" alt="{{ config('app.name', 'BotPedidos') }}" {{ $attributes->merge(['class' => 'object-contain']) }}>
-@elseif (file_exists($fallbackLogoPath))
-    <img src="{{ asset('images/logo-loteria.png') }}" alt="{{ config('app.name', 'BotPedidos') }}" {{ $attributes->merge(['class' => 'object-contain']) }}>
 @else
     <svg viewBox="0 0 280 120" xmlns="http://www.w3.org/2000/svg" {{ $attributes }}>
         <defs>

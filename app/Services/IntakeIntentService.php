@@ -38,20 +38,20 @@ class IntakeIntentService
     public function startReply(): string
     {
         return implode("\n\n", [
-            'Bienvenido al sistema de recepción de solicitudes.',
+            'Bienvenido a BotPedidos.',
             'Puedes enviar mensajes como:',
-            "• 1000 al 28 2pm\n• 1000 al 25 y 28 5pm",
-            'Tu solicitud será revisada y confirmada.',
+            "• 2 bolsas de jardin\n• 1 caja de vasos\n• 5 bolsas de apretados",
+            'Tu pedido sera revisado y preparado por el equipo.',
         ]);
     }
 
     public function helpReply(): string
     {
         return implode("\n\n", [
-            'Puedo ayudarte a registrar solicitudes de forma simple.',
-            'Envíame mensajes como:',
-            "• 1000 al 28 2pm\n• 1000 al 25 y 28 5pm",
-            'Si tu mensaje trae una solicitud válida, la procesaré de inmediato.',
+            'BotPedidos recibe pedidos automaticos por Telegram.',
+            'Envia mensajes como:',
+            "• 2 bolsas de jardin\n• 1 caja de vasos\n• 5 bolsas de apretados",
+            'Tambien puedes revisar pedidos, productos y seguimiento desde el panel.',
         ]);
     }
 
@@ -60,8 +60,8 @@ class IntakeIntentService
         return implode("\n\n", [
             'Hola.',
             'Puedes enviar mensajes como:',
-            "• 1000 al 28 2pm\n• 1000 al 25 y 28 5pm",
-            'Tu solicitud será revisada y confirmada.',
+            "• 2 bolsas de jardin\n• 1 caja de vasos\n• 5 bolsas de apretados",
+            'Tu pedido sera revisado y preparado por el equipo.',
         ]);
     }
 

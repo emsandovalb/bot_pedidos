@@ -17,7 +17,7 @@ class TelegramPollCommand extends Command
 {
     protected $signature = 'telegram:poll {--loop : Keep polling until stopped with Ctrl+C} {--sleep=5 : Seconds to wait between polling cycles when --loop is enabled}';
 
-    protected $description = 'Poll Telegram updates and ingest text messages into the intake flow.';
+    protected $description = 'Poll Telegram updates and ingest orders from Telegram messages.';
 
     public function handle(
         TelegramBotService $telegramBotService,
@@ -154,17 +154,15 @@ class TelegramPollCommand extends Command
 
             try {
                 if (config('services.order_ingestion.enabled')) {
-                    if ($this->isTelegramCommandMessage($messageText)) {
-                        $intent = $intakeIntentService->detect($messageText);
+                    $command = $this->detectOrderCommand($messageText);
 
+                    if ($command !== null) {
                         $this->rememberProcessedTelegramUpdateId($updateId);
                         $telegramBotService->sendMessage(
                             $chatId,
-                            match ($intent['command']) {
-                                'start' => $intakeIntentService->startReply(),
-                                'help', 'menu' => $intakeIntentService->helpReply(),
-                                default => $intakeIntentService->helpReply(),
-                            }
+                            $command === 'start'
+                                ? $this->orderStartReply()
+                                : $this->orderHelpReply()
                         );
                         $processedCount++;
 
@@ -329,11 +327,40 @@ class TelegramPollCommand extends Command
         return str_starts_with($messageText, '/');
     }
 
+    private function detectOrderCommand(string $messageText): ?string
+    {
+        if (! preg_match('/^\/(start|help|menu)(?:@\w+)?(?:\s|$)/u', $messageText, $matches)) {
+            return null;
+        }
+
+        return $matches[1];
+    }
+
     private function orderIngestionReply(string $messageText): string
     {
         return sprintf(
             "Recibimos tu pedido y sera revisado por un operador.\n\nMensaje recibido:\n'%s'\n\nPronto confirmaremos tu pedido.",
             $messageText,
         );
+    }
+
+    private function orderStartReply(): string
+    {
+        return implode("\n\n", [
+            'Bienvenido a BotPedidos.',
+            'Envia mensajes como:',
+            "• 2 bolsas de jardin\n• 1 caja de vasos\n• 5 bolsas de apretados",
+            'Tu pedido sera revisado y preparado por el equipo.',
+        ]);
+    }
+
+    private function orderHelpReply(): string
+    {
+        return implode("\n\n", [
+            'BotPedidos recibe pedidos automaticos por Telegram.',
+            'Envia mensajes como:',
+            "• 2 bolsas de jardin\n• 1 caja de vasos\n• 5 bolsas de apretados",
+            'Tambien puedes revisar pedidos, productos y seguimiento desde el panel.',
+        ]);
     }
 }

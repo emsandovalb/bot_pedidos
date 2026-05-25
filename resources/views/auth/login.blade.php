@@ -1,11 +1,7 @@
 <x-guest-layout>
     <div class="text-center">
         <div class="flex justify-center">
-            <img
-                src="{{ asset('images/logo-loteria.png') }}"
-                alt="{{ config('app.name', 'BotPedidos') }}"
-                class="block h-[21rem] w-auto "
-            >
+            <x-application-logo class="block h-[16rem] w-auto max-w-full" />
         </div>
 
         <h1 class="mt-2 text-2xl font-semibold tracking-tight text-brand-navy">Iniciar sesión</h1>

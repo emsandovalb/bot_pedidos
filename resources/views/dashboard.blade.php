@@ -8,7 +8,7 @@
             </div>
             <div class="flex flex-wrap items-center gap-3">
                 {{-- Keep the dashboard focused on the official order workflow; legacy /requests pages stay out of the primary UI during migration. --}}
-                <a href="{{ route('orders.index', ['status' => \App\Models\Order::STATUS_PENDING_REVIEW]) }}" class="brand-btn-primary">Ordenes pendientes</a>
+                <a href="{{ route('orders.index', ['status' => \App\Models\Order::STATUS_PENDING_REVIEW]) }}" class="brand-btn-primary">Pedidos pendientes</a>
                 <a href="{{ route('order-reviews.index') }}" class="brand-btn-secondary">Revisar pedidos</a>
                 <a href="{{ route('incoming-messages.index') }}" class="brand-btn-secondary">Bandeja de mensajes</a>
             </div>
@@ -27,7 +27,7 @@
             <div class="brand-card border-brand-gold/20 p-5">
                 <div class="flex items-start justify-between gap-3">
                     <div>
-                        <div class="text-sm font-medium text-slate-500">Ordenes pendientes</div>
+                        <div class="text-sm font-medium text-slate-500">Pedidos pendientes</div>
                         <div class="mt-2 text-3xl font-semibold text-brand-navy">{{ $totalPendingRequests }}</div>
                     </div>
                     <div class="rounded-2xl bg-amber-50 px-3 py-2 text-amber-700">⏳</div>
