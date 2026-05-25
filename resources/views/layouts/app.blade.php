@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>{{ config('app.name', 'BotPedidos') }}</title>
 
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=poppins:400,500,600,700,800&display=swap" rel="stylesheet" />
@@ -16,7 +16,7 @@
         @endif
     </head>
     <body class="font-sans antialiased text-slate-900">
-        @php($appName = config('app.name', 'Loteria Automatica'))
+        @php($appName = config('app.name', 'BotPedidos'))
         <div x-data="{ sidebarOpen: false }" class="brand-shell min-h-screen">
             <div class="absolute inset-x-0 top-0 h-64 bg-[radial-gradient(circle_at_top,rgba(10,61,145,0.18),transparent_68%)]"></div>
             <div class="relative flex min-h-screen">
@@ -40,19 +40,21 @@
                     </div>
 
                     <nav class="flex-1 space-y-1 px-4 py-5">
-                        @foreach ([
-                            ['label' => 'Dashboard', 'href' => 'dashboard', 'active' => 'dashboard', 'icon' => 'M4 11.5 12 5l8 6.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1v-8.5Z'],
-                            ['label' => 'Simulator', 'href' => 'simulator.index', 'active' => 'simulator.*', 'icon' => 'M4 17l4-8 4 5 4-7 4 10'],
-                            ['label' => 'Numbers', 'href' => 'numbers.index', 'active' => 'numbers.*', 'icon' => 'M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm-2-3h4M12 8v7'],
-                            ['label' => 'Limits', 'href' => 'limits.index', 'active' => 'limits.*', 'icon' => 'M12 3 4 7v5c0 5 3.5 8.7 8 10 4.5-1.3 8-5 8-10V7l-8-4Zm0 7a2 2 0 0 1 2 2v1h1v2h-1v1a2 2 0 0 1-4 0v-1h-1v-2h1v-1a2 2 0 0 1 2-2Z'],
-                            ['label' => 'Branches', 'href' => 'branches.index', 'active' => 'branches.*', 'icon' => 'M5 20V9l7-4 7 4v11M9 20v-6h6v6M8 11h.01M12 11h.01M16 11h.01'],
-                            ['label' => 'Closures', 'href' => 'closures.index', 'active' => 'closures.*', 'icon' => 'M8 3v3M16 3v3M4 8h16M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z'],
-                            ['label' => 'Pilot Checklist', 'href' => 'pilot.checklist', 'active' => 'pilot.checklist', 'icon' => 'M9 11h6M9 15h6M7 4h7l4 4v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z'],
-                            ['label' => 'Pilot Script', 'href' => 'pilot.script', 'active' => 'pilot.script', 'icon' => 'M9 4h6l4 4v12a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm6 0v4h4'],
-                            ['label' => 'Operator Guide', 'href' => 'pilot.guide', 'active' => 'pilot.guide', 'icon' => 'M5 5h6a4 4 0 0 1 4 4v11a3 3 0 0 0-3-3H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm14 0h-6a4 4 0 0 0-4 4v11a3 3 0 0 1 3-3h7a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1Z'],
-                            ['label' => 'Incoming Messages', 'href' => 'incoming-messages.index', 'active' => 'incoming-messages.*', 'icon' => 'M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10Z'],
-                            ['label' => 'Requests', 'href' => 'intake-requests.index', 'active' => 'intake-requests.*', 'icon' => 'M4 6a2 2 0 0 1 2-2h3l2 2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6Zm4 5h8M8 15h5'],
-                        ] as $item)
+                        {{-- Legacy /requests pages remain available for migration safety, but they are intentionally excluded from the primary navigation. --}}
+                        @foreach (array_filter([
+                            ['label' => 'Panel', 'href' => 'dashboard', 'active' => 'dashboard', 'icon' => 'M4 11.5 12 5l8 6.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1v-8.5Z'],
+                            ['label' => 'Pedidos por Telegram', 'href' => 'simulator.index', 'active' => 'simulator.*', 'icon' => 'M4 17l4-8 4 5 4-7 4 10'],
+                            ['label' => 'Numeros', 'href' => 'numbers.index', 'active' => 'numbers.*', 'icon' => 'M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm-2-3h4M12 8v7'],
+                            ['label' => 'Catálogo de productos', 'href' => 'products.index', 'active' => 'products.*', 'icon' => 'M4 6h16M4 12h16M4 18h10'],
+                            ['label' => 'Órdenes pendientes', 'href' => 'limits.index', 'active' => 'limits.*', 'icon' => 'M12 3 4 7v5c0 5 3.5 8.7 8 10 4.5-1.3 8-5 8-10V7l-8-4Zm0 7a2 2 0 0 1 2 2v1h1v2h-1v1a2 2 0 0 1-4 0v-1h-1v-2h1v-1a2 2 0 0 1 2-2Z'],
+                            ['label' => 'Sucursales', 'href' => 'branches.index', 'active' => 'branches.*', 'icon' => 'M5 20V9l7-4 7 4v11M9 20v-6h6v6M8 11h.01M12 11h.01M16 11h.01'],
+                            ['label' => 'Cierres diarios', 'href' => 'closures.index', 'active' => 'closures.*', 'icon' => 'M8 3v3M16 3v3M4 8h16M6 5h12a2 2 0 0 1 2 2v11a1 1 0 0 1-1 2H6a1 1 0 0 1-1-2V7a2 2 0 0 1 2-2Z'],
+                            ['label' => 'Revisión de pedidos', 'href' => 'pilot.checklist', 'active' => 'pilot.checklist', 'icon' => 'M9 11h6M9 15h6M7 4h7l4 4v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z'],
+                            ['label' => 'Guía de pedidos', 'href' => 'pilot.script', 'active' => 'pilot.script', 'icon' => 'M9 4h6l4 4v12a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm6 0v4h4'],
+                            ['label' => 'Operación', 'href' => 'pilot.guide', 'active' => 'pilot.guide', 'icon' => 'M5 5h6a4 4 0 0 1 4 4v11a3 3 0 0 0-3-3H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm14 0h-6a4 4 0 0 0-4 4v11a3 3 0 0 1 3-3h7a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1Z'],
+                            ['label' => 'Bandeja de mensajes', 'href' => 'incoming-messages.index', 'active' => 'incoming-messages.*', 'icon' => 'M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10Z'],
+                            ['label' => 'Órdenes', 'href' => 'orders.index', 'active' => 'orders.*', 'icon' => 'M4 6h16M4 12h16M4 18h10'],
+                        ], fn (array $item): bool => ! str_starts_with($item['href'], 'intake-requests.')) as $item)
                             <a
                                 href="{{ route($item['href']) }}"
                                 class="group relative flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition"
@@ -83,7 +85,7 @@
                             <form method="POST" action="{{ route('logout') }}" class="mt-4">
                                 @csrf
                                 <button type="submit" class="brand-btn-secondary w-full border-white/15 bg-white/10 text-white hover:bg-white/15 hover:text-white">
-                                    Log out
+                                    Cerrar sesión
                                 </button>
                             </form>
                         </div>
@@ -95,7 +97,7 @@
                         <div class="flex h-20 items-center justify-between px-4 sm:px-6 lg:px-8">
                             <div class="flex items-center gap-3">
                                 <button type="button" class="brand-btn-secondary lg:hidden" @click="sidebarOpen = true">
-                                    Menu
+                                    Menú
                                 </button>
                                 <div>
                                     <div class="text-sm font-semibold text-slate-900">{{ auth()->user()->name }}</div>
@@ -107,8 +109,8 @@
                                 <div class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 shadow-sm">
                                     {{ now()->format('M d, Y') }}
                                 </div>
-                                <a href="{{ route('numbers.index') }}" class="brand-btn-primary">
-                                    Open Numbers
+                                <a href="{{ route('orders.index', ['status' => \App\Models\Order::STATUS_PENDING_REVIEW]) }}" class="brand-btn-primary">
+                                    Órdenes pendientes
                                 </a>
                             </div>
                         </div>

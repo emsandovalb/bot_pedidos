@@ -8,6 +8,8 @@ use App\Models\Draw;
 use App\Models\IncomingMessage;
 use App\Models\IntakeRequest;
 use App\Models\Organization;
+use App\Models\Product;
+use App\Models\ProductAlias;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -143,6 +145,52 @@ class DatabaseSeeder extends Seeder
                 'rejected_at' => null,
                 'notes' => $index === 1 ? 'Needs amount clarification.' : null,
             ]);
+        });
+
+        $products = collect([
+            [
+                'name' => 'Bolsas de jardÃ­n',
+                'sku' => 'JARDIN-01',
+                'unit_label' => 'bolsa',
+                'branch_id' => null,
+                'aliases' => ['bolsas de jardin', 'bolsa jardin'],
+            ],
+            [
+                'name' => 'Bolsas de apretados',
+                'sku' => 'APRET-01',
+                'unit_label' => 'bolsa',
+                'branch_id' => $branches->first()?->id,
+                'aliases' => ['bolsas de apretados', 'apretados'],
+            ],
+            [
+                'name' => 'Vasos plÃ¡sticos',
+                'sku' => 'VASOS-01',
+                'unit_label' => 'caja',
+                'branch_id' => null,
+                'aliases' => ['vasos', 'caja de vasos'],
+            ],
+        ]);
+
+        $products->each(function (array $productData) use ($organization): void {
+            $product = Product::create([
+                'organization_id' => $organization->id,
+                'branch_id' => $productData['branch_id'],
+                'name' => $productData['name'],
+                'sku' => $productData['sku'],
+                'unit_label' => $productData['unit_label'],
+                'is_active' => true,
+                'sort_order' => 0,
+            ]);
+
+            foreach ($productData['aliases'] as $alias) {
+                ProductAlias::create([
+                    'organization_id' => $organization->id,
+                    'product_id' => $product->id,
+                    'alias' => $alias,
+                    'match_weight' => 100,
+                    'is_active' => true,
+                ]);
+            }
         });
     }
 }

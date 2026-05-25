@@ -3,10 +3,12 @@
 namespace App\Console\Commands;
 
 use App\Models\Branch;
+use App\Models\Customer;
 use App\Models\IncomingMessage;
 use App\Models\User;
 use App\Services\IntakeIntentService;
 use App\Services\IntakeMessageService;
+use App\Services\OrderIngestionService;
 use App\Services\Telegram\TelegramBotService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
@@ -21,6 +23,7 @@ class TelegramPollCommand extends Command
         TelegramBotService $telegramBotService,
         IntakeIntentService $intakeIntentService,
         IntakeMessageService $intakeMessageService,
+        OrderIngestionService $orderIngestionService,
     ): int {
         if (! $telegramBotService->enabled()) {
             $this->info('Telegram polling is disabled. Set TELEGRAM_ENABLED=true to process updates.');
@@ -67,6 +70,7 @@ class TelegramPollCommand extends Command
                     $telegramBotService,
                     $intakeIntentService,
                     $intakeMessageService,
+                    $orderIngestionService,
                     $user,
                     $branch,
                     $loop,
@@ -113,6 +117,7 @@ class TelegramPollCommand extends Command
         TelegramBotService $telegramBotService,
         IntakeIntentService $intakeIntentService,
         IntakeMessageService $intakeMessageService,
+        OrderIngestionService $orderIngestionService,
         User $user,
         Branch $branch,
         bool $continueOnError,
@@ -136,8 +141,6 @@ class TelegramPollCommand extends Command
                 continue;
             }
 
-            $intent = $intakeIntentService->detect($messageText);
-
             $alreadyProcessed = IncomingMessage::query()
                 ->where('channel_type', Branch::CHANNEL_TYPE_TELEGRAM)
                 ->where('external_message_id', $updateId)
@@ -150,6 +153,66 @@ class TelegramPollCommand extends Command
             }
 
             try {
+                if (config('services.order_ingestion.enabled')) {
+                    if ($this->isTelegramCommandMessage($messageText)) {
+                        $intent = $intakeIntentService->detect($messageText);
+
+                        $this->rememberProcessedTelegramUpdateId($updateId);
+                        $telegramBotService->sendMessage(
+                            $chatId,
+                            match ($intent['command']) {
+                                'start' => $intakeIntentService->startReply(),
+                                'help', 'menu' => $intakeIntentService->helpReply(),
+                                default => $intakeIntentService->helpReply(),
+                            }
+                        );
+                        $processedCount++;
+
+                        continue;
+                    }
+
+                    $customer = $this->resolveTelegramCustomer(
+                        branch: $branch,
+                        customerPhone: (string) $chatId,
+                        customerName: $telegramBotService->extractSenderName($update),
+                    );
+
+                    $incomingMessage = IncomingMessage::create([
+                        'organization_id' => $branch->organization_id,
+                        'branch_id' => $branch->id,
+                        'customer_id' => $customer->id,
+                        'channel_type' => Branch::CHANNEL_TYPE_TELEGRAM,
+                        'from_identifier' => (string) $chatId,
+                        'to_identifier' => $telegramBotService->getBotIdentifier(),
+                        'raw_text' => $messageText,
+                        'payload_json' => [
+                            'source' => Branch::CHANNEL_TYPE_TELEGRAM,
+                            'payload' => $update,
+                        ],
+                        'external_message_id' => (string) $updateId,
+                        'status' => IncomingMessage::STATUS_RECEIVED,
+                        'received_at' => now(),
+                    ]);
+
+                    $orderIngestionService->ingest(
+                        organization: $branch->organization,
+                        branch: $branch,
+                        customer: $customer,
+                        rawMessageText: $messageText,
+                        sourceChannel: Branch::CHANNEL_TYPE_TELEGRAM,
+                        externalMessageId: (string) $updateId,
+                        incomingMessage: $incomingMessage,
+                    );
+
+                    $this->rememberProcessedTelegramUpdateId($updateId);
+                    $telegramBotService->sendMessage($chatId, $this->orderIngestionReply($messageText));
+                    $processedCount++;
+
+                    continue;
+                }
+
+                $intent = $intakeIntentService->detect($messageText);
+
                 if ($intent['type'] === IntakeIntentService::TYPE_COMMAND) {
                     $this->rememberProcessedTelegramUpdateId($updateId);
                     $telegramBotService->sendMessage(
@@ -223,5 +286,54 @@ class TelegramPollCommand extends Command
         }
 
         return $updateIds->max();
+    }
+
+    private function resolveTelegramCustomer(Branch $branch, string $customerPhone, ?string $customerName): Customer
+    {
+        $customer = Customer::query()
+            ->where('organization_id', $branch->organization_id)
+            ->where('phone', $customerPhone)
+            ->first();
+
+        if (! $customer) {
+            $customer = Customer::create([
+                'organization_id' => $branch->organization_id,
+                'branch_id' => $branch->id,
+                'name' => $customerName,
+                'phone' => $customerPhone,
+                'external_id' => null,
+            ]);
+
+            return $customer;
+        }
+
+        $updates = [];
+
+        if ($customer->branch_id !== $branch->id) {
+            $updates['branch_id'] = $branch->id;
+        }
+
+        if ($customerName && blank($customer->name)) {
+            $updates['name'] = $customerName;
+        }
+
+        if ($updates !== []) {
+            $customer->update($updates);
+        }
+
+        return $customer->fresh();
+    }
+
+    private function isTelegramCommandMessage(string $messageText): bool
+    {
+        return str_starts_with($messageText, '/');
+    }
+
+    private function orderIngestionReply(string $messageText): string
+    {
+        return sprintf(
+            "Recibimos tu pedido y sera revisado por un operador.\n\nMensaje recibido:\n'%s'\n\nPronto confirmaremos tu pedido.",
+            $messageText,
+        );
     }
 }

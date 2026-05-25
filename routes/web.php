@@ -7,6 +7,10 @@ use App\Http\Controllers\IncomingMessageController;
 use App\Http\Controllers\IntakeRequestController;
 use App\Http\Controllers\NumberBoardController;
 use App\Http\Controllers\NumberLimitController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\OrderReviewController;
+use App\Http\Controllers\ProductAliasController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PilotPageController;
 use App\Http\Controllers\SimulatorController;
 use App\Http\Controllers\ProfileController;
@@ -33,6 +37,33 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/simulator', [SimulatorController::class, 'store'])->name('simulator.store');
     Route::get('/numbers', [NumberBoardController::class, 'index'])->name('numbers.index');
     Route::post('/numbers', [NumberBoardController::class, 'store'])->name('numbers.store');
+
+    Route::prefix('/orders')->name('orders.')->group(function () {
+        Route::get('/', [OrderController::class, 'index'])->name('index');
+        Route::get('/{order}', [OrderController::class, 'show'])->name('show');
+        Route::get('/{order}/edit', [OrderController::class, 'edit'])->name('edit');
+        Route::patch('/{order}', [OrderController::class, 'update'])->name('update');
+        Route::post('/{order}/confirm', [OrderController::class, 'confirm'])->name('confirm');
+        Route::post('/{order}/prepare', [OrderController::class, 'prepare'])->name('prepare');
+        Route::post('/{order}/ready-for-dispatch', [OrderController::class, 'readyForDispatch'])->name('ready-for-dispatch');
+        Route::post('/{order}/dispatch', [OrderController::class, 'dispatch'])->name('dispatch');
+        Route::post('/{order}/reject', [OrderController::class, 'reject'])->name('reject');
+        Route::post('/{order}/cancel', [OrderController::class, 'cancel'])->name('cancel');
+    });
+
+    Route::get('/order-reviews', [OrderReviewController::class, 'index'])->name('order-reviews.index');
+
+    Route::prefix('/products')->name('products.')->group(function () {
+        Route::get('/', [ProductController::class, 'index'])->name('index');
+        Route::get('/create', [ProductController::class, 'create'])->name('create');
+        Route::post('/', [ProductController::class, 'store'])->name('store');
+        Route::get('/{product}/edit', [ProductController::class, 'edit'])->name('edit');
+        Route::patch('/{product}', [ProductController::class, 'update'])->name('update');
+        Route::post('/{product}/toggle', [ProductController::class, 'toggle'])->name('toggle');
+    });
+
+    Route::post('/products/{product}/aliases', [ProductAliasController::class, 'store'])->name('product-aliases.store');
+    Route::delete('/product-aliases/{productAlias}', [ProductAliasController::class, 'destroy'])->name('product-aliases.destroy');
 
     Route::prefix('/limits')->name('limits.')->group(function () {
         Route::get('/', [NumberLimitController::class, 'index'])->name('index');

@@ -42,4 +42,8 @@ return [
         'verify_ssl' => (bool) env('TELEGRAM_VERIFY_SSL', true),
     ],
 
+    'order_ingestion' => [
+        'enabled' => (bool) env('ORDER_INGESTION_ENABLED', false),
+    ],
+
 ];

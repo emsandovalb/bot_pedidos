@@ -1,20 +1,20 @@
 <x-app-layout>
     <div class="space-y-6">
         <div>
-            <div class="brand-badge bg-brand-primary/10 text-brand-primary">Message feed</div>
-            <h1 class="mt-3 text-3xl font-semibold tracking-tight text-brand-navy">Incoming Messages</h1>
-            <p class="mt-1 text-sm text-slate-600">Latest captured messages for the visible scope.</p>
+            <div class="brand-badge bg-brand-primary/10 text-brand-primary">Bandeja de mensajes</div>
+            <h1 class="mt-3 text-3xl font-semibold tracking-tight text-brand-navy">Mensajes entrantes</h1>
+            <p class="mt-1 text-sm text-slate-600">Últimos mensajes capturados para el ámbito visible.</p>
         </div>
 
         <div class="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm">
             <table class="min-w-full divide-y divide-slate-200">
                 <thead class="bg-slate-50">
                     <tr>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Received</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">From</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">To</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Text</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Status</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Recibido</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Desde</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Hacia</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Texto</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Estado</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200 bg-white">
@@ -30,7 +30,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-4 py-8 text-center text-sm text-slate-500">No messages available for this account.</td>
+                            <td colspan="5" class="px-4 py-8 text-center text-sm text-slate-500">No hay mensajes disponibles para esta cuenta.</td>
                         </tr>
                     @endforelse
                 </tbody>

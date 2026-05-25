@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Branch;
 use App\Models\Draw;
 use App\Models\IncomingMessage;
+use App\Models\Order;
 use App\Models\IntakeRequest;
 use App\Models\MessageResponse;
 use App\Models\Organization;
@@ -60,6 +61,53 @@ class TelegramIntakeTest extends TestCase
             return str_contains($request->url(), '/sendMessage')
                 && $request->data()['chat_id'] === '4001'
                 && str_contains($request->data()['text'], 'Sorteo 2:00 pm');
+        });
+    }
+
+    public function test_telegram_text_update_uses_order_ingestion_when_enabled(): void
+    {
+        [, $branch] = $this->makeOrgWithTelegramBranchAndOwner();
+        $messageText = '2 bolsas de jardin y 1 caja de vasos';
+        $update = $this->telegramUpdate(9010, 4010, $messageText, 'maria', 'Maria');
+
+        $this->configureTelegram(enabled: true, branchId: $branch->id, orderIngestionEnabled: true);
+        Http::fake($this->telegramResponses([$update]));
+
+        Artisan::call('telegram:poll');
+
+        $this->assertDatabaseCount('orders', 1);
+        $this->assertDatabaseHas('orders', [
+            'branch_id' => $branch->id,
+            'raw_message_text' => $messageText,
+            'status' => Order::STATUS_PENDING_REVIEW,
+        ]);
+        $this->assertDatabaseCount('requests', 0);
+        $this->assertDatabaseCount('message_responses', 0);
+        $this->assertDatabaseHas('incoming_messages', [
+            'organization_id' => $branch->organization_id,
+            'branch_id' => $branch->id,
+            'channel_type' => Branch::CHANNEL_TYPE_TELEGRAM,
+            'from_identifier' => '4010',
+            'to_identifier' => '@loteriabot',
+            'raw_text' => $messageText,
+            'external_message_id' => '9010',
+            'parse_status' => Order::STATUS_PENDING_REVIEW,
+        ]);
+
+        Http::assertSent(function ($request) use ($messageText): bool {
+            if (! str_contains($request->url(), '/sendMessage')) {
+                return false;
+            }
+
+            $text = $request->data()['text'];
+
+            return $request->data()['chat_id'] === '4010'
+                && $text === "Recibimos tu pedido y sera revisado por un operador.\n\nMensaje recibido:\n'" . $messageText . "'\n\nPronto confirmaremos tu pedido."
+                && str_contains($text, 'pedido')
+                && str_contains($text, $messageText)
+                && ! str_contains($text, 'Sorteo')
+                && ! str_contains($text, 'amount')
+                && ! str_contains($text, 'number');
         });
     }
 
@@ -137,6 +185,29 @@ class TelegramIntakeTest extends TestCase
         Http::assertSent(function ($request) use ($expectedText): bool {
             return str_contains($request->url(), '/sendMessage')
                 && $request->data()['chat_id'] === '4006'
+            && $request->data()['text'] === $expectedText;
+        });
+    }
+
+    #[DataProvider('telegramCommandProvider')]
+    public function test_telegram_commands_still_work_when_order_ingestion_is_enabled(string $command, string $expectedText): void
+    {
+        [, $branch] = $this->makeOrgWithTelegramBranchAndOwner();
+        $update = $this->telegramUpdate(9008, 4008, $command, 'botuser', 'Bot User');
+
+        $this->configureTelegram(enabled: true, branchId: $branch->id, orderIngestionEnabled: true);
+        Http::fake($this->telegramResponses([$update]));
+
+        Artisan::call('telegram:poll');
+
+        $this->assertDatabaseCount('orders', 0);
+        $this->assertDatabaseCount('incoming_messages', 0);
+        $this->assertDatabaseCount('requests', 0);
+        $this->assertDatabaseCount('message_responses', 0);
+
+        Http::assertSent(function ($request) use ($expectedText): bool {
+            return str_contains($request->url(), '/sendMessage')
+                && $request->data()['chat_id'] === '4008'
                 && $request->data()['text'] === $expectedText;
         });
     }
@@ -292,10 +363,11 @@ class TelegramIntakeTest extends TestCase
         ];
     }
 
-    private function configureTelegram(bool $enabled, ?int $branchId = null): void
+    private function configureTelegram(bool $enabled, ?int $branchId = null, bool $orderIngestionEnabled = false): void
     {
         Config::set('services.telegram.enabled', $enabled);
         Config::set('services.telegram.bot_token', 'test-token');
         Config::set('services.telegram.default_branch_id', $branchId);
+        Config::set('services.order_ingestion.enabled', $orderIngestionEnabled);
     }
 }

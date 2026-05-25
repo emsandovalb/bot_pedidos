@@ -46,13 +46,13 @@
     >
         <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
             <div class="max-w-3xl">
-                <div class="brand-badge bg-brand-primary/10 text-brand-primary">Live board</div>
-                <h1 class="mt-3 text-3xl font-semibold tracking-tight text-brand-navy">Numbers</h1>
+                <div class="brand-badge bg-brand-primary/10 text-brand-primary">Catálogo de productos</div>
+                <h1 class="mt-3 text-3xl font-semibold tracking-tight text-brand-navy">Catálogo operativo</h1>
                 <p class="mt-1 text-sm text-slate-600">
-                    Scan 00-99 in grouped tiles, open a centered manual request modal from any card, and keep the board wide.
+                    Revisa el catálogo, abre el formulario rápido desde cualquier tarjeta y mantén la vista amplia.
                 </p>
             </div>
-            <a href="{{ route('intake-requests.index') }}" class="brand-btn-secondary">Back to requests</a>
+            <a href="{{ route('intake-requests.index') }}" class="brand-btn-secondary">Volver a órdenes</a>
         </div>
 
         @if (session('status'))
@@ -82,7 +82,7 @@
                         </div>
 
                         <div>
-                            <label for="draw_id" class="block text-sm font-medium text-slate-700">Draw</label>
+                            <label for="draw_id" class="block text-sm font-medium text-slate-700">Referencia</label>
                             <select id="draw_id" name="draw_id" class="brand-input mt-1 block w-full rounded-xl text-sm" @disabled($draws->isEmpty())>
                                 @foreach ($draws as $draw)
                                     <option value="{{ $draw->id }}" @selected($selectedDraw?->id === $draw->id)>{{ $draw->name }}</option>
@@ -104,8 +104,8 @@
                         <div class="mt-1 text-base font-semibold text-brand-navy">{{ $selectedBranch?->name ?? 'No branch available' }}</div>
                     </div>
                     <div class="rounded-2xl border border-slate-200/80 bg-slate-50 p-4">
-                        <div class="text-sm text-slate-500">Selected draw</div>
-                        <div class="mt-1 text-base font-semibold text-brand-navy">{{ $selectedDraw?->name ?? 'No draw available' }}</div>
+                        <div class="text-sm text-slate-500">Referencia seleccionada</div>
+                        <div class="mt-1 text-base font-semibold text-brand-navy">{{ $selectedDraw?->name ?? 'No reference available' }}</div>
                     </div>
                 </div>
             </div>
@@ -141,7 +141,7 @@
         <div class="brand-card p-4">
             <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div class="flex flex-wrap items-center gap-2">
-                    <span class="text-sm font-medium text-slate-700">Status legend</span>
+                            <span class="text-sm font-medium text-slate-700">Leyenda de estados</span>
                     <span class="brand-badge bg-green-50 text-green-700">available <span class="font-normal text-slate-500">below 80% or no limit</span></span>
                     <span class="brand-badge bg-amber-50 text-amber-700">warning <span class="font-normal text-slate-500">80% to 99%</span></span>
                     <span class="brand-badge bg-blue-50 text-blue-700">full <span class="font-normal text-slate-500">100%</span></span>
@@ -305,8 +305,8 @@
 
             <div x-show="view === 'table'" x-cloak class="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm">
                 <div class="border-b border-slate-100 px-4 py-4 sm:px-5">
-                    <h3 class="text-base font-semibold text-brand-navy">Detailed table view</h3>
-                    <p class="text-sm text-slate-600">The same board data, shown in a compact operational table.</p>
+                    <h3 class="text-base font-semibold text-brand-navy">Vista detallada</h3>
+                    <p class="text-sm text-slate-600">Los mismos datos, mostrados en una tabla operativa compacta.</p>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -417,11 +417,11 @@
 
                         <div class="grid gap-4 sm:grid-cols-3">
                             <div>
-                                <label class="block text-sm font-medium text-slate-700">Selected branch</label>
+                            <label class="block text-sm font-medium text-slate-700">Sucursal seleccionada</label>
                                 <input type="text" readonly value="{{ $selectedBranch?->name ?? '-' }}" class="brand-input mt-1 block w-full rounded-xl bg-slate-50 text-sm text-slate-700">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700">Selected draw</label>
+                            <label class="block text-sm font-medium text-slate-700">Referencia seleccionada</label>
                                 <input type="text" readonly value="{{ $selectedDraw?->name ?? '-' }}" class="brand-input mt-1 block w-full rounded-xl bg-slate-50 text-sm text-slate-700">
                             </div>
                             <div>

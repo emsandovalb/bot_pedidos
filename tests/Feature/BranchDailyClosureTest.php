@@ -111,8 +111,8 @@ class BranchDailyClosureTest extends TestCase
         $response = $this->actingAs($owner)->get(route('closures.show', $closure));
 
         $response->assertOk();
-        $response->assertSeeText('Closure Detail');
-        $response->assertSeeText('Organization');
+        $response->assertSeeText('Detalle de cierre');
+        $response->assertSeeText('Organización');
         $response->assertSeeText('Maria Lopez');
         $response->assertSeeText('+50255512345');
         $response->assertSeeText((string) $request->id);

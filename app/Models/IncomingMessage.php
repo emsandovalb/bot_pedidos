@@ -34,6 +34,9 @@ class IncomingMessage extends Model
     {
         return [
             'payload_json' => 'array',
+            'parser_result_json' => 'array',
+            'parser_confidence' => 'decimal:2',
+            'processed_at' => 'datetime',
             'received_at' => 'datetime',
         ];
     }

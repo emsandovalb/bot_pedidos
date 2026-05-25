@@ -6,6 +6,8 @@ use App\Models\Branch;
 use App\Models\BranchDailyClosure;
 use App\Models\IncomingMessage;
 use App\Models\IntakeRequest;
+use App\Models\Order;
+use App\Models\Product;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Carbon;
@@ -27,6 +29,14 @@ class DashboardController extends Controller
         };
 
         $closureScope = function (Builder $query) use ($user, $organizationId, $branchIds): Builder {
+            if ($user?->canViewAllBranchesForRead()) {
+                return $organizationId ? $query->where('organization_id', $organizationId) : $query->whereRaw('1 = 0');
+            }
+
+            return $branchIds ? $query->whereIn('branch_id', $branchIds) : $query->whereRaw('1 = 0');
+        };
+
+        $orderScope = function (Builder $query) use ($user, $organizationId, $branchIds): Builder {
             if ($user?->canViewAllBranchesForRead()) {
                 return $organizationId ? $query->where('organization_id', $organizationId) : $query->whereRaw('1 = 0');
             }
@@ -61,6 +71,31 @@ class DashboardController extends Controller
                 ->tap($requestScope)
                 ->where('status', IntakeRequest::STATUS_CONFIRMED)
                 ->whereDate('confirmed_at', today())
+                ->count(),
+            'activeProductCount' => Product::query()
+                ->when($organizationId, fn ($query) => $query->where('organization_id', $organizationId), fn ($query) => $query->whereRaw('1 = 0'))
+                ->where('is_active', true)
+                ->count(),
+            'orderPendingReviewCount' => Order::query()
+                ->tap($orderScope)
+                ->where('status', Order::STATUS_PENDING_REVIEW)
+                ->count(),
+            'orderConfirmedCount' => Order::query()
+                ->tap($orderScope)
+                ->where('status', Order::STATUS_CONFIRMED)
+                ->count(),
+            'orderPreparingCount' => Order::query()
+                ->tap($orderScope)
+                ->where('status', Order::STATUS_PREPARING)
+                ->count(),
+            'orderReadyForDispatchCount' => Order::query()
+                ->tap($orderScope)
+                ->where('status', Order::STATUS_READY_FOR_DISPATCH)
+                ->count(),
+            'orderDispatchedCount' => Order::query()
+                ->tap($orderScope)
+                ->where('status', Order::STATUS_DISPATCHED)
+                ->whereDate('dispatched_at', today())
                 ->count(),
             'statusCounts' => [
                 'pending' => IntakeRequest::query()->tap($requestScope)->where('status', IntakeRequest::STATUS_PENDING)->count(),

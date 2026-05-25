@@ -2,8 +2,8 @@
     <div class="space-y-6">
         <div class="flex items-start justify-between gap-4">
             <div>
-                <h1 class="text-2xl font-semibold text-slate-900">Intake Simulator</h1>
-                <p class="mt-1 text-sm text-slate-600">Create a local incoming message and review the parser output.</p>
+                <h1 class="text-2xl font-semibold text-slate-900">Pedidos por Telegram</h1>
+                <p class="mt-1 text-sm text-slate-600">Crea un mensaje local y revisa la salida del parser.</p>
             </div>
             <a href="{{ route('dashboard') }}" class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50">
                 Back to dashboard
@@ -15,29 +15,29 @@
             <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-emerald-900">
                 <div class="font-semibold">Intake saved successfully.</div>
                 <div class="mt-2 text-sm">
-                    Incoming message #{{ $result['incoming_message_id'] }} · Branch: {{ $result['branch_name'] }} · Phone: {{ $result['customer_phone'] }}
+                    Mensaje entrante #{{ $result['incoming_message_id'] }} · Sucursal: {{ $result['branch_name'] }} · Teléfono: {{ $result['customer_phone'] }}
                 </div>
                 <div class="mt-2 text-sm">
-                    Created requests: {{ $result['created_requests_count'] }} · Parser type: {{ $result['parser_result']['parser_type'] }}
+                    Pedidos creados: {{ $result['created_requests_count'] }} · Tipo de parser: {{ $result['parser_result']['parser_type'] }}
                     · Confidence: {{ number_format($result['parser_result']['confidence'] * 100, 0) }}%
                     · Review: {{ $result['parser_result']['needs_review'] ? 'yes' : 'no' }}
                 </div>
                 @if (! empty($result['parser_result']['draw_reference']))
-                    <div class="mt-2 text-sm">Draw detected: {{ $result['parser_result']['draw_reference'] }}</div>
+                    <div class="mt-2 text-sm">Referencia detectada: {{ $result['parser_result']['draw_reference'] }}</div>
                 @endif
                 @if ($result['parser_result']['reason'])
                     <div class="mt-2 text-sm">Reason: {{ $result['parser_result']['reason'] }}</div>
                 @endif
                 <div class="mt-4 rounded-md border border-emerald-200 bg-white/70 p-3">
-                    <div class="text-sm font-semibold">Interpreted requests</div>
+                    <div class="text-sm font-semibold">Pedidos interpretados</div>
                     <ul class="mt-2 space-y-1 text-sm">
                         @foreach ($result['requests'] as $item)
-                            <li>• Número {{ $item['detected_number'] ?? '-' }} → ₡{{ $item['detected_amount'] ?? '-' }} · {{ str_replace('_', ' ', $item['status']) }}</li>
+                            <li>• Código {{ $item['detected_number'] ?? '-' }} → ₡{{ $item['detected_amount'] ?? '-' }} · {{ str_replace('_', ' ', $item['status']) }}</li>
                         @endforeach
                     </ul>
                 </div>
                 <div class="mt-4 rounded-md border border-emerald-200 bg-white/70 p-3">
-                    <div class="text-sm font-semibold">Generated customer confirmation text</div>
+                    <div class="text-sm font-semibold">Texto de confirmación generado</div>
                     <pre class="mt-2 whitespace-pre-wrap text-sm text-emerald-950">{{ $result['customer_confirmation_text'] }}</pre>
                 </div>
             </div>

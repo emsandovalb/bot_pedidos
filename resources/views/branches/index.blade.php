@@ -2,12 +2,12 @@
     <div class="space-y-6">
         <div class="flex items-start justify-between gap-4">
             <div>
-                <div class="brand-badge bg-brand-primary/10 text-brand-primary">Branch scope</div>
-                <h1 class="mt-3 text-3xl font-semibold tracking-tight text-brand-navy">Branches</h1>
-                <p class="mt-1 text-sm text-slate-600">Visible branches for your current scope.</p>
+                <div class="brand-badge bg-brand-primary/10 text-brand-primary">Sucursales</div>
+                <h1 class="mt-3 text-3xl font-semibold tracking-tight text-brand-navy">Sucursales</h1>
+                <p class="mt-1 text-sm text-slate-600">Sucursales visibles para tu ámbito actual.</p>
             </div>
             <a href="{{ route('closures.index') }}" class="brand-btn-secondary">
-                Open closures
+                Cierres diarios
             </a>
         </div>
 
@@ -15,11 +15,11 @@
             <table class="min-w-full divide-y divide-slate-200">
                 <thead class="bg-slate-50">
                     <tr>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Name</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Channel</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Identifier</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Status</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Action</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Nombre</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Canal</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Identificador</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Estado</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Acción</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200 bg-white">
@@ -34,16 +34,16 @@
                             <td class="px-4 py-3 text-sm">
                                 @can('create', [\App\Models\BranchDailyClosure::class, $branch])
                                     <a href="{{ route('closures.index', ['branch_id' => $branch->id, 'closure_date' => today()->toDateString()]) }}" class="brand-btn-secondary px-3 py-1.5 text-xs">
-                                        Close Day
+                                        Cerrar día
                                     </a>
                                 @else
-                                    <span class="text-sm text-slate-400">Read only</span>
+                                    <span class="text-sm text-slate-400">Solo lectura</span>
                                 @endcan
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-4 py-8 text-center text-sm text-slate-500">No branches available for this account.</td>
+                            <td colspan="5" class="px-4 py-8 text-center text-sm text-slate-500">No hay sucursales disponibles para esta cuenta.</td>
                         </tr>
                     @endforelse
                 </tbody>

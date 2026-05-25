@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Order;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -24,5 +25,16 @@ class ExampleTest extends TestCase
         $response = $this->actingAs($user)->get('/dashboard');
 
         $response->assertOk();
+    }
+
+    public function test_dashboard_uses_official_order_workflow_links(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get(route('dashboard'));
+
+        $response->assertOk();
+        $response->assertSee(route('orders.index', ['status' => Order::STATUS_PENDING_REVIEW]));
+        $response->assertDontSee(route('intake-requests.index'));
     }
 }
