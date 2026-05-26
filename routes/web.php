@@ -9,6 +9,7 @@ use App\Http\Controllers\NumberBoardController;
 use App\Http\Controllers\NumberLimitController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderReviewController;
+use App\Http\Controllers\ProductImportController;
 use App\Http\Controllers\ProductAliasController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PilotPageController;
@@ -49,6 +50,8 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('/products')->name('products.')->group(function () {
         Route::get('/', [ProductController::class, 'index'])->name('index');
         Route::get('/create', [ProductController::class, 'create'])->name('create');
+        Route::get('/import', [ProductImportController::class, 'index'])->name('import');
+        Route::post('/import', [ProductImportController::class, 'store'])->name('import.store');
         Route::post('/', [ProductController::class, 'store'])->name('store');
         Route::get('/{product}/edit', [ProductController::class, 'edit'])->name('edit');
         Route::patch('/{product}', [ProductController::class, 'update'])->name('update');

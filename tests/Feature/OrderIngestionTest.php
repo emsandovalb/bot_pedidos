@@ -44,6 +44,26 @@ class OrderIngestionTest extends TestCase
         ]);
     }
 
+    public function test_order_ingestion_stores_extracted_notes_in_order_notes(): void
+    {
+        [$organization, $branch, $customer] = $this->makeOrganizationBranchCustomer();
+
+        $order = app(OrderIngestionService::class)->ingest(
+            organization: $organization,
+            branch: $branch,
+            customer: $customer,
+            rawMessageText: 'Me aparta 3 kilos de carne y 2 paquetes de tortillas para mañana urgente',
+        );
+
+        $this->assertSame('para manana, urgente', $order->notes);
+        $this->assertSame(['para manana', 'urgente'], $order->parsed_payload_json['notes']);
+        $this->assertSame('para manana, urgente', $order->parsed_payload_json['notes_text']);
+        $this->assertDatabaseHas('orders', [
+            'id' => $order->id,
+            'notes' => 'para manana, urgente',
+        ]);
+    }
+
     public function test_order_ingestion_creates_order_items(): void
     {
         [$organization, $branch, $customer] = $this->makeOrganizationBranchCustomer();

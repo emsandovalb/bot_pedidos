@@ -29,8 +29,9 @@ class OrderIngestionService
         ?IncomingMessage $incomingMessage = null,
     ): Order {
         $parserResult = $this->orderParserService->parse($rawMessageText);
+        $orderNotes = $parserResult['notes_text'] ?? null;
 
-        return DB::transaction(function () use ($organization, $branch, $customer, $rawMessageText, $sourceChannel, $externalMessageId, $incomingMessage, $parserResult): Order {
+        return DB::transaction(function () use ($organization, $branch, $customer, $rawMessageText, $sourceChannel, $externalMessageId, $incomingMessage, $parserResult, $orderNotes): Order {
             $order = Order::create([
                 'organization_id' => $organization->id,
                 'branch_id' => $branch->id,
@@ -42,7 +43,7 @@ class OrderIngestionService
                 'parser_confidence' => $parserResult['confidence'],
                 'raw_message_text' => $rawMessageText,
                 'parsed_payload_json' => $parserResult,
-                'notes' => null,
+                'notes' => $orderNotes !== '' ? $orderNotes : null,
                 'reviewed_by' => null,
                 'reviewed_at' => null,
                 'confirmed_by' => null,

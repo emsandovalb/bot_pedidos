@@ -13,7 +13,10 @@
                 <p class="mt-2 text-sm text-slate-600">Administra el catalogo de productos y sus alias de coincidencia.</p>
             </div>
             @if ($canManageProducts)
-                <a href="{{ route('products.create') }}" class="brand-btn-primary">Nuevo producto</a>
+                <div class="flex flex-wrap gap-3">
+                    <a href="{{ route('products.import') }}" class="brand-btn-secondary">Importar productos</a>
+                    <a href="{{ route('products.create') }}" class="brand-btn-primary">Nuevo producto</a>
+                </div>
             @endif
         </div>
 

@@ -6,12 +6,27 @@ use Illuminate\Support\Str;
 
 class OrderParserService
 {
+    private const UNIT_REGEX = '(?:unidad(?:es)?|paquete(?:s)?|caja(?:s)?|bolsa(?:s)?|docena(?:s)?|rollo(?:s)?|kilo(?:s)?|libra(?:s)?|litro(?:s)?)';
+    private const NOTE_PATTERNS = [
+        ['regex' => '/\bpara\s+manana\b/u', 'note' => 'para manana'],
+        ['regex' => '/\bpara\s+hoy\b/u', 'note' => 'para hoy'],
+        ['regex' => '/\bpara\s+las?\s+\d{1,2}(?::\d{2})?(?:\s*(?:am|pm|a\.m\.|p\.m\.|md))?\b/u', 'note' => null],
+        ['regex' => '/\burgente\b/u', 'note' => 'urgente'],
+        ['regex' => '/\blo\s+paso\s+recogiendo\b/u', 'note' => 'lo paso recogiendo'],
+        ['regex' => '/\bme\s+lo\s+env(?:ia|ias|ie|ien)\b/u', 'note' => 'me lo envia'],
+        ['regex' => '/\benviar\s+a\s+domicilio\b/u', 'note' => 'enviar a domicilio'],
+        ['regex' => '/\brecoger\s+en\s+tienda\b/u', 'note' => 'recoger en tienda'],
+        ['regex' => '/\bsin\s+falta\b/u', 'note' => 'sin falta'],
+    ];
+
     /**
      * @return array{
      *     raw_text:string,
      *     normalized_text:string,
      *     confidence:float,
      *     needs_review:bool,
+     *     notes:array<int, string>,
+     *     notes_text:?string,
      *     items:array<int, array{
      *         quantity:int|float,
      *         unit:?string,
@@ -25,11 +40,12 @@ class OrderParserService
     public function parse(string $rawText): array
     {
         $normalizedText = $this->normalize($rawText);
-        $candidates = $this->extractCandidatePhrases($normalizedText);
+        $notes = $this->extractNotes($normalizedText);
+        $candidates = $this->extractCandidatePhrases($rawText, $normalizedText);
         $items = [];
 
         foreach ($candidates as $candidate) {
-            $parsedItem = $this->parseCandidate($candidate, $rawText);
+            $parsedItem = $this->parseCandidate($candidate['raw'], $candidate['normalized'], $rawText);
 
             if ($parsedItem !== null) {
                 $items[] = $parsedItem;
@@ -49,6 +65,8 @@ class OrderParserService
             'normalized_text' => $normalizedText,
             'confidence' => $confidence,
             'needs_review' => $needsReview,
+            'notes' => $notes,
+            'notes_text' => $notes !== [] ? implode(', ', $notes) : null,
             'items' => $items,
         ];
     }
@@ -57,7 +75,7 @@ class OrderParserService
     {
         $normalized = Str::ascii(mb_strtolower(trim($rawText)));
         $normalized = str_replace(["\r\n", "\r", "\n"], ' , ', $normalized);
-        $normalized = str_replace([';', '|', '•'], ',', $normalized);
+        $normalized = str_replace([';', '|', 'â€¢'], ',', $normalized);
         $normalized = preg_replace('/[^\p{L}\p{N}\s,.-]+/u', ' ', $normalized) ?? $normalized;
         $normalized = preg_replace('/\s+/u', ' ', $normalized) ?? $normalized;
 
@@ -65,72 +83,115 @@ class OrderParserService
     }
 
     /**
-     * @return array<int, string>
+     * @return array<int, array{raw:string, normalized:string}>
      */
-    private function extractCandidatePhrases(string $normalizedText): array
+    private function extractCandidatePhrases(string $rawText, string $normalizedText): array
     {
-        if ($normalizedText === '') {
+        if (trim($rawText) === '' && $normalizedText === '') {
             return [];
         }
 
-        $text = preg_replace('/\s*,\s*/u', ' | ', $normalizedText) ?? $normalizedText;
-        $text = preg_replace('/\s+\b(?:y|e)\b\s+(?=(?:\d|un|una|uno|unos|unas|ocupo|necesito|quiero|quisiera|me|bolsas|caja|cajas|paquete|paquetes|vasos|servilletas|jardin|basura|negras|grandes))/u', ' | ', $text) ?? $text;
+        $segments = [];
 
-        $phrases = array_values(array_filter(array_map('trim', preg_split('/\s*\|\s*/u', $text) ?: [])));
+        foreach ($this->splitCompositeText($rawText) as $rawSegment) {
+            $rawSegment = trim($rawSegment);
+            $normalizedSegment = $this->normalize($rawSegment);
 
-        return $phrases !== [] ? $phrases : [$normalizedText];
+            if ($rawSegment === '' && $normalizedSegment === '') {
+                continue;
+            }
+
+            $segments[] = [
+                'raw' => $rawSegment,
+                'normalized' => $normalizedSegment,
+            ];
+        }
+
+        return $segments !== [] ? $segments : [[
+            'raw' => trim($rawText),
+            'normalized' => $normalizedText,
+        ]];
     }
 
-    private function parseCandidate(string $candidate, string $rawText): ?array
+    /**
+     * @return array<int, string>
+     */
+    private function splitCompositeText(string $text): array
     {
-        $candidate = trim($this->stripLeadInPhrases($candidate));
+        $text = preg_replace('/\s*(?:\r\n|\r|\n)\s*/u', ',', $text) ?? $text;
+        $text = preg_replace('/\s*;\s*/u', ',', $text) ?? $text;
+        $text = preg_replace('/\s*\|\s*/u', ',', $text) ?? $text;
+        $text = preg_replace('/\s+\b(?:y|e)\b\s+/u', ',', $text) ?? $text;
 
-        if ($candidate === '') {
+        $segments = array_values(array_filter(array_map('trim', preg_split('/\s*,\s*/u', $text) ?: [])));
+
+        return $segments !== [] ? $segments : [trim($text)];
+    }
+
+    private function parseCandidate(string $rawCandidate, string $normalizedCandidate, string $rawText): ?array
+    {
+        $candidate = trim($this->stripLeadInPhrases($this->stripTrailingNotes($normalizedCandidate)));
+        $rawCandidate = trim($rawCandidate);
+
+        if ($candidate === '' && $rawCandidate === '') {
+            return null;
+        }
+
+        if ($candidate === '' || $this->isNoteOnlyCandidate($candidate)) {
             return null;
         }
 
         $quantity = 1;
         $unit = null;
-        $productName = $candidate;
-        $matchedText = null;
+        $productName = $candidate !== '' ? $candidate : $rawCandidate;
+        $matchedText = $candidate !== '' ? $candidate : null;
         $confidenceScore = 0.68;
 
-        if (preg_match('/^(?<quantity>\d+(?:[.,]\d+)?)\s+(?<rest>.+)$/u', $candidate, $matches) === 1) {
-            $quantity = (int) str_replace(',', '.', $matches['quantity']);
-            $rest = trim($matches['rest']);
-            $matchedText = $matches[0];
+        if (($match = $this->matchPrefixQuantity($candidate)) !== null) {
+            $quantity = $match['quantity'];
+            $matchedText = trim($match['rest']);
             $confidenceScore = 0.9;
 
-            [$unit, $productName, $matchedText, $confidenceScore] = $this->parseStructuredRest($rest, $quantity, $candidate, $confidenceScore, $matchedText);
-        } elseif (preg_match('/^(?<quantity_word>un|una|uno|unos|unas)\s+(?<rest>.+)$/u', $candidate, $matches) === 1) {
-            $quantity = 1;
-            $rest = trim($matches['rest']);
-            $matchedText = $matches[0];
+            [$unit, $productName, $matchedText, $confidenceScore] = $this->parseStructuredRest($match['rest'], $quantity, $candidate, $confidenceScore, $matchedText);
+        } elseif (($match = $this->matchSuffixQuantityWithUnit($candidate)) !== null) {
+            $quantity = $match['quantity'];
+            $matchedText = trim($match['product']);
+            $unit = $this->normalizeUnit($match['unit']);
+            $productName = $this->cleanupProductName($match['product']);
+            $confidenceScore = 0.94;
+        } elseif (($match = $this->matchSuffixQuantity($candidate)) !== null) {
+            $quantity = $match['quantity'];
+            $matchedText = trim($match['product']);
             $confidenceScore = 0.88;
 
-            [$unit, $productName, $matchedText, $confidenceScore] = $this->parseStructuredRest($rest, $quantity, $candidate, $confidenceScore, $matchedText);
+            [$unit, $productName, $matchedText, $confidenceScore] = $this->parseStructuredRest($match['product'], $quantity, $candidate, $confidenceScore, $matchedText);
         } else {
             $productName = $this->cleanupProductName($candidate);
-            $matchedText = null;
-            $confidenceScore = max($confidenceScore, $productName !== '' ? 0.72 : 0.45);
+            $matchedText = $productName !== '' ? $productName : null;
+            $confidenceScore = $productName !== '' ? 0.72 : 0.45;
         }
 
         $productName = $this->cleanupProductName($productName);
+        $matchedText = $matchedText !== null ? $this->cleanupProductName($matchedText) : null;
 
         if ($productName === '') {
-            $productName = $this->cleanupProductName($candidate);
+            $productName = $this->cleanupProductName($rawCandidate);
         }
 
         if ($productName === '') {
             $productName = $this->cleanupProductName($rawText);
         }
 
+        if ($matchedText === null && $productName !== '') {
+            $matchedText = $productName;
+        }
+
         return [
             'quantity' => $quantity,
             'unit' => $unit,
-            'raw_text' => $candidate,
+            'raw_text' => $candidate !== '' ? $candidate : trim($rawText),
             'product_name' => $productName,
-            'matched_text' => $matchedText !== null ? $this->cleanupProductName($matchedText) : null,
+            'matched_text' => $matchedText,
             'confidence_score' => round($confidenceScore, 2),
         ];
     }
@@ -143,7 +204,7 @@ class OrderParserService
         $unit = null;
         $productName = $rest;
 
-        if (preg_match('/^(?<unit>bolsas?|cajas?|paquetes?|paqs?|piezas?|rollos?|docenas?|sacos?|botellas?|litros?|galones?|libra?s?|metros?|pares?|docena|cartones?|vasos|servilletas)\b\s*(?<rest>.*)$/u', $rest, $matches) === 1) {
+        if (preg_match('/^(?<unit>' . $this->unitRegex() . ')\b\s*(?:de\s+)?(?<rest>.*)$/u', $rest, $matches) === 1) {
             $unit = $this->normalizeUnit($matches['unit']);
             $productName = trim($matches['rest']);
             $matchedText = trim($matches[0]);
@@ -161,6 +222,95 @@ class OrderParserService
         return [$unit, $productName, $matchedText, $confidenceScore];
     }
 
+    /**
+     * @return array{quantity:int|float,rest:string}|null
+     */
+    private function matchPrefixQuantity(string $candidate): ?array
+    {
+        $patterns = [
+            '/^(?<quantity>\d+(?:[.,]\d+)?)\s*x\s+(?<rest>.+)$/u',
+            '/^x\s*(?<quantity>\d+(?:[.,]\d+)?)\s+(?<rest>.+)$/u',
+            '/^x(?<quantity>\d+(?:[.,]\d+)?)\s+(?<rest>.+)$/u',
+            '/^(?<quantity>\d+(?:[.,]\d+)?)\s+(?<rest>.+)$/u',
+            '/^(?<quantity_word>un|una|uno|unos|unas)\s+(?<rest>.+)$/u',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $candidate, $matches) !== 1) {
+                continue;
+            }
+
+            $quantity = isset($matches['quantity_word']) ? 1 : $this->parseQuantityValue($matches['quantity']);
+            $rest = trim($matches['rest']);
+
+            if ($rest === '') {
+                continue;
+            }
+
+            return [
+                'quantity' => $quantity,
+                'rest' => $rest,
+            ];
+        }
+
+        return null;
+    }
+
+    /**
+     * @return array{quantity:int|float,product:string,unit:string}|null
+     */
+    private function matchSuffixQuantityWithUnit(string $candidate): ?array
+    {
+        $pattern = '/^(?<product>.+?)\s+(?<quantity>\d+(?:[.,]\d+)?)\s+(?<unit>' . $this->unitRegex() . ')\s*$/u';
+
+        if (preg_match($pattern, $candidate, $matches) !== 1) {
+            return null;
+        }
+
+        $product = trim($matches['product']);
+
+        if ($product === '') {
+            return null;
+        }
+
+        return [
+            'quantity' => $this->parseQuantityValue($matches['quantity']),
+            'product' => $product,
+            'unit' => $matches['unit'],
+        ];
+    }
+
+    /**
+     * @return array{quantity:int|float,product:string}|null
+     */
+    private function matchSuffixQuantity(string $candidate): ?array
+    {
+        $patterns = [
+            '/^(?<product>.+?)\s+(?<quantity>\d+(?:[.,]\d+)?)\s*x\s*$/u',
+            '/^(?<product>.+?)\s+x\s*(?<quantity>\d+(?:[.,]\d+)?)\s*$/u',
+            '/^(?<product>.+?)\s+(?<quantity>\d+(?:[.,]\d+)?)\s*$/u',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $candidate, $matches) !== 1) {
+                continue;
+            }
+
+            $product = trim($matches['product']);
+
+            if ($product === '') {
+                continue;
+            }
+
+            return [
+                'quantity' => $this->parseQuantityValue($matches['quantity']),
+                'product' => $product,
+            ];
+        }
+
+        return null;
+    }
+
     private function stripLeadInPhrases(string $candidate): string
     {
         $candidate = trim($candidate);
@@ -169,12 +319,18 @@ class OrderParserService
             '/^(?:me\s+)?aparta(?:me|nos|n|s)?\b\s*/u',
             '/^ocupo\b\s*/u',
             '/^necesito\b\s*/u',
+            '/^requiero\b\s*/u',
+            '/^quiero\s+pedir\b\s*/u',
             '/^quiero\b\s*/u',
             '/^quisiera\b\s*/u',
+            '/^solicito\b\s*/u',
             '/^favor\s+de\b\s*/u',
             '/^por\s+favor\b\s*/u',
+            '/^mande(?:me|nos|n|s)?\b\s*/u',
             '/^manda(?:me|nos|n|s)?\b\s*/u',
             '/^me\s+regala\b\s*/u',
+            '/^me\s+regalas?\b\s*/u',
+            '/^me\s+vende(?:me|nos|n|s)?\b\s*/u',
             '/^me\s+vende\b\s*/u',
             '/^dame\b\s*/u',
         ];
@@ -190,7 +346,99 @@ class OrderParserService
     {
         $value = trim($value);
         $value = preg_replace('/^(?:de|del|para|por|con)\s+/u', '', $value) ?? $value;
+        $value = preg_replace('/\s+(?:para\s+(?:manana|hoy)|urgente|sin\s+falta|lo\s+paso\s+recogiendo|me\s+lo\s+env(?:ia|ias|ie|ien)|enviar\s+a\s+domicilio|recoger\s+en\s+tienda)\b.*$/u', '', $value) ?? $value;
         $value = preg_replace('/\s+/u', ' ', $value) ?? $value;
+
+        return trim($value);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function extractNotes(string $normalizedText): array
+    {
+        if ($normalizedText === '') {
+            return [];
+        }
+
+        $matches = [];
+
+        foreach (self::NOTE_PATTERNS as $definition) {
+            if (preg_match_all($definition['regex'], $normalizedText, $found, PREG_OFFSET_CAPTURE) < 1) {
+                continue;
+            }
+
+            foreach ($found[0] as $match) {
+                $note = $definition['note'] ?? $this->normalizeNotePhrase($match[0]);
+                $matches[] = [
+                    'note' => $note,
+                    'offset' => $match[1],
+                ];
+            }
+        }
+
+        usort($matches, static fn (array $left, array $right): int => $left['offset'] <=> $right['offset']);
+
+        $notes = [];
+
+        foreach ($matches as $match) {
+            if (in_array($match['note'], $notes, true)) {
+                continue;
+            }
+
+            $notes[] = $match['note'];
+        }
+
+        return $notes;
+    }
+
+    private function stripTrailingNotes(string $candidate): string
+    {
+        $candidate = trim($candidate);
+
+        if ($candidate === '') {
+            return '';
+        }
+
+        $patterns = [
+            '/(?:\s*(?:,|;|\.)\s*|\s+)\bpara\s+manana\b\s*$/u',
+            '/(?:\s*(?:,|;|\.)\s*|\s+)\bpara\s+hoy\b\s*$/u',
+            '/(?:\s*(?:,|;|\.)\s*|\s+)\bpara\s+las?\s+\d{1,2}(?::\d{2})?(?:\s*(?:am|pm|a\.m\.|p\.m\.|md))?\b\s*$/u',
+            '/(?:\s*(?:,|;|\.)\s*|\s+)\burgente\b\s*$/u',
+            '/(?:\s*(?:,|;|\.)\s*|\s+)\blo\s+paso\s+recogiendo\b\s*$/u',
+            '/(?:\s*(?:,|;|\.)\s*|\s+)\bme\s+lo\s+env(?:ia|ias|ie|ien)\b\s*$/u',
+            '/(?:\s*(?:,|;|\.)\s*|\s+)\benviar\s+a\s+domicilio\b\s*$/u',
+            '/(?:\s*(?:,|;|\.)\s*|\s+)\brecoger\s+en\s+tienda\b\s*$/u',
+            '/(?:\s*(?:,|;|\.)\s*|\s+)\bsin\s+falta\b\s*$/u',
+        ];
+
+        do {
+            $before = $candidate;
+
+            foreach ($patterns as $pattern) {
+                $candidate = preg_replace($pattern, '', $candidate) ?? $candidate;
+            }
+
+            $candidate = trim(preg_replace('/\s+/u', ' ', $candidate) ?? $candidate, " \t\n\r\0\x0B,.;:-");
+        } while ($candidate !== $before);
+
+        return $candidate;
+    }
+
+    private function isNoteOnlyCandidate(string $candidate): bool
+    {
+        $candidate = trim($candidate);
+
+        if ($candidate === '') {
+            return true;
+        }
+
+        return $this->stripTrailingNotes($candidate) === '';
+    }
+
+    private function normalizeNotePhrase(string $value): string
+    {
+        $value = preg_replace('/\s+/u', ' ', trim($value)) ?? $value;
 
         return trim($value);
     }
@@ -198,21 +446,32 @@ class OrderParserService
     private function normalizeUnit(string $unit): string
     {
         return match (true) {
+            str_starts_with($unit, 'unidad') => 'unidad',
+            str_starts_with($unit, 'paquete') => 'paquete',
             str_starts_with($unit, 'caja') => 'caja',
-            str_starts_with($unit, 'paquete') || str_starts_with($unit, 'paq') => 'paquete',
-            str_starts_with($unit, 'pieza') => 'pieza',
-            str_starts_with($unit, 'rollo') => 'rollo',
+            str_starts_with($unit, 'bolsa') => 'bolsa',
             str_starts_with($unit, 'docena') => 'docena',
-            str_starts_with($unit, 'saco') => 'saco',
-            str_starts_with($unit, 'botella') => 'botella',
-            str_starts_with($unit, 'litro') => 'litro',
-            str_starts_with($unit, 'galon') => 'galon',
+            str_starts_with($unit, 'rollo') => 'rollo',
+            str_starts_with($unit, 'kilo') => 'kilo',
             str_starts_with($unit, 'libra') => 'libra',
-            str_starts_with($unit, 'metro') => 'metro',
-            str_starts_with($unit, 'par') => 'par',
-            str_starts_with($unit, 'carton') => 'carton',
+            str_starts_with($unit, 'litro') => 'litro',
             default => 'bolsa',
         };
+    }
+
+    private function unitRegex(): string
+    {
+        return self::UNIT_REGEX;
+    }
+
+    /**
+     * @return int|float
+     */
+    private function parseQuantityValue(string $value): int|float
+    {
+        $normalized = str_replace(',', '.', trim($value));
+
+        return str_contains($normalized, '.') ? (float) $normalized : (int) $normalized;
     }
 
     /**
