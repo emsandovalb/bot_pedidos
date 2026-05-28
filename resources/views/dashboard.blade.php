@@ -7,14 +7,14 @@
                 <p class="mt-2 text-sm text-slate-600">Resumen operativo de pedidos por Telegram, revision manual y cierres diarios.</p>
             </div>
             <div class="flex flex-wrap items-center gap-3">
-                {{-- Keep the dashboard focused on the official order workflow; legacy /requests pages stay out of the primary UI during migration. --}}
                 <a href="{{ route('orders.index', ['status' => \App\Models\Order::STATUS_PENDING_REVIEW]) }}" class="brand-btn-primary">Pedidos pendientes</a>
                 <a href="{{ route('order-reviews.index') }}" class="brand-btn-secondary">Revisar pedidos</a>
                 <a href="{{ route('incoming-messages.index') }}" class="brand-btn-secondary">Bandeja de mensajes</a>
+                <a href="{{ route('daily-order-closures.index') }}" class="brand-btn-secondary">Cierres diarios</a>
             </div>
         </div>
 
-        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
             <div class="brand-card border-brand-primary/10 p-5">
                 <div class="flex items-start justify-between gap-3">
                     <div>
@@ -30,7 +30,7 @@
                         <div class="text-sm font-medium text-slate-500">Pedidos pendientes</div>
                         <div class="mt-2 text-3xl font-semibold text-brand-navy">{{ $totalPendingRequests }}</div>
                     </div>
-                    <div class="rounded-2xl bg-amber-50 px-3 py-2 text-amber-700">⏳</div>
+                    <div class="rounded-2xl bg-amber-50 px-3 py-2 text-amber-700">#</div>
                 </div>
             </div>
             <div class="brand-card border-brand-info/20 p-5">
@@ -48,9 +48,18 @@
                         <div class="text-sm font-medium text-slate-500">Pedidos confirmados hoy</div>
                         <div class="mt-2 text-3xl font-semibold text-brand-navy">{{ $totalConfirmedRequestsToday }}</div>
                     </div>
-                    <div class="rounded-2xl bg-green-50 px-3 py-2 text-brand-success">✓</div>
+                    <div class="rounded-2xl bg-green-50 px-3 py-2 text-brand-success">#</div>
                 </div>
             </div>
+            <a href="{{ route('daily-order-closures.index') }}" class="brand-card border-brand-gold/20 p-5 transition hover:-translate-y-0.5 hover:shadow-md">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <div class="text-sm font-medium text-slate-500">Cierres diarios hoy</div>
+                        <div class="mt-2 text-3xl font-semibold text-brand-navy">{{ $dailyOrderClosuresTodayCount }}</div>
+                    </div>
+                    <div class="rounded-2xl bg-amber-50 px-3 py-2 text-amber-700">#</div>
+                </div>
+            </a>
         </div>
 
         <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
@@ -69,7 +78,7 @@
                         <div class="text-sm font-medium text-slate-500">Confirmados</div>
                         <div class="mt-2 text-3xl font-semibold text-brand-navy">{{ $orderConfirmedCount }}</div>
                     </div>
-                    <div class="rounded-2xl bg-green-50 px-3 py-2 text-brand-success">✓</div>
+                    <div class="rounded-2xl bg-green-50 px-3 py-2 text-brand-success">#</div>
                 </div>
             </a>
             <a href="{{ route('orders.index', ['status' => \App\Models\Order::STATUS_PREPARING]) }}" class="brand-card border-violet-200 p-5 transition hover:-translate-y-0.5 hover:shadow-md">
@@ -87,7 +96,7 @@
                         <div class="text-sm font-medium text-slate-500">Listos para despacho</div>
                         <div class="mt-2 text-3xl font-semibold text-brand-navy">{{ $orderReadyForDispatchCount }}</div>
                     </div>
-                    <div class="rounded-2xl bg-sky-50 px-3 py-2 text-brand-info">→</div>
+                    <div class="rounded-2xl bg-sky-50 px-3 py-2 text-brand-info">-></div>
                 </div>
             </a>
             <a href="{{ route('orders.index', ['status' => \App\Models\Order::STATUS_DISPATCHED]) }}" class="brand-card border-emerald-200 p-5 transition hover:-translate-y-0.5 hover:shadow-md">
@@ -96,7 +105,7 @@
                         <div class="text-sm font-medium text-slate-500">Despachados hoy</div>
                         <div class="mt-2 text-3xl font-semibold text-brand-navy">{{ $orderDispatchedCount }}</div>
                     </div>
-                    <div class="rounded-2xl bg-emerald-50 px-3 py-2 text-emerald-700">✓</div>
+                    <div class="rounded-2xl bg-emerald-50 px-3 py-2 text-emerald-700">#</div>
                 </div>
             </a>
         </div>
@@ -204,7 +213,7 @@
                                 <div class="text-sm font-medium text-slate-900">{{ $closure->branch?->name ?? '-' }}</div>
                                 <div class="text-xs text-slate-500">{{ $closure->closure_date?->format('Y-m-d') }}</div>
                             </div>
-                            <div class="mt-1 text-xs text-slate-600">Cerrado por {{ $closure->closedByUser?->name ?? '-' }} · Pedidos {{ $closure->total_requests }}</div>
+                            <div class="mt-1 text-xs text-slate-600">Cerrado por {{ $closure->closedByUser?->name ?? '-' }} · Pedidos {{ $closure->total_orders }}</div>
                         </div>
                     @empty
                         <div class="text-sm text-slate-500">No closures recorded yet.</div>

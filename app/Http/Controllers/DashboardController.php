@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Branch;
-use App\Models\BranchDailyClosure;
+use App\Models\DailyOrderClosure;
 use App\Models\IncomingMessage;
 use App\Models\IntakeRequest;
 use App\Models\Order;
@@ -118,7 +118,11 @@ class DashboardController extends Controller
                 ->orderByDesc('created_at')
                 ->limit(5)
                 ->get(),
-            'recentClosures' => BranchDailyClosure::query()
+            'dailyOrderClosuresTodayCount' => DailyOrderClosure::query()
+                ->tap($closureScope)
+                ->whereDate('closure_date', today())
+                ->count(),
+            'recentClosures' => DailyOrderClosure::query()
                 ->tap($closureScope)
                 ->with(['branch', 'closedByUser'])
                 ->orderByDesc('closed_at')

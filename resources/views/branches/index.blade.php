@@ -4,9 +4,9 @@
             <div>
                 <div class="brand-badge bg-brand-primary/10 text-brand-primary">Sucursales</div>
                 <h1 class="mt-3 text-3xl font-semibold tracking-tight text-brand-navy">Sucursales</h1>
-                <p class="mt-1 text-sm text-slate-600">Sucursales visibles para tu ámbito actual.</p>
+                <p class="mt-1 text-sm text-slate-600">Sucursales visibles para tu ambito actual.</p>
             </div>
-            <a href="{{ route('closures.index') }}" class="brand-btn-secondary">
+            <a href="{{ route('daily-order-closures.index') }}" class="brand-btn-secondary">
                 Cierres diarios
             </a>
         </div>
@@ -19,7 +19,7 @@
                         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Canal</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Identificador</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Estado</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Acción</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Accion</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200 bg-white">
@@ -32,13 +32,9 @@
                                 <span class="brand-badge bg-slate-100 text-slate-700">{{ $branch->status }}</span>
                             </td>
                             <td class="px-4 py-3 text-sm">
-                                @can('create', [\App\Models\BranchDailyClosure::class, $branch])
-                                    <a href="{{ route('closures.index', ['branch_id' => $branch->id, 'closure_date' => today()->toDateString()]) }}" class="brand-btn-secondary px-3 py-1.5 text-xs">
-                                        Cerrar día
-                                    </a>
-                                @else
-                                    <span class="text-sm text-slate-400">Solo lectura</span>
-                                @endcan
+                                <a href="{{ route('daily-order-closures.create', ['branch_id' => $branch->id, 'closure_date' => today()->toDateString()]) }}" class="brand-btn-secondary px-3 py-1.5 text-xs">
+                                    Cerrar dia
+                                </a>
                             </td>
                         </tr>
                     @empty

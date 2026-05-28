@@ -45,7 +45,7 @@
                             ['label' => 'Revision de pedidos', 'href' => 'order-reviews.index', 'active' => 'order-reviews.*', 'icon' => 'M9 11h6M9 15h6M7 4h7l4 4v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z'],
                             ['label' => 'Catalogo de productos', 'href' => 'products.index', 'active' => 'products.*', 'icon' => 'M4 6h16M4 12h16M4 18h10'],
                             ['label' => 'Sucursales', 'href' => 'branches.index', 'active' => 'branches.*', 'icon' => 'M5 20V9l7-4 7 4v11M9 20v-6h6v6M8 11h.01M12 11h.01M16 11h.01'],
-                            ['label' => 'Cierres diarios', 'href' => 'closures.index', 'active' => 'closures.*', 'icon' => 'M8 3v3M16 3v3M4 8h16M6 5h12a2 2 0 0 1 2 2v11a1 1 0 0 1-1 2H6a1 1 0 0 1-1-2V7a2 2 0 0 1 2-2Z'],
+                            ['label' => 'Cierres diarios', 'href' => 'daily-order-closures.index', 'active' => 'daily-order-closures.*', 'icon' => 'M8 3v3M16 3v3M4 8h16M6 5h12a2 2 0 0 1 2 2v11a1 1 0 0 1-1 2H6a1 1 0 0 1-1-2V7a2 2 0 0 1 2-2Z'],
                             ['label' => 'Bandeja de mensajes', 'href' => 'incoming-messages.index', 'active' => 'incoming-messages.*', 'icon' => 'M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10Z'],
                         ] as $item)
                             <a

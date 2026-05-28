@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\BranchDailyClosureController;
+use App\Http\Controllers\DailyOrderClosureController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\IncomingMessageController;
 use App\Http\Controllers\IntakeRequestController;
@@ -26,6 +27,11 @@ Route::get('/', function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/branches', [BranchController::class, 'index'])->name('branches.index');
+    Route::get('/daily-order-closures', [DailyOrderClosureController::class, 'index'])->name('daily-order-closures.index');
+    Route::get('/daily-order-closures/create', [DailyOrderClosureController::class, 'create'])->name('daily-order-closures.create');
+    Route::post('/daily-order-closures', [DailyOrderClosureController::class, 'store'])->name('daily-order-closures.store');
+    Route::get('/daily-order-closures/{dailyOrderClosure}', [DailyOrderClosureController::class, 'show'])->name('daily-order-closures.show');
+    Route::get('/daily-order-closures/{dailyOrderClosure}/export', [DailyOrderClosureController::class, 'export'])->name('daily-order-closures.export');
     Route::get('/closures', [BranchDailyClosureController::class, 'index'])->name('closures.index');
     Route::post('/closures', [BranchDailyClosureController::class, 'store'])->name('closures.store');
     Route::get('/closures/{closure}', [BranchDailyClosureController::class, 'show'])->name('closures.show');
