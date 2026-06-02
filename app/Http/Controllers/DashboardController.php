@@ -4,13 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Branch;
 use App\Models\DailyOrderClosure;
-use App\Models\IncomingMessage;
 use App\Models\IntakeRequest;
 use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Carbon;
 
 class DashboardController extends Controller
 {
@@ -55,10 +53,6 @@ class DashboardController extends Controller
             ->orderBy('name');
 
         return view('dashboard', [
-            'totalIncomingMessagesToday' => IncomingMessage::query()
-                ->tap($requestScope)
-                ->whereDate('received_at', today())
-                ->count(),
             'totalPendingRequests' => IntakeRequest::query()
                 ->tap($requestScope)
                 ->where('status', IntakeRequest::STATUS_PENDING)
@@ -75,6 +69,13 @@ class DashboardController extends Controller
             'activeProductCount' => Product::query()
                 ->when($organizationId, fn ($query) => $query->where('organization_id', $organizationId), fn ($query) => $query->whereRaw('1 = 0'))
                 ->where('is_active', true)
+                ->count(),
+            'totalProductCount' => Product::query()
+                ->when($organizationId, fn ($query) => $query->where('organization_id', $organizationId), fn ($query) => $query->whereRaw('1 = 0'))
+                ->count(),
+            'ordersTodayCount' => Order::query()
+                ->tap($orderScope)
+                ->whereDate('created_at', today())
                 ->count(),
             'orderPendingReviewCount' => Order::query()
                 ->tap($orderScope)
@@ -97,6 +98,12 @@ class DashboardController extends Controller
                 ->where('status', Order::STATUS_DISPATCHED)
                 ->whereDate('dispatched_at', today())
                 ->count(),
+            'recentOrders' => Order::query()
+                ->tap($orderScope)
+                ->with(['customer', 'branch'])
+                ->orderByDesc('created_at')
+                ->limit(5)
+                ->get(),
             'statusCounts' => [
                 'pending' => IntakeRequest::query()->tap($requestScope)->where('status', IntakeRequest::STATUS_PENDING)->count(),
                 'needs_review' => IntakeRequest::query()->tap($requestScope)->where('status', IntakeRequest::STATUS_NEEDS_REVIEW)->count(),
@@ -128,6 +135,9 @@ class DashboardController extends Controller
                 ->orderByDesc('closed_at')
                 ->limit(5)
                 ->get(),
+            'totalClosuresCount' => DailyOrderClosure::query()
+                ->tap($closureScope)
+                ->count(),
             'stalePendingRequestCount' => IntakeRequest::query()
                 ->tap($requestScope)
                 ->where('status', IntakeRequest::STATUS_PENDING)
