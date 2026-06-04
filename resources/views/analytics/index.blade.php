@@ -18,7 +18,7 @@
         };
     @endphp
 
-    <div class="space-y-8">
+    <div class="space-y-10">
         <section class="rounded-[2rem] border border-slate-200/70 bg-gradient-to-br from-white via-white to-[#146EDB]/5 p-6 shadow-sm sm:p-8">
             <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                 <div class="max-w-3xl">
@@ -33,7 +33,7 @@
                     </p>
                 </div>
 
-                <div class="grid gap-3 sm:grid-cols-3 lg:min-w-[460px]">
+                <div class="grid gap-4 sm:grid-cols-3 lg:min-w-[460px]">
                     <div class="rounded-2xl border border-slate-200/70 bg-white p-4 shadow-sm">
                         <div class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Hoy</div>
                         <div class="mt-2 text-2xl font-semibold tracking-tight text-brand-navy">{{ $ordersTodayCount }}</div>
@@ -53,7 +53,7 @@
             </div>
         </section>
 
-        <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+        <section class="grid gap-6 md:grid-cols-2 xl:grid-cols-5">
             <article class="rounded-2xl border border-[#146EDB]/15 bg-white p-5 shadow-sm">
                 <div class="text-sm font-medium text-slate-500">Pedidos hoy</div>
                 <div class="mt-3 text-3xl font-semibold tracking-tight text-brand-navy">{{ $ordersTodayCount }}</div>
@@ -85,7 +85,7 @@
             </article>
         </section>
 
-        <section class="grid gap-6 xl:grid-cols-[1.35fr_0.9fr]">
+        <section class="grid gap-8 xl:grid-cols-[1.35fr_0.9fr]">
             <div class="rounded-[2rem] border border-slate-200/70 bg-white p-6 shadow-sm">
                 <div class="flex items-center justify-between gap-3">
                     <div>
@@ -157,7 +157,7 @@
             </div>
         </section>
 
-        <section class="grid gap-6 xl:grid-cols-2">
+        <section class="grid gap-8 xl:grid-cols-2">
             <div class="rounded-[2rem] border border-slate-200/70 bg-white p-6 shadow-sm">
                 <div class="flex items-center justify-between gap-3">
                     <div>
