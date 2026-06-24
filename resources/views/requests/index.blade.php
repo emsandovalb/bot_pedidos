@@ -3,7 +3,7 @@
         <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div class="max-w-3xl">
                 <div class="brand-badge bg-brand-primary/10 text-brand-primary">Revisión de pedidos</div>
-                <h1 class="mt-3 text-3xl font-semibold tracking-tight text-brand-navy">Órdenes pendientes</h1>
+                <h1 class="mt-3 text-3xl font-semibold tracking-tight text-brand-navy">Pedidos pendientes</h1>
                 <p class="mt-1 text-sm text-slate-600">Bandeja de pedidos para el ámbito actual.</p>
             </div>
 

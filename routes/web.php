@@ -5,6 +5,7 @@ use App\Http\Controllers\BranchDailyClosureController;
 use App\Http\Controllers\DailyOrderClosureController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\ChannelController;
 use App\Http\Controllers\IncomingMessageController;
 use App\Http\Controllers\IntakeRequestController;
 use App\Http\Controllers\NumberBoardController;
@@ -28,6 +29,9 @@ Route::get('/', function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
+    Route::get('/channels', [ChannelController::class, 'index'])->name('channels.index');
+    Route::get('/channels/whatsapp', [ChannelController::class, 'whatsapp'])->name('channels.whatsapp');
+    Route::get('/channels/whatsapp/status', [ChannelController::class, 'status'])->name('channels.whatsapp.status');
     Route::get('/branches', [BranchController::class, 'index'])->name('branches.index');
     Route::get('/daily-order-closures', [DailyOrderClosureController::class, 'index'])->name('daily-order-closures.index');
     Route::get('/daily-order-closures/create', [DailyOrderClosureController::class, 'create'])->name('daily-order-closures.create');

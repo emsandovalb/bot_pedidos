@@ -1,90 +1,90 @@
 <x-app-layout>
-    <div class="space-y-6">
-        @php
-            $queueOrders = $orders->getCollection();
+    @php
+        $queueOrders = $orders->getCollection();
 
-            $totalPending = $queueOrders->count();
-            $classifiedCount = $queueOrders->filter(fn ($order) => (int) ($order->recognized_order_items_count ?? 0) > 0)->count();
-            $unclassifiedCount = $totalPending - $classifiedCount;
+        $totalPending = $queueOrders->count();
+        $classifiedCount = $queueOrders->filter(fn ($order) => (int) ($order->recognized_order_items_count ?? 0) > 0)->count();
+        $unclassifiedCount = $totalPending - $classifiedCount;
 
-            $confidenceLabelFor = static function (?float $score): array {
-                if ($score === null) {
-                    return ['label' => 'Sin confianza', 'class' => 'bg-slate-100 text-slate-700 ring-1 ring-slate-200'];
-                }
+        $confidenceLabelFor = static function (?float $score): array {
+            if ($score === null) {
+                return ['label' => 'Sin confianza', 'class' => 'bg-slate-100 text-slate-700 ring-1 ring-slate-200'];
+            }
 
-                if ($score >= 0.75) {
-                    return ['label' => 'High', 'class' => 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100'];
-                }
+            if ($score >= 0.75) {
+                return ['label' => 'High', 'class' => 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100'];
+            }
 
-                if ($score >= 0.45) {
-                    return ['label' => 'Medium', 'class' => 'bg-amber-50 text-amber-700 ring-1 ring-amber-100'];
-                }
+            if ($score >= 0.45) {
+                return ['label' => 'Medium', 'class' => 'bg-amber-50 text-amber-700 ring-1 ring-amber-100'];
+            }
 
-                return ['label' => 'Low', 'class' => 'bg-red-50 text-red-700 ring-1 ring-red-100'];
-            };
+            return ['label' => 'Low', 'class' => 'bg-red-50 text-red-700 ring-1 ring-red-100'];
+        };
 
-            $confidenceCount = static function ($order, callable $predicate): int {
-                return $order->filter(function ($candidate) use ($predicate) {
-                    $score = $candidate->parser_confidence !== null ? (float) $candidate->parser_confidence : null;
+        $confidenceCount = static function ($order, callable $predicate): int {
+            return $order->filter(function ($candidate) use ($predicate) {
+                $score = $candidate->parser_confidence !== null ? (float) $candidate->parser_confidence : null;
 
-                    return $predicate($score);
-                })->count();
-            };
+                return $predicate($score);
+            })->count();
+        };
 
-            $highConfidenceCount = $confidenceCount($queueOrders, static fn (?float $score) => $score !== null && $score >= 0.75);
-            $mediumConfidenceCount = $confidenceCount($queueOrders, static fn (?float $score) => $score !== null && $score >= 0.45 && $score < 0.75);
-            $lowConfidenceCount = $confidenceCount($queueOrders, static fn (?float $score) => $score !== null && $score < 0.45);
+        $highConfidenceCount = $confidenceCount($queueOrders, static fn (?float $score) => $score !== null && $score >= 0.75);
+        $mediumConfidenceCount = $confidenceCount($queueOrders, static fn (?float $score) => $score !== null && $score >= 0.45 && $score < 0.75);
+        $lowConfidenceCount = $confidenceCount($queueOrders, static fn (?float $score) => $score !== null && $score < 0.45);
 
-            $statusToneFor = static function ($order): array {
-                $recognizedCount = (int) ($order->recognized_order_items_count ?? 0);
-                $totalItems = (int) $order->orderItems->count();
+        $statusToneFor = static function ($order): array {
+            $recognizedCount = (int) ($order->recognized_order_items_count ?? 0);
+            $totalItems = (int) $order->orderItems->count();
 
-                if ($recognizedCount > 0 && $totalItems > 0 && $recognizedCount === $totalItems) {
-                    return [
-                        'border' => 'border-emerald-200/80 ring-1 ring-emerald-100',
-                        'accent' => 'bg-emerald-500',
-                        'badge' => 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100',
-                        'label' => 'Clasificado',
-                    ];
-                }
-
-                if ($recognizedCount > 0) {
-                    return [
-                        'border' => 'border-amber-200/80 ring-1 ring-amber-100',
-                        'accent' => 'bg-amber-500',
-                        'badge' => 'bg-amber-50 text-amber-700 ring-1 ring-amber-100',
-                        'label' => 'Pendiente de validacion',
-                    ];
-                }
-
+            if ($recognizedCount > 0 && $totalItems > 0 && $recognizedCount === $totalItems) {
                 return [
-                    'border' => 'border-orange-200/80 ring-1 ring-orange-100',
-                    'accent' => 'bg-orange-500',
-                    'badge' => 'bg-orange-50 text-orange-700 ring-1 ring-orange-100',
-                    'label' => 'Pendiente de clasificar',
+                    'border' => 'border-emerald-200/80 ring-1 ring-emerald-100',
+                    'accent' => 'bg-emerald-500',
+                    'badge' => 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100',
+                    'label' => 'Clasificado',
                 ];
-            };
-        @endphp
+            }
 
-        <div class="overflow-hidden rounded-[28px] border border-slate-200/70 bg-[linear-gradient(135deg,rgba(20,110,219,0.08),rgba(15,23,42,0.02)_38%,rgba(255,255,255,1)_70%)] shadow-[0_18px_50px_-30px_rgba(15,23,42,0.35)]">
+            if ($recognizedCount > 0) {
+                return [
+                    'border' => 'border-amber-200/80 ring-1 ring-amber-100',
+                    'accent' => 'bg-amber-500',
+                    'badge' => 'bg-amber-50 text-amber-700 ring-1 ring-amber-100',
+                    'label' => 'Pendiente de validacion',
+                ];
+            }
+
+            return [
+                'border' => 'border-orange-200/80 ring-1 ring-orange-100',
+                'accent' => 'bg-orange-500',
+                'badge' => 'bg-orange-50 text-orange-700 ring-1 ring-orange-100',
+                'label' => 'Pendiente de clasificar',
+            ];
+        };
+    @endphp
+
+    <div class="space-y-6">
+        <div class="overflow-hidden rounded-[28px] border border-slate-200/70 bg-[linear-gradient(135deg,rgba(20,110,219,0.08),rgba(22,163,74,0.05)_36%,rgba(255,255,255,1)_78%)] shadow-[0_18px_50px_-28px_rgba(15,23,42,0.45)]">
             <div class="flex flex-col gap-6 p-6 sm:p-8 lg:flex-row lg:items-end lg:justify-between">
                 <div class="max-w-3xl">
-                    <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-[#146EDB] ring-1 ring-inset ring-blue-100">
+                    <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-brand-primary ring-1 ring-inset ring-blue-100">
                         Benditio operations inbox
                     </div>
-                    <h1 class="mt-4 text-3xl font-semibold tracking-tight text-[#0F172A] sm:text-4xl">
-                        Revisi&oacute;n de pedidos
+                    <h1 class="mt-4 text-3xl font-semibold tracking-tight text-brand-navy sm:text-4xl">
+                        Revisión de pedidos
                     </h1>
-                    <p class="mt-3 max-w-2xl text-sm leading-6 text-[#64748B] sm:text-base">
-                        Pedidos que requieren validaci&oacute;n antes de continuar el flujo operativo.
+                    <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+                        Pedidos que requieren validación antes de continuar el flujo operativo.
                     </p>
                 </div>
 
                 <div class="flex flex-wrap items-center gap-3">
-                    <a href="{{ route('orders.index', ['status' => \App\Models\Order::STATUS_PENDING_REVIEW]) }}" class="inline-flex items-center justify-center rounded-2xl bg-[#146EDB] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
+                    <a href="{{ route('orders.index', ['status' => \App\Models\Order::STATUS_PENDING_REVIEW]) }}" class="inline-flex items-center justify-center rounded-2xl bg-brand-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-700">
                         Ver cola operativa
                     </a>
-                    <a href="{{ route('dashboard') }}" class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">
+                    <a href="{{ route('dashboard') }}" class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50">
                         Ir al panel
                     </a>
                 </div>
@@ -92,23 +92,23 @@
         </div>
 
         <div class="grid gap-4 md:grid-cols-3 xl:grid-cols-5">
-            <div class="rounded-[22px] border border-slate-200/70 bg-white p-5 shadow-sm">
+            <div class="rounded-[22px] border border-slate-200/70 border-l-4 border-l-brand-primary bg-white p-5 shadow-sm">
                 <div class="text-sm font-medium text-slate-500">Total pendientes</div>
-                <div class="mt-2 text-3xl font-semibold tracking-tight text-[#0F172A]">{{ $totalPending }}</div>
+                <div class="mt-2 text-3xl font-semibold tracking-tight text-brand-navy">{{ $totalPending }}</div>
             </div>
-            <div class="rounded-[22px] border border-emerald-200/70 bg-white p-5 shadow-sm">
+            <div class="rounded-[22px] border border-emerald-200/70 border-l-4 border-l-emerald-500 bg-white p-5 shadow-sm">
                 <div class="text-sm font-medium text-slate-500">Clasificados</div>
-                <div class="mt-2 text-3xl font-semibold tracking-tight text-[#16A34A]">{{ $classifiedCount }}</div>
+                <div class="mt-2 text-3xl font-semibold tracking-tight text-emerald-700">{{ $classifiedCount }}</div>
             </div>
-            <div class="rounded-[22px] border border-orange-200/70 bg-white p-5 shadow-sm">
+            <div class="rounded-[22px] border border-orange-200/70 border-l-4 border-l-amber-500 bg-white p-5 shadow-sm">
                 <div class="text-sm font-medium text-slate-500">Pendientes de clasificar</div>
-                <div class="mt-2 text-3xl font-semibold tracking-tight text-orange-600">{{ $unclassifiedCount }}</div>
+                <div class="mt-2 text-3xl font-semibold tracking-tight text-amber-600">{{ $unclassifiedCount }}</div>
             </div>
-            <div class="rounded-[22px] border border-slate-200/70 bg-white p-5 shadow-sm">
+            <div class="rounded-[22px] border border-slate-200/70 border-l-4 border-l-emerald-500 bg-white p-5 shadow-sm">
                 <div class="text-sm font-medium text-slate-500">Alta confianza</div>
                 <div class="mt-2 text-3xl font-semibold tracking-tight text-emerald-600">{{ $highConfidenceCount }}</div>
             </div>
-            <div class="rounded-[22px] border border-slate-200/70 bg-white p-5 shadow-sm md:col-span-2 xl:col-span-1">
+            <div class="rounded-[22px] border border-slate-200/70 border-l-4 border-l-amber-500 bg-white p-5 shadow-sm md:col-span-2 xl:col-span-1">
                 <div class="text-sm font-medium text-slate-500">Media / baja confianza</div>
                 <div class="mt-2 flex items-end gap-3">
                     <div class="text-3xl font-semibold tracking-tight text-amber-600">{{ $mediumConfidenceCount }}</div>
@@ -127,8 +127,8 @@
                 <span class="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700">
                     Clasificados <span class="ml-2 text-xs text-emerald-600">{{ $classifiedCount }}</span>
                 </span>
-                <span class="inline-flex items-center rounded-full border border-orange-200 bg-orange-50 px-4 py-2 text-sm font-medium text-orange-700">
-                    Pendientes de clasificar <span class="ml-2 text-xs text-orange-600">{{ $unclassifiedCount }}</span>
+                <span class="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-700">
+                    Pendientes de clasificar <span class="ml-2 text-xs text-amber-600">{{ $unclassifiedCount }}</span>
                 </span>
                 <span class="inline-flex items-center rounded-full border border-emerald-200 bg-white px-4 py-2 text-sm font-medium text-emerald-700 ring-1 ring-emerald-100">
                     Alta confianza <span class="ml-2 text-xs text-emerald-600">{{ $highConfidenceCount }}</span>
@@ -169,14 +169,14 @@
                                 <div class="flex flex-wrap items-center gap-3">
                                     <div>
                                         <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Pedido</div>
-                                        <div class="text-2xl font-semibold tracking-tight text-[#0F172A]">#{{ $order->id }}</div>
+                                        <div class="text-2xl font-semibold tracking-tight text-brand-navy">#{{ $order->id }}</div>
                                     </div>
 
                                     <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $tone['badge'] }}">
                                         {{ $tone['label'] }}
                                     </span>
 
-                                    <span class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-[#146EDB] ring-1 ring-blue-100">
+                                    <span class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-brand-primary ring-1 ring-blue-100">
                                         {{ $order->source_channel ?? 'Canal no definido' }}
                                     </span>
 
@@ -186,29 +186,29 @@
                                 </div>
 
                                 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                                    <div class="rounded-2xl bg-slate-50 p-4">
+                                    <div class="rounded-2xl border border-slate-100 bg-slate-50 p-4">
                                         <div class="text-xs font-medium uppercase tracking-wide text-slate-500">Cliente</div>
-                                        <div class="mt-1 text-sm font-semibold text-[#0F172A]">{{ $order->customer?->name ?? 'Sin cliente' }}</div>
+                                        <div class="mt-1 text-sm font-semibold text-brand-navy">{{ $order->customer?->name ?? 'Sin cliente' }}</div>
                                         <div class="mt-1 text-sm text-slate-600">{{ $order->customer?->phone ?? 'Sin telefono' }}</div>
                                     </div>
-                                    <div class="rounded-2xl bg-slate-50 p-4">
+                                    <div class="rounded-2xl border border-slate-100 bg-slate-50 p-4">
                                         <div class="text-xs font-medium uppercase tracking-wide text-slate-500">Sucursal</div>
-                                        <div class="mt-1 text-sm font-semibold text-[#0F172A]">{{ $order->branch?->name ?? 'Sin sucursal' }}</div>
+                                        <div class="mt-1 text-sm font-semibold text-brand-navy">{{ $order->branch?->name ?? 'Sin sucursal' }}</div>
                                     </div>
-                                    <div class="rounded-2xl bg-slate-50 p-4">
+                                    <div class="rounded-2xl border border-slate-100 bg-slate-50 p-4">
                                         <div class="text-xs font-medium uppercase tracking-wide text-slate-500">Fecha</div>
-                                        <div class="mt-1 text-sm font-semibold text-[#0F172A]">{{ $order->created_at?->format('d/m/Y H:i') ?? 'Sin fecha' }}</div>
+                                        <div class="mt-1 text-sm font-semibold text-brand-navy">{{ $order->created_at?->format('d/m/Y H:i') ?? 'Sin fecha' }}</div>
                                     </div>
-                                    <div class="rounded-2xl bg-slate-50 p-4">
+                                    <div class="rounded-2xl border border-slate-100 bg-slate-50 p-4">
                                         <div class="text-xs font-medium uppercase tracking-wide text-slate-500">Canal</div>
-                                        <div class="mt-1 text-sm font-semibold text-[#0F172A]">{{ $order->source_channel ?? 'Sin canal' }}</div>
+                                        <div class="mt-1 text-sm font-semibold text-brand-navy">{{ $order->source_channel ?? 'Sin canal' }}</div>
                                     </div>
                                 </div>
 
                                 <div class="grid gap-4 xl:grid-cols-[1.45fr_1fr]">
-                                    <section class="rounded-2xl border border-slate-200/80 bg-white p-4">
+                                    <section class="rounded-2xl border border-slate-200/80 border-l-4 border-l-brand-primary bg-white p-4">
                                         <div class="flex items-center justify-between gap-3">
-                                            <h2 class="text-sm font-semibold text-[#0F172A]">Mensaje original</h2>
+                                            <h2 class="text-sm font-semibold text-brand-navy">Mensaje original</h2>
                                             <span class="text-xs font-medium uppercase tracking-wide text-slate-500">Vista previa</span>
                                         </div>
                                         <p
@@ -219,9 +219,9 @@
                                         </p>
                                     </section>
 
-                                    <section class="rounded-2xl border border-slate-200/80 bg-white p-4">
+                                    <section class="rounded-2xl border border-slate-200/80 border-l-4 border-l-amber-500 bg-white p-4">
                                         <div class="flex items-center justify-between gap-3">
-                                            <h2 class="text-sm font-semibold text-[#0F172A]">Clasificaci&oacute;n</h2>
+                                            <h2 class="text-sm font-semibold text-brand-navy">Clasificación</h2>
                                             <span class="text-xs font-medium uppercase tracking-wide text-slate-500">{{ $itemCount }} item(s)</span>
                                         </div>
 
@@ -250,7 +250,7 @@
                                                     </div>
                                                     <div class="mt-2 text-xs font-medium text-orange-700">Sin producto asociado</div>
                                                     <p class="mt-2 text-sm leading-6 text-orange-700">
-                                                        No se identificaron productos autom&aacute;ticamente en este pedido.
+                                                        No se identificaron productos automáticamente en este pedido.
                                                     </p>
                                                 </div>
                                             @endif
@@ -258,9 +258,9 @@
                                     </section>
                                 </div>
 
-                                <section class="rounded-2xl border border-slate-200/80 bg-white p-4">
+                                <section class="rounded-2xl border border-slate-200/80 border-l-4 border-l-slate-300 bg-white p-4">
                                     <div class="flex items-center justify-between gap-3">
-                                        <h2 class="text-sm font-semibold text-[#0F172A]">Items detectados</h2>
+                                        <h2 class="text-sm font-semibold text-brand-navy">Items detectados</h2>
                                         <span class="text-xs font-medium uppercase tracking-wide text-slate-500">{{ $itemCount }} total</span>
                                     </div>
 
@@ -270,14 +270,14 @@
                                                 $itemScore = $item->confidence_score !== null ? (float) $item->confidence_score : null;
                                                 $itemConfidence = $confidenceLabelFor($itemScore);
                                             @endphp
-                                            <div class="rounded-2xl border border-slate-200/80 bg-slate-50 p-4">
+                                            <div class="rounded-2xl border border-slate-200/80 bg-slate-50 p-4 transition hover:bg-white">
                                                 <div class="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
                                                     <div class="min-w-0 flex-1">
                                                         <div class="flex flex-wrap items-center gap-2">
                                                             <span class="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200">
                                                                 {{ $item->quantity }}{{ $item->unit ? ' ' . $item->unit : '' }}
                                                             </span>
-                                                            <span class="text-sm font-semibold text-[#0F172A]">
+                                                            <span class="text-sm font-semibold text-brand-navy">
                                                                 {{ $item->raw_text ?? 'Sin texto detectado' }}
                                                             </span>
                                                         </div>
@@ -297,7 +297,7 @@
                                                 </div>
                                             </div>
                                         @empty
-                                            <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500">
+                                            <div class="rounded-2xl border border-dashed border-blue-200 bg-blue-50/70 px-4 py-6 text-sm text-slate-600">
                                                 No se detectaron items en este pedido.
                                             </div>
                                         @endforelse
@@ -305,9 +305,9 @@
                                 </section>
 
                                 @if ($notesToShow->isNotEmpty())
-                                    <section class="rounded-2xl border border-slate-200/80 bg-white p-4">
+                                    <section class="rounded-2xl border border-slate-200/80 border-l-4 border-l-slate-300 bg-white p-4">
                                         <div class="flex items-center justify-between gap-3">
-                                            <h2 class="text-sm font-semibold text-[#0F172A]">Notas</h2>
+                                            <h2 class="text-sm font-semibold text-brand-navy">Notas</h2>
                                             <span class="text-xs font-medium uppercase tracking-wide text-slate-500">Notas detectadas</span>
                                         </div>
 
@@ -323,9 +323,9 @@
                             </div>
 
                             <aside class="flex shrink-0 flex-col gap-4 lg:w-72">
-                                <section class="rounded-2xl border border-slate-200/80 bg-white p-4">
+                                <section class="rounded-2xl border border-slate-200/80 border-l-4 border-l-brand-primary bg-white p-4">
                                     <div class="flex items-center justify-between gap-3">
-                                        <h2 class="text-sm font-semibold text-[#0F172A]">Confianza</h2>
+                                        <h2 class="text-sm font-semibold text-brand-navy">Confianza</h2>
                                         <span class="text-xs font-medium uppercase tracking-wide text-slate-500">Parser</span>
                                     </div>
 
@@ -333,18 +333,18 @@
                                         <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $confidence['class'] }}">
                                             {{ $confidence['label'] }}
                                         </span>
-                                        <span class="text-sm font-semibold text-[#0F172A]">{{ $confidencePercent }}</span>
+                                        <span class="text-sm font-semibold text-brand-navy">{{ $confidencePercent }}</span>
                                     </div>
 
                                     <p class="mt-3 text-sm leading-6 text-slate-600">
-                                        Nivel de confianza extra&iacute;do del parser para priorizar validaci&oacute;n operativa.
+                                        Nivel de confianza extraído del parser para priorizar validación operativa.
                                     </p>
                                 </section>
 
-                                <section class="rounded-2xl border border-slate-200/80 bg-slate-50 p-4">
-                                    <h2 class="text-sm font-semibold text-[#0F172A]">Acciones</h2>
+                                <section class="rounded-2xl border border-slate-200/80 border-l-4 border-l-slate-300 bg-slate-50 p-4">
+                                    <h2 class="text-sm font-semibold text-brand-navy">Acciones</h2>
                                     <div class="mt-4 space-y-3">
-                                        <a href="{{ route('orders.show', $order) }}" class="inline-flex w-full items-center justify-center rounded-2xl bg-[#146EDB] px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
+                                        <a href="{{ route('orders.show', $order) }}" class="inline-flex w-full items-center justify-center rounded-2xl bg-brand-primary px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-700">
                                             Ver pedido
                                         </a>
                                         <a href="{{ route('orders.edit', $order) }}" class="inline-flex w-full items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">
@@ -362,8 +362,8 @@
                         <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 text-3xl text-[#146EDB]">
                             📦
                         </div>
-                        <h2 class="mt-5 text-lg font-semibold text-[#0F172A]">No hay pedidos pendientes de revisión.</h2>
-                        <p class="mt-2 text-sm leading-6 text-slate-600">Todo est&aacute; al d&iacute;a.</p>
+                        <h2 class="mt-5 text-lg font-semibold text-brand-navy">No hay pedidos pendientes de revisión.</h2>
+                        <p class="mt-2 text-sm leading-6 text-slate-600">Todo está al día.</p>
                     </div>
                 </div>
             @endforelse

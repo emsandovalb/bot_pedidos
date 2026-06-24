@@ -6,7 +6,7 @@
                 <p class="mt-1 text-sm text-slate-600">Trazabilidad completa para este pedido.</p>
             </div>
             <a href="{{ route('intake-requests.index') }}" class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50">
-                Volver a órdenes
+                Volver a pedidos
             </a>
         </div>
 

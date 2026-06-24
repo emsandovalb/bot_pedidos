@@ -7,15 +7,14 @@
 
 @layer base {
     :root {
-        --brand-primary: #0a3d91;
-        --brand-navy: #081f4d;
-        --brand-gold: #f5b400;
-        --ui-bg: #f4f7fb;
-        --ui-secondary: #6b7280;
-        --ui-success: #22c55e;
-        --ui-warning: #f59e0b;
-        --ui-danger: #ef4444;
-        --ui-info: #3b82f6;
+        --brand-primary: #146edb;
+        --brand-secondary: #16a34a;
+        --brand-navy: #0f172a;
+        --brand-cloud: #f8fafc;
+        --brand-slate: #64748b;
+        --brand-amber: #f59e0b;
+        --brand-danger: #dc2626;
+        --ui-bg: #f8fafc;
     }
 
     html {
@@ -25,10 +24,10 @@
 
     body {
         background:
-            radial-gradient(circle at top left, rgba(10, 61, 145, 0.08), transparent 34%),
-            radial-gradient(circle at top right, rgba(245, 180, 0, 0.12), transparent 28%),
+            radial-gradient(circle at top left, rgba(20, 110, 219, 0.08), transparent 34%),
+            radial-gradient(circle at top right, rgba(22, 163, 74, 0.08), transparent 28%),
             var(--ui-bg);
-        color: #0f172a;
+        color: var(--brand-navy);
         min-height: 100vh;
     }
 
@@ -44,6 +43,10 @@
     .brand-shell {
         position: relative;
         overflow: hidden;
+        background:
+            radial-gradient(circle at top left, rgba(20, 110, 219, 0.12), transparent 34%),
+            radial-gradient(circle at top right, rgba(22, 163, 74, 0.08), transparent 30%),
+            linear-gradient(180deg, #ffffff 0%, var(--brand-cloud) 100%);
     }
 
     .brand-shell::before {
@@ -52,8 +55,8 @@
         inset: 0;
         pointer-events: none;
         background:
-            linear-gradient(135deg, rgba(10, 61, 145, 0.04), transparent 34%),
-            linear-gradient(315deg, rgba(245, 180, 0, 0.08), transparent 24%);
+            linear-gradient(135deg, rgba(20, 110, 219, 0.05), transparent 34%),
+            linear-gradient(315deg, rgba(22, 163, 74, 0.06), transparent 24%);
     }
 
     .brand-card {
@@ -79,14 +82,14 @@
 
     .brand-input:focus {
         border-color: var(--brand-primary);
-        box-shadow: 0 0 0 3px rgba(10, 61, 145, 0.16);
+        box-shadow: 0 0 0 3px rgba(20, 110, 219, 0.16);
         outline: none;
     }
 
     .brand-btn-primary {
         @apply inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-medium text-white transition;
         background: linear-gradient(135deg, var(--brand-primary), #0b4ba9);
-        box-shadow: 0 12px 24px -16px rgba(10, 61, 145, 0.72);
+        box-shadow: 0 12px 24px -16px rgba(20, 110, 219, 0.72);
     }
 
     .brand-btn-primary:hover {
@@ -107,8 +110,8 @@
 
     .brand-btn-danger {
         @apply inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-medium text-white transition;
-        background: linear-gradient(135deg, var(--ui-danger), #dc2626);
-        box-shadow: 0 12px 24px -16px rgba(239, 68, 68, 0.7);
+        background: linear-gradient(135deg, var(--brand-danger), #b91c1c);
+        box-shadow: 0 12px 24px -16px rgba(220, 38, 38, 0.7);
     }
 
     .brand-badge {
