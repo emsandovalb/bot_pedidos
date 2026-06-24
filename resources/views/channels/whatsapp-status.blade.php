@@ -41,7 +41,7 @@
 
                     <div class="mt-5 rounded-2xl border border-slate-200/70 bg-slate-50 p-4">
                         <div class="text-sm font-semibold text-brand-navy">{{ $connectionStatus['lastChecked'] }}</div>
-                        <p class="mt-1 text-sm text-slate-500">Referencia demo para el panel de monitoreo.</p>
+                        <p class="mt-1 text-sm text-slate-500">Referencia persistida para el panel de monitoreo.</p>
                     </div>
                 </div>
             </div>

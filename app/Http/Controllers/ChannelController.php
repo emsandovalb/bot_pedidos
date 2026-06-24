@@ -2,30 +2,38 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ChannelConnection;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Str;
 
 class ChannelController extends Controller
 {
     public function index(): View
     {
+        $connection = $this->channelConnection();
+
         return view('channels.index', [
             'channelHighlights' => [
                 [
                     'label' => 'WhatsApp Business',
-                    'value' => 'Canal principal',
-                    'description' => 'Onboarding, estado y monitoreo en una sola experiencia.',
+                    'value' => $this->connectionValue($connection),
+                    'description' => $connection
+                        ? 'Registro persistido para esta organización.'
+                        : 'Todavía no existe un registro persistido para esta organización.',
                     'tone' => 'green',
                 ],
                 [
                     'label' => 'Estado del canal',
-                    'value' => 'Operativo',
-                    'description' => 'Vista de conexión, salud y mensajes demo.',
+                    'value' => $this->statusLabel($connection),
+                    'description' => $connection
+                        ? 'Estado actual guardado en la base de datos.'
+                        : 'Borrador inicial sin conexión activa.',
                     'tone' => 'emerald',
                 ],
                 [
-                    'label' => 'Tiempo de activación',
-                    'value' => '15 min',
-                    'description' => 'Flujo guiado para avanzar sin integración real todavía.',
+                    'label' => 'Proveedor',
+                    'value' => $connection?->provider ?? 'Pendiente',
+                    'description' => 'Preparado para Embedded Signup sin integrar Meta todavía.',
                     'tone' => 'blue',
                 ],
             ],
@@ -48,9 +56,11 @@ class ChannelController extends Controller
             ],
             'activityFeed' => [
                 [
-                    'title' => 'Mensaje de bienvenida listo',
-                    'detail' => 'Plantilla demo aprobada para el flujo inicial.',
-                    'time' => 'Hace 8 min',
+                    'title' => 'Registro de canal preparado',
+                    'detail' => $connection
+                        ? 'La conexión ya vive en la base de datos de la organización.'
+                        : 'Aún no existe un registro persistido.',
+                    'time' => 'Ahora',
                 ],
                 [
                     'title' => 'Derivación manual activada',
@@ -58,8 +68,8 @@ class ChannelController extends Controller
                     'time' => 'Hace 1 h',
                 ],
                 [
-                    'title' => 'Estado del canal revisado',
-                    'detail' => 'Sin integración todavía, pero con checklist preparado.',
+                    'title' => 'Arquitectura lista',
+                    'detail' => 'Sin Meta ni WhatsApp API todavía, solo la base del módulo.',
                     'time' => 'Hoy',
                 ],
             ],
@@ -80,12 +90,14 @@ class ChannelController extends Controller
 
     public function whatsapp(): View
     {
+        $connection = $this->channelConnection();
+
         return view('channels.whatsapp', [
             'steps' => [
                 [
                     'index' => '1',
                     'title' => 'Identidad del canal',
-                    'description' => 'Nombre, número demo y horarios visibles para el equipo.',
+                    'description' => 'Nombre, número y estado persistido para el equipo.',
                     'status' => 'completed',
                 ],
                 [
@@ -115,16 +127,16 @@ class ChannelController extends Controller
             ],
             'mockProfiles' => [
                 [
-                    'label' => 'Número principal',
-                    'value' => '+502 5555 0101',
+                    'label' => 'Estado persistido',
+                    'value' => $this->statusLabel($connection),
                 ],
                 [
                     'label' => 'Nombre público',
-                    'value' => 'Benditio Pedidos',
+                    'value' => $connection?->display_name ?? 'No conectado',
                 ],
                 [
-                    'label' => 'Horario',
-                    'value' => 'Lun - Sáb, 8:00 a 20:00',
+                    'label' => 'Número principal',
+                    'value' => $connection?->phone_number ?? 'Sin número',
                 ],
             ],
             'templateSamples' => [
@@ -142,45 +154,51 @@ class ChannelController extends Controller
 
     public function status(): View
     {
+        $connection = $this->channelConnection();
+
         return view('channels.whatsapp-status', [
             'connectionStatus' => [
-                'label' => 'Canal demo',
-                'value' => 'Listo para activar',
-                'description' => 'Sin API conectada todavía, pero con el flujo preparado para operar.',
-                'lastChecked' => 'Actualizado hace 5 min',
+                'label' => 'Canal WhatsApp',
+                'value' => $this->connectionValue($connection),
+                'description' => $connection
+                    ? 'Registro persistido listo para futuras integraciones.'
+                    : 'No existe un registro persistido para esta organización.',
+                'lastChecked' => $connection?->last_sync_at?->format('d/m/Y H:i') ?? 'Sin sincronización',
             ],
             'statusMetrics' => [
                 [
-                    'label' => 'Salud del canal',
-                    'value' => '98%',
-                    'detail' => 'Configuración, acceso y flujo base en buen estado.',
+                    'label' => 'Estado',
+                    'value' => $this->statusLabel($connection),
+                    'detail' => 'Base persistida, lista para ampliar el flujo.',
                 ],
                 [
-                    'label' => 'Mensajes en espera',
-                    'value' => '12',
-                    'detail' => 'Casos demo listos para la primera lectura del equipo.',
+                    'label' => 'Proveedor',
+                    'value' => $connection?->provider ?? 'Pendiente',
+                    'detail' => 'Preparado para Embedded Signup.',
                 ],
                 [
-                    'label' => 'Respuestas rápidas',
-                    'value' => '06',
-                    'detail' => 'Plantillas internas para acelerar la operación.',
+                    'label' => 'Business ID',
+                    'value' => $connection?->external_business_id ?? 'Sin dato',
+                    'detail' => 'Campo externo reservado para Meta.',
                 ],
                 [
-                    'label' => 'Tiempo de respuesta',
-                    'value' => '2m 14s',
-                    'detail' => 'Promedio demo para la vista de monitoreo.',
+                    'label' => 'Phone Number ID',
+                    'value' => $connection?->external_phone_number_id ?? 'Sin dato',
+                    'detail' => 'Campo externo reservado para WhatsApp.',
                 ],
             ],
             'healthChecks' => [
                 [
                     'title' => 'Número verificado',
-                    'state' => 'Ok',
-                    'detail' => 'Número demo visible en la configuración.',
+                    'state' => $connection?->phone_number ? 'Ok' : 'Pendiente',
+                    'detail' => $connection?->phone_number ?? 'Número pendiente de configuración.',
                 ],
                 [
                     'title' => 'Mensajes de bienvenida',
-                    'state' => 'Ok',
-                    'detail' => 'Plantilla de entrada cargada en el asistente.',
+                    'state' => $connection ? 'Ok' : 'Demo',
+                    'detail' => $connection
+                        ? 'Estructura lista para persistir plantillas.'
+                        : 'Plantilla de entrada cargada en el asistente.',
                 ],
                 [
                     'title' => 'Derivación manual',
@@ -195,21 +213,57 @@ class ChannelController extends Controller
             ],
             'timeline' => [
                 [
-                    'time' => '09:24',
-                    'title' => 'Primer saludo enviado',
-                    'detail' => 'Se simula una recepción con el mensaje de bienvenida.',
+                    'time' => $connection?->connected_at?->format('H:i') ?? 'Sin dato',
+                    'title' => 'Conexión registrada',
+                    'detail' => $connection
+                        ? 'El canal quedó persistido en la base de datos.'
+                        : 'Todavía no existe una conexión registrada.',
                 ],
                 [
-                    'time' => '09:31',
-                    'title' => 'Consulta derivada',
-                    'detail' => 'El caso pasa al equipo operativo por revisión manual.',
+                    'time' => $connection?->last_sync_at?->format('H:i') ?? 'Sin sincronización',
+                    'title' => 'Última sincronización',
+                    'detail' => 'Lista para alimentar Embedded Signup y estados externos.',
                 ],
                 [
-                    'time' => '09:47',
-                    'title' => 'Estado revisado',
-                    'detail' => 'Sin API todavía, pero con todos los indicadores visibles.',
+                    'time' => 'Ahora',
+                    'title' => 'Preparación arquitectónica',
+                    'detail' => 'Sin integrar Meta ni WhatsApp todavía, solo persistencia local.',
                 ],
             ],
         ]);
+    }
+
+    private function channelConnection(): ?ChannelConnection
+    {
+        $organizationId = request()->user()?->organization_id;
+
+        if ($organizationId === null) {
+            return null;
+        }
+
+        return ChannelConnection::query()
+            ->where('organization_id', $organizationId)
+            ->where('channel', ChannelConnection::CHANNEL_WHATSAPP)
+            ->latest('id')
+            ->first();
+    }
+
+    private function connectionValue(?ChannelConnection $connection): string
+    {
+        return $connection?->display_name
+            ?? $connection?->phone_number
+            ?? 'No conectado';
+    }
+
+    private function statusLabel(?ChannelConnection $connection): string
+    {
+        if ($connection === null) {
+            return 'No conectado';
+        }
+
+        return match ($connection->status) {
+            ChannelConnection::STATUS_DRAFT => 'Borrador',
+            default => Str::headline($connection->status),
+        };
     }
 }

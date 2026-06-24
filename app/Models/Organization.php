@@ -59,4 +59,9 @@ class Organization extends Model
     {
         return $this->hasMany(BranchDailyClosure::class);
     }
+
+    public function channelConnections(): HasMany
+    {
+        return $this->hasMany(ChannelConnection::class);
+    }
 }
