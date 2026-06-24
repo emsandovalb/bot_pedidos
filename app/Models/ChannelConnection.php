@@ -13,6 +13,9 @@ class ChannelConnection extends Model
     public const CHANNEL_WHATSAPP = 'whatsapp';
 
     public const STATUS_DRAFT = 'draft';
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_READY_FOR_SETUP = 'ready_for_setup';
+    public const STATUS_CONNECTED = 'connected';
 
     protected $fillable = [
         'organization_id',
