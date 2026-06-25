@@ -35,6 +35,11 @@ class Organization extends Model
         return $this->hasMany(Customer::class);
     }
 
+    public function customerIdentities(): HasMany
+    {
+        return $this->hasMany(CustomerIdentity::class);
+    }
+
     public function incomingMessages(): HasMany
     {
         return $this->hasMany(IncomingMessage::class);

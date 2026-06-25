@@ -6,6 +6,7 @@ use App\Models\Branch;
 use App\Models\Customer;
 use App\Models\IncomingMessage;
 use App\Models\Organization;
+use App\Services\CustomerIdentityResolver;
 use App\Services\Messaging\DTO\IncomingMessageDTO;
 use App\Services\OrderIngestionService;
 use Illuminate\Database\QueryException;
@@ -17,6 +18,7 @@ class MessagingIngestionService
 {
     public function __construct(
         private readonly OrderIngestionService $orderIngestionService,
+        private readonly CustomerIdentityResolver $customerIdentityResolver,
     ) {
     }
 
@@ -54,12 +56,7 @@ class MessagingIngestionService
                 $existingMessage->loadMissing(['customer', 'order']);
                 $resolvedCustomer = $existingMessage->customer
                     ?? $existingMessage->order?->customer
-                    ?? $this->resolveCustomer(
-                        organization: $organization,
-                        branch: $branch,
-                        phone: $message->customer_phone,
-                        name: $message->customer_name,
-                    );
+                    ?? $this->resolveCustomer($organization, $branch, $message);
 
                 return [
                     'duplicate' => true,
@@ -71,12 +68,7 @@ class MessagingIngestionService
                 ];
             }
 
-            $customer = $this->resolveCustomer(
-                organization: $organization,
-                branch: $branch,
-                phone: $message->customer_phone,
-                name: $message->customer_name,
-            );
+            $customer = $this->resolveCustomer($organization, $branch, $message);
 
             try {
                 $incomingMessage = IncomingMessage::create([
@@ -174,22 +166,22 @@ class MessagingIngestionService
         });
     }
 
-    private function resolveCustomer(Organization $organization, Branch $branch, string $phone, ?string $name): Customer
+    private function resolveCustomer(Organization $organization, Branch $branch, IncomingMessageDTO $message): Customer
     {
-        $customer = Customer::query()
-            ->where('organization_id', $organization->id)
-            ->where('phone', $phone)
-            ->first();
+        $resolution = $this->customerIdentityResolver->resolve(
+            organizationId: $organization->id,
+            provider: $message->provider,
+            externalUserId: $message->external_user_id,
+            externalChatId: $message->external_chat_id,
+            providerUsername: $message->provider_username,
+            phone: $message->customer_phone,
+            displayName: $message->customer_name,
+            email: $message->email,
+            metadata: $message->metadata,
+        );
 
-        if ($customer === null) {
-            return Customer::create([
-                'organization_id' => $organization->id,
-                'branch_id' => $branch->id,
-                'name' => $name,
-                'phone' => $phone,
-                'external_id' => null,
-            ]);
-        }
+        /** @var Customer $customer */
+        $customer = $resolution['customer'];
 
         $updates = [];
 
@@ -197,8 +189,8 @@ class MessagingIngestionService
             $updates['branch_id'] = $branch->id;
         }
 
-        if ($name && blank($customer->name)) {
-            $updates['name'] = $name;
+        if (filled($message->customer_name) && blank($customer->name)) {
+            $updates['name'] = $message->customer_name;
         }
 
         if ($updates !== []) {

@@ -56,6 +56,7 @@ class OrderController extends Controller
             'order' => $order->load([
                 'branch',
                 'customer',
+                'customer.customerIdentities',
                 'possibleDuplicateOf',
                 'orderItems' => fn ($query) => $query->orderBy('sort_order'),
                 'orderItems.product',

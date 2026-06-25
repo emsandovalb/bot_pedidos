@@ -4,8 +4,11 @@ namespace Tests\Feature;
 
 use App\Models\Branch;
 use App\Models\IncomingMessage;
+use App\Models\Customer;
+use App\Models\CustomerIdentity;
 use App\Models\Organization;
 use App\Services\Messaging\DTO\IncomingMessageDTO;
+use App\Services\CustomerIdentityResolver;
 use App\Services\Messaging\MessagingIngestionService;
 use App\Services\OrderIngestionService;
 use DateTimeImmutable;
@@ -78,6 +81,101 @@ class MessagingIngestionServiceTest extends TestCase
         $this->assertSame('Parser exploded.', $result['incoming_message']->status_reason);
         $this->assertDatabaseCount('incoming_messages', 1);
         $this->assertDatabaseCount('orders', 0);
+    }
+
+    public function test_provider_identity_is_resolved_before_order_ingestion(): void
+    {
+        [$organization, $branch] = $this->makeOrganizationAndBranch();
+        $customer = Customer::create([
+            'organization_id' => $organization->id,
+            'branch_id' => null,
+            'name' => 'Resolved Customer',
+            'phone' => '+50255550002',
+            'external_id' => null,
+        ]);
+
+        $customerIdentity = CustomerIdentity::create([
+            'organization_id' => $organization->id,
+            'customer_id' => $customer->id,
+            'provider' => 'telegram',
+            'external_user_id' => 'tg-user-1',
+            'external_chat_id' => 'tg-chat-1',
+            'provider_username' => '@resolved',
+            'phone' => '+50255550002',
+            'normalized_phone' => '+50255550002',
+            'display_name' => 'Resolved Customer',
+            'confidence_score' => 100,
+            'is_primary' => false,
+            'metadata_json' => ['source' => 'telegram'],
+            'first_seen_at' => now(),
+            'last_seen_at' => now(),
+        ]);
+
+        $resolver = Mockery::mock(CustomerIdentityResolver::class);
+        $resolver->shouldReceive('resolve')
+            ->once()
+            ->ordered()
+            ->withArgs(function (
+                int $organizationId,
+                string $provider,
+                ?string $externalUserId,
+                ?string $externalChatId,
+                ?string $providerUsername,
+                ?string $phone,
+                ?string $displayName,
+                ?string $email,
+                ?array $metadata
+            ) use ($organization): bool {
+                return $organizationId === $organization->id
+                    && $provider === 'telegram'
+                    && $externalUserId === 'tg-user-1'
+                    && $externalChatId === 'tg-chat-1'
+                    && $providerUsername === '@resolved'
+                    && $phone === '+50255550002'
+                    && $displayName === 'Resolved Customer'
+                    && $email === 'resolved@example.com'
+                    && $metadata === ['source' => 'telegram'];
+            })
+            ->andReturn([
+                'customer' => $customer,
+                'customer_identity' => $customerIdentity,
+                'match_type' => 'exact_provider_match',
+                'confidence_score' => 100,
+            ]);
+
+        $this->app->instance(CustomerIdentityResolver::class, $resolver);
+
+        $result = app(MessagingIngestionService::class)->ingest(
+            $organization,
+            $branch,
+            new IncomingMessageDTO(
+                provider: 'telegram',
+                external_message_id: 'msg-identity-1',
+                external_chat_id: 'tg-chat-1',
+                received_at: new DateTimeImmutable('2026-06-24 14:00:00'),
+                external_user_id: 'tg-user-1',
+                provider_username: '@resolved',
+                customer_name: 'Resolved Customer',
+                customer_phone: '+50255550002',
+                email: 'resolved@example.com',
+                metadata: ['source' => 'telegram'],
+                message: '2 bolsas de jardin',
+                raw_payload: ['update_id' => 321],
+                attachments: [],
+            )
+        );
+
+        $this->assertFalse($result['duplicate']);
+        $this->assertSame($customer->id, $result['customer']->id);
+        $this->assertNotNull($result['order']);
+        $this->assertDatabaseHas('incoming_messages', [
+            'organization_id' => $organization->id,
+            'branch_id' => $branch->id,
+            'customer_id' => $customer->id,
+            'provider' => 'telegram',
+            'external_message_id' => 'msg-identity-1',
+        ]);
+        $this->assertDatabaseCount('orders', 1);
     }
 
     /**

@@ -122,6 +122,42 @@
                             <div class="mt-1 text-sm font-semibold text-slate-900">{{ $order->parser_confidence !== null ? number_format((float) $order->parser_confidence, 2) : '—' }}</div>
                         </div>
                     </div>
+
+                    @if ($order->customer?->customerIdentities?->isNotEmpty())
+                        <div class="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                            <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">Identidades del cliente</div>
+                            <div class="mt-3 space-y-3">
+                                @foreach ($order->customer->customerIdentities as $identity)
+                                    <div class="rounded-xl border border-slate-200 bg-white p-3">
+                                        <div class="flex flex-wrap items-center justify-between gap-2">
+                                            <div class="text-sm font-semibold text-slate-900">{{ $identity->provider }}</div>
+                                            <div class="text-xs text-slate-500">
+                                                {{ $identity->confidence_score !== null ? number_format((float) $identity->confidence_score, 0) . '% confianza' : 'Sin confianza' }}
+                                            </div>
+                                        </div>
+                                        <div class="mt-2 grid gap-2 text-sm text-slate-600 sm:grid-cols-2 lg:grid-cols-3">
+                                            <div>
+                                                <span class="font-medium text-slate-700">Phone:</span>
+                                                {{ $identity->normalized_phone ?? $identity->phone ?? '—' }}
+                                            </div>
+                                            <div>
+                                                <span class="font-medium text-slate-700">Username:</span>
+                                                {{ $identity->provider_username ?? '—' }}
+                                            </div>
+                                            <div>
+                                                <span class="font-medium text-slate-700">External ID:</span>
+                                                {{ $identity->external_user_id ?? $identity->external_chat_id ?? '—' }}
+                                            </div>
+                                            <div>
+                                                <span class="font-medium text-slate-700">Last seen:</span>
+                                                {{ $identity->last_seen_at?->format('d/m/Y H:i') ?? '—' }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
                 </section>
 
                 <section class="rounded-[24px] border border-slate-200/80 border-l-4 border-l-emerald-500 bg-white p-6 shadow-sm">
