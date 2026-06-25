@@ -39,6 +39,11 @@ class Customer extends Model
         return $this->hasMany(IntakeRequest::class);
     }
 
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
     public function customerIdentities(): HasMany
     {
         return $this->hasMany(CustomerIdentity::class);

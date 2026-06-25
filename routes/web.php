@@ -7,6 +7,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\ChannelController;
 use App\Http\Controllers\ChannelOnboardingController;
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\IncomingMessageController;
 use App\Http\Controllers\IntakeRequestController;
 use App\Http\Controllers\NumberBoardController;
@@ -35,6 +36,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/channels/whatsapp', [ChannelController::class, 'whatsapp'])->name('channels.whatsapp');
     Route::post('/channels/whatsapp/onboarding', [ChannelOnboardingController::class, 'update'])->name('channels.whatsapp.onboarding.update');
     Route::get('/channels/whatsapp/status', [ChannelController::class, 'status'])->name('channels.whatsapp.status');
+    Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
+    Route::get('/customers/{customer}', [CustomerController::class, 'show'])->name('customers.show');
     Route::get('/setup-requests', [SetupRequestController::class, 'index'])->name('setup-requests.index');
     Route::post('/setup-requests', [SetupRequestController::class, 'store'])->name('setup-requests.store');
     Route::get('/setup-requests/{setupRequest}', [SetupRequestController::class, 'show'])->name('setup-requests.show');
