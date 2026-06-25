@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ChannelConnection;
+use App\Models\SetupRequest;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Str;
 
@@ -159,8 +160,15 @@ class ChannelController extends Controller
     public function status(): View
     {
         $connection = $this->channelConnection();
+        $openSetupRequest = SetupRequest::query()
+            ->where('organization_id', request()->user()?->organization_id)
+            ->where('type', SetupRequest::TYPE_WHATSAPP_ASSISTED_SETUP)
+            ->where('status', SetupRequest::STATUS_OPEN)
+            ->latest('requested_at')
+            ->first();
 
         return view('channels.whatsapp-status', [
+            'openSetupRequest' => $openSetupRequest,
             'connectionStatus' => [
                 'label' => 'Canal WhatsApp',
                 'value' => $this->connectionValue($connection),

@@ -64,4 +64,9 @@ class Organization extends Model
     {
         return $this->hasMany(ChannelConnection::class);
     }
+
+    public function setupRequests(): HasMany
+    {
+        return $this->hasMany(SetupRequest::class);
+    }
 }

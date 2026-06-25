@@ -47,6 +47,23 @@
             </div>
         </section>
 
+        @if ($openSetupRequest)
+            <section class="rounded-[2rem] border border-amber-200/80 bg-amber-50/60 p-6 shadow-sm">
+                <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div>
+                        <div class="text-sm font-semibold uppercase tracking-[0.16em] text-amber-700">Configuracion asistida pendiente</div>
+                        <div class="mt-2 text-lg font-semibold text-brand-navy">Hay una solicitud abierta para WhatsApp</div>
+                        <p class="mt-1 text-sm leading-6 text-slate-600">
+                            La organizacion ya tiene una solicitud abierta que el equipo puede retomar desde el centro de configuraciones.
+                        </p>
+                    </div>
+                    <a href="{{ route('setup-requests.show', $openSetupRequest) }}" class="brand-btn-primary justify-center">
+                        Abrir solicitud
+                    </a>
+                </div>
+            </section>
+        @endif
+
         <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             @foreach ($statusMetrics as $metric)
                 <article class="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm">

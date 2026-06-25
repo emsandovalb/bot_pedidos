@@ -45,7 +45,22 @@
             </div>
         </section>
 
-        <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+        @if ($openSetupRequestsCount > 0)
+            <section class="rounded-3xl border border-amber-200 bg-amber-50/70 p-5 shadow-sm">
+                <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                    <div>
+                        <div class="text-sm font-semibold uppercase tracking-[0.16em] text-amber-700">Configuraciones pendientes</div>
+                        <div class="mt-1 text-lg font-semibold text-brand-navy">{{ $openSetupRequestsCount }} solicitud(es) abiertas requieren seguimiento</div>
+                        <p class="mt-1 text-sm text-slate-600">El equipo operativo tiene casos de soporte en espera dentro del flujo de WhatsApp.</p>
+                    </div>
+                    <a href="{{ route('setup-requests.index') }}" class="brand-btn-primary justify-center">
+                        Ir al centro
+                    </a>
+                </div>
+            </section>
+        @endif
+
+        <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
             <a href="{{ route('orders.index', ['status' => \App\Models\Order::STATUS_PENDING_REVIEW]) }}" class="group rounded-xl border border-slate-200/70 border-l-4 border-l-brand-primary bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-brand-primary/30 hover:shadow-md">
                 <div class="flex items-start justify-between gap-3">
                     <div>
@@ -98,6 +113,17 @@
                         <div class="mt-1 text-xs text-slate-500">Salidas registradas hoy</div>
                     </div>
                     <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-100">→</div>
+                </div>
+            </a>
+
+            <a href="{{ route('setup-requests.index') }}" class="group rounded-xl border border-amber-200/70 border-l-4 border-l-amber-500 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-amber-300 hover:shadow-md">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <div class="text-sm font-medium text-slate-500">Configuraciones pendientes</div>
+                        <div class="mt-2 text-3xl font-semibold tracking-tight text-brand-navy">{{ $openSetupRequestsCount }}</div>
+                        <div class="mt-1 text-xs text-slate-500">Solicitudes de soporte abiertas</div>
+                    </div>
+                    <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-100">!</div>
                 </div>
             </a>
         </section>

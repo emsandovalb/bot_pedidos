@@ -21,7 +21,7 @@
         $readyForAssistedSetup = $readinessPercentage === 100 && $statusLabel !== 'Conectado';
     @endphp
 
-    <div class="space-y-8">
+    <div x-data="{ assisted: @js($requiredItems['needs_assisted_setup']) }" class="space-y-8">
         @if (session('status'))
             <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
                 {{ session('status') }}
@@ -161,6 +161,7 @@
                             <input
                                 type="text"
                                 name="display_name"
+                                x-ref="displayName"
                                 value="{{ $displayNameValue }}"
                                 class="mt-2 w-full rounded-2xl border-slate-300 bg-white px-4 py-3 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
                                 placeholder="Benditio Pedidos"
@@ -172,6 +173,7 @@
                             <input
                                 type="text"
                                 name="phone_number"
+                                x-ref="phoneNumber"
                                 value="{{ $phoneNumberValue }}"
                                 class="mt-2 w-full rounded-2xl border-slate-300 bg-white px-4 py-3 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
                                 placeholder="+502 5555 0101"
@@ -183,6 +185,7 @@
                             <input
                                 type="text"
                                 name="business_category"
+                                x-ref="businessCategory"
                                 value="{{ $businessCategoryValue }}"
                                 class="mt-2 w-full rounded-2xl border-slate-300 bg-white px-4 py-3 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
                                 placeholder="Restaurante, retail, servicios..."
@@ -196,6 +199,7 @@
                                 min="0"
                                 step="1"
                                 name="expected_monthly_orders"
+                                x-ref="expectedMonthlyOrders"
                                 value="{{ $expectedMonthlyOrdersValue }}"
                                 class="mt-2 w-full rounded-2xl border-slate-300 bg-white px-4 py-3 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
                                 placeholder="120"
@@ -248,7 +252,7 @@
 
                     <div class="mt-5 space-y-4">
                         <label class="flex items-start gap-3 rounded-3xl border border-slate-200 bg-slate-50/70 p-4">
-                            <input type="checkbox" name="needs_assisted_setup" value="1" class="mt-1 h-5 w-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" @checked(old('needs_assisted_setup', $requiredItems['needs_assisted_setup']))>
+                            <input type="checkbox" name="needs_assisted_setup" value="1" x-model="assisted" class="mt-1 h-5 w-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" @checked(old('needs_assisted_setup', $requiredItems['needs_assisted_setup']))>
                             <span>
                                 <span class="block text-sm font-semibold text-brand-navy">Necesito configuracion asistida</span>
                                 <span class="mt-1 block text-sm leading-6 text-slate-600">Marca esto si el equipo tecnico debe continuar contigo.</span>
@@ -259,6 +263,7 @@
                             <span class="text-sm font-medium text-slate-700">Notas</span>
                             <textarea
                                 name="notes"
+                                x-ref="notes"
                                 rows="5"
                                 class="mt-2 w-full rounded-2xl border-slate-300 bg-white px-4 py-3 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
                                 placeholder="Describe restricciones, horarios, dudas o pasos pendientes."
@@ -346,5 +351,49 @@
                 </section>
             </aside>
         </form>
+
+        <section class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-amber-500 bg-[linear-gradient(180deg,rgba(245,158,11,0.08),rgba(255,255,255,1)_74%)] p-6 shadow-sm">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                <div>
+                    <h2 class="text-lg font-semibold text-brand-navy">Solicitud asistida</h2>
+                    <p class="mt-1 text-sm text-slate-500">Cuando el negocio necesita apoyo, Benditio puede abrir una solicitud operativa para el equipo.</p>
+                </div>
+                <div class="inline-flex items-center rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 ring-1 ring-inset ring-amber-100">
+                    Flujo operativo
+                </div>
+            </div>
+
+            <form method="POST" action="{{ route('setup-requests.store') }}" class="mt-5 grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end" x-cloak x-show="assisted">
+                @csrf
+                <input type="hidden" name="channel_connection_id" value="{{ $connection?->id }}">
+                <input type="hidden" name="contact_name" x-bind:value="$refs.displayName?.value || @js($connection?->display_name ?? auth()->user()->name)">
+                <input type="hidden" name="contact_phone" x-bind:value="$refs.phoneNumber?.value || @js($connection?->phone_number ?? '')">
+                <input type="hidden" name="contact_email" value="{{ auth()->user()->email }}">
+                <input type="hidden" name="preferred_contact_time" value="">
+                <input type="hidden" name="notes" x-bind:value="$refs.notes?.value || @js($notesValue)">
+
+                <div class="rounded-3xl border border-amber-200 bg-white p-5">
+                    <div class="flex items-start gap-4">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-100">
+                            <svg viewBox="0 0 24 24" fill="none" class="h-6 w-6" aria-hidden="true">
+                                <path d="M12 2v10m0 0 4-4m-4 4-4-4M4 20h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-sm font-semibold text-brand-navy">Solicitar configuracion asistida</div>
+                            <p class="mt-1 text-sm leading-6 text-slate-600">Abre una solicitud en el centro de configuraciones con los datos actuales del wizard.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="brand-btn-primary justify-center lg:min-w-[280px]">
+                    Solicitar configuracion asistida
+                </button>
+            </form>
+
+            <div class="mt-5 rounded-3xl border border-dashed border-slate-200 bg-white/80 p-5 text-sm text-slate-600" x-cloak x-show="!assisted">
+                Activa <span class="font-semibold text-brand-navy">Necesito configuracion asistida</span> para mostrar el boton de solicitud.
+            </div>
+        </section>
     </div>
 </x-app-layout>

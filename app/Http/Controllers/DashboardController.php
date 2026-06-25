@@ -7,6 +7,7 @@ use App\Models\DailyOrderClosure;
 use App\Models\IntakeRequest;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\SetupRequest;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\View\View;
 
@@ -53,6 +54,18 @@ class DashboardController extends Controller
             ->orderBy('name');
 
         return view('dashboard', [
+            'openSetupRequestsCount' => SetupRequest::query()
+                ->when($organizationId, fn (Builder $query) => $query->where('organization_id', $organizationId), fn (Builder $query) => $query->whereRaw('1 = 0'))
+                ->where('status', SetupRequest::STATUS_OPEN)
+                ->count(),
+            'inProgressSetupRequestsCount' => SetupRequest::query()
+                ->when($organizationId, fn (Builder $query) => $query->where('organization_id', $organizationId), fn (Builder $query) => $query->whereRaw('1 = 0'))
+                ->where('status', SetupRequest::STATUS_IN_PROGRESS)
+                ->count(),
+            'completedSetupRequestsCount' => SetupRequest::query()
+                ->when($organizationId, fn (Builder $query) => $query->where('organization_id', $organizationId), fn (Builder $query) => $query->whereRaw('1 = 0'))
+                ->where('status', SetupRequest::STATUS_COMPLETED)
+                ->count(),
             'totalPendingRequests' => IntakeRequest::query()
                 ->tap($requestScope)
                 ->where('status', IntakeRequest::STATUS_PENDING)

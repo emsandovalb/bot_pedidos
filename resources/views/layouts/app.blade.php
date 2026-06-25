@@ -112,6 +112,30 @@
                                 @endforeach
                             </div>
                         </div>
+
+                        <div class="px-2 pt-6">
+                            <div class="px-2 text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                                Support
+                            </div>
+                            <div class="mt-3 space-y-1">
+                                <a
+                                    href="{{ route('setup-requests.index') }}"
+                                    @class([
+                                        'group relative flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-medium transition' => true,
+                                        'border-amber-300 bg-amber-50/80 text-amber-950 shadow-sm' => request()->routeIs('setup-requests.*'),
+                                        'border-transparent text-slate-600 hover:bg-slate-50 hover:text-brand-navy' => ! request()->routeIs('setup-requests.*'),
+                                    ])
+                                >
+                                    <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5 shrink-0 transition-colors {{ request()->routeIs('setup-requests.*') ? 'text-amber-600' : 'text-slate-400 group-hover:text-amber-600' }}" aria-hidden="true">
+                                        <path d="M12 8v8m-4-4h8M4 6h16M4 18h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <span class="flex-1">Configuraciones</span>
+                                    @if (request()->routeIs('setup-requests.*'))
+                                        <span class="absolute inset-y-0 right-0 w-1 rounded-l-full bg-amber-500"></span>
+                                    @endif
+                                </a>
+                            </div>
+                        </div>
                     </nav>
 
                     <div class="border-t border-slate-200/80 px-4 py-5">
