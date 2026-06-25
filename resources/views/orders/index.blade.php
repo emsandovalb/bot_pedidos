@@ -99,6 +99,11 @@
                                     <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $statusBadgeClasses[$order->status] ?? 'bg-slate-100 text-slate-700 ring-1 ring-slate-200' }}">
                                         {{ $statusLabels[$order->status] ?? str_replace('_', ' ', $order->status) }}
                                     </span>
+                                    @if ($order->possibleDuplicateOf)
+                                        <span class="inline-flex items-center rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800 ring-1 ring-amber-100">
+                                            Posible duplicado
+                                        </span>
+                                    @endif
                                     @if ($order->status === \App\Models\Order::STATUS_PENDING_REVIEW)
                                         <span class="text-xs font-medium text-slate-500">Pendiente de revisión</span>
                                     @endif
@@ -129,6 +134,12 @@
                                         <div class="mt-1 text-sm font-semibold text-slate-900">{{ $order->created_at?->format('d/m/Y H:i') ?? '—' }}</div>
                                     </div>
                                 </div>
+
+                                @if ($order->possibleDuplicateOf)
+                                    <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                                        Similar al pedido #{{ $order->possibleDuplicateOf->id }}
+                                    </div>
+                                @endif
 
                                 <div class="grid gap-3 sm:grid-cols-2">
                                     <div class="rounded-2xl border border-slate-200/80 border-l-4 border-l-brand-primary bg-white p-4">

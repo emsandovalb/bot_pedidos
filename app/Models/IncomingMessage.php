@@ -13,13 +13,18 @@ class IncomingMessage extends Model
     use HasFactory;
 
     public const STATUS_RECEIVED = 'received';
+    public const STATUS_PROCESSING = 'processing';
     public const STATUS_PROCESSED = 'processed';
-    public const STATUS_ERROR = 'error';
+    public const STATUS_FAILED = 'failed';
+    public const STATUS_DUPLICATE = 'duplicate';
+    public const STATUS_IGNORED = 'ignored';
+    public const STATUS_ERROR = self::STATUS_FAILED;
 
     protected $fillable = [
         'organization_id',
         'branch_id',
         'customer_id',
+        'provider',
         'channel_type',
         'from_identifier',
         'to_identifier',
@@ -41,6 +46,15 @@ class IncomingMessage extends Model
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::creating(function (IncomingMessage $incomingMessage): void {
+            if (blank($incomingMessage->provider)) {
+                $incomingMessage->provider = (string) $incomingMessage->channel_type;
+            }
+        });
+    }
+
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
@@ -54,6 +68,11 @@ class IncomingMessage extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class);
     }
 
     public function request(): HasOne

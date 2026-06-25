@@ -9,6 +9,8 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderStatusHistory;
 use App\Models\Organization;
+use App\Services\OrderDuplicateDetectionService;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 
 class OrderIngestionService
@@ -16,6 +18,7 @@ class OrderIngestionService
     public function __construct(
         private readonly OrderParserService $orderParserService,
         private readonly ProductMatchingService $productMatchingService,
+        private readonly OrderDuplicateDetectionService $orderDuplicateDetectionService,
     ) {
     }
 
@@ -31,7 +34,7 @@ class OrderIngestionService
         $parserResult = $this->orderParserService->parse($rawMessageText);
         $orderNotes = $parserResult['notes_text'] ?? null;
 
-        return DB::transaction(function () use ($organization, $branch, $customer, $rawMessageText, $sourceChannel, $externalMessageId, $incomingMessage, $parserResult, $orderNotes): Order {
+        $order = DB::transaction(function () use ($organization, $branch, $customer, $rawMessageText, $sourceChannel, $externalMessageId, $incomingMessage, $parserResult, $orderNotes): Order {
             $order = Order::create([
                 'organization_id' => $organization->id,
                 'branch_id' => $branch->id,
@@ -94,6 +97,7 @@ class OrderIngestionService
                     'order_id' => $order->id,
                     'parser_result_json' => $parserResult,
                     'parser_confidence' => $parserResult['confidence'],
+                    'status' => IncomingMessage::STATUS_PROCESSED,
                     'parse_status' => Order::STATUS_PENDING_REVIEW,
                     'status_reason' => $parserResult['needs_review']
                         ? 'Order parsed and queued for manual review.'
@@ -104,5 +108,28 @@ class OrderIngestionService
 
             return $order->load('orderItems.product');
         });
+
+        try {
+            $duplicateResult = $this->orderDuplicateDetectionService->detect($order);
+            $duplicateUpdates = [
+                'duplicate_checked_at' => now(),
+                'order_fingerprint' => $duplicateResult['fingerprint'],
+            ];
+
+            if (($duplicateResult['matched_order'] ?? null) instanceof Order && (float) ($duplicateResult['score'] ?? 0) >= 75) {
+                $duplicateUpdates['possible_duplicate_of_order_id'] = $duplicateResult['matched_order']->id;
+                $duplicateUpdates['duplicate_score'] = $duplicateResult['score'];
+                $duplicateUpdates['duplicate_reason'] = $duplicateResult['reason'];
+            }
+
+            $order->forceFill($duplicateUpdates)->save();
+        } catch (\Throwable $exception) {
+            Log::warning('Order duplicate detection failed.', [
+                'order_id' => $order->id,
+                'exception' => $exception->getMessage(),
+            ]);
+        }
+
+        return $order->fresh(['customer', 'incomingMessage', 'orderItems.product', 'possibleDuplicateOf']);
     }
 }

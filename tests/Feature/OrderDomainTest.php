@@ -31,11 +31,18 @@ class OrderDomainTest extends TestCase
         $this->assertTrue(Schema::hasTable('daily_order_closures'));
 
         $this->assertTrue(Schema::hasColumn('incoming_messages', 'order_id'));
+        $this->assertTrue(Schema::hasColumn('incoming_messages', 'provider'));
         $this->assertTrue(Schema::hasColumn('incoming_messages', 'parser_result_json'));
         $this->assertTrue(Schema::hasColumn('incoming_messages', 'parser_confidence'));
         $this->assertTrue(Schema::hasColumn('incoming_messages', 'parse_status'));
         $this->assertTrue(Schema::hasColumn('incoming_messages', 'status_reason'));
         $this->assertTrue(Schema::hasColumn('incoming_messages', 'processed_at'));
+
+        $this->assertTrue(Schema::hasColumn('orders', 'possible_duplicate_of_order_id'));
+        $this->assertTrue(Schema::hasColumn('orders', 'duplicate_score'));
+        $this->assertTrue(Schema::hasColumn('orders', 'duplicate_reason'));
+        $this->assertTrue(Schema::hasColumn('orders', 'duplicate_checked_at'));
+        $this->assertTrue(Schema::hasColumn('orders', 'order_fingerprint'));
     }
 
     public function test_product_belongs_to_organization(): void

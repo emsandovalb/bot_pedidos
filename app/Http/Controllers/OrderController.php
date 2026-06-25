@@ -31,7 +31,7 @@ class OrderController extends Controller
         ]);
 
         $query = $this->scopedQuery()
-            ->with(['branch', 'customer'])
+            ->with(['branch', 'customer', 'possibleDuplicateOf'])
             ->withCount([
                 'orderItems as recognized_order_items_count' => fn ($query) => $query->whereNotNull('product_id'),
             ])
@@ -56,6 +56,7 @@ class OrderController extends Controller
             'order' => $order->load([
                 'branch',
                 'customer',
+                'possibleDuplicateOf',
                 'orderItems' => fn ($query) => $query->orderBy('sort_order'),
                 'orderItems.product',
                 'orderStatusHistories' => fn ($query) => $query->orderBy('created_at'),
@@ -74,6 +75,7 @@ class OrderController extends Controller
             'order' => $order->load([
                 'branch',
                 'customer',
+                'possibleDuplicateOf',
                 'orderItems' => fn ($query) => $query->orderBy('sort_order'),
                 'orderItems.product',
             ]),

@@ -61,6 +61,31 @@
             </div>
         @endif
 
+        @if ($order->possibleDuplicateOf)
+            <div class="rounded-[24px] border border-amber-200 bg-amber-50 p-5 shadow-sm">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                        <div class="text-sm font-semibold uppercase tracking-wide text-amber-800">Posible pedido duplicado</div>
+                        <p class="mt-2 text-sm leading-6 text-amber-900">
+                            Este pedido se parece al pedido #{{ $order->possibleDuplicateOf->id }} recibido recientemente.
+                        </p>
+                        <p class="mt-2 text-sm leading-6 text-amber-800">
+                            Score: {{ $order->duplicate_score !== null ? number_format((float) $order->duplicate_score, 0) : 'â€”' }}
+                        </p>
+                        @if ($order->duplicate_reason)
+                            <p class="mt-1 text-sm leading-6 text-amber-800">
+                                Motivo: {{ $order->duplicate_reason }}
+                            </p>
+                        @endif
+                    </div>
+
+                    <a href="{{ route('orders.show', $order->possibleDuplicateOf) }}" class="inline-flex items-center justify-center rounded-2xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-amber-700">
+                        Ver pedido original #{{ $order->possibleDuplicateOf->id }}
+                    </a>
+                </div>
+            </div>
+        @endif
+
         <div class="grid gap-6 xl:grid-cols-3">
             <div class="space-y-6 xl:col-span-2">
                 <section class="rounded-[24px] border border-slate-200/80 border-l-4 border-l-brand-primary bg-white p-6 shadow-sm">

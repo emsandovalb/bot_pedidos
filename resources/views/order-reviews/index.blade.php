@@ -176,6 +176,12 @@
                                         {{ $tone['label'] }}
                                     </span>
 
+                                    @if ($order->possibleDuplicateOf)
+                                        <span class="inline-flex items-center rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800 ring-1 ring-amber-100">
+                                            Posible duplicado
+                                        </span>
+                                    @endif
+
                                     <span class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-brand-primary ring-1 ring-blue-100">
                                         {{ $order->source_channel ?? 'Canal no definido' }}
                                     </span>
@@ -204,6 +210,12 @@
                                         <div class="mt-1 text-sm font-semibold text-brand-navy">{{ $order->source_channel ?? 'Sin canal' }}</div>
                                     </div>
                                 </div>
+
+                                @if ($order->possibleDuplicateOf)
+                                    <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                                        Similar al pedido #{{ $order->possibleDuplicateOf->id }}
+                                    </div>
+                                @endif
 
                                 <div class="grid gap-4 xl:grid-cols-[1.45fr_1fr]">
                                     <section class="rounded-2xl border border-slate-200/80 border-l-4 border-l-brand-primary bg-white p-4">

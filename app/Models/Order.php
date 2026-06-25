@@ -24,12 +24,17 @@ class Order extends Model
         'branch_id',
         'customer_id',
         'incoming_message_id',
+        'possible_duplicate_of_order_id',
         'source_channel',
         'external_message_id',
         'status',
         'parser_confidence',
         'raw_message_text',
         'parsed_payload_json',
+        'duplicate_score',
+        'duplicate_reason',
+        'duplicate_checked_at',
+        'order_fingerprint',
         'notes',
         'reviewed_by',
         'reviewed_at',
@@ -51,6 +56,8 @@ class Order extends Model
     {
         return [
             'parser_confidence' => 'decimal:2',
+            'duplicate_score' => 'decimal:2',
+            'duplicate_checked_at' => 'datetime',
             'parsed_payload_json' => 'array',
             'reviewed_at' => 'datetime',
             'confirmed_at' => 'datetime',
@@ -80,6 +87,16 @@ class Order extends Model
     public function incomingMessage(): BelongsTo
     {
         return $this->belongsTo(IncomingMessage::class);
+    }
+
+    public function possibleDuplicateOf(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'possible_duplicate_of_order_id');
+    }
+
+    public function possibleDuplicates(): HasMany
+    {
+        return $this->hasMany(self::class, 'possible_duplicate_of_order_id');
     }
 
     public function orderItems(): HasMany
