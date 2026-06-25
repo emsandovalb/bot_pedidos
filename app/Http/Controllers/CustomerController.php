@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\CustomerIdentity;
 use App\Models\Order;
+use App\Services\CustomerInsightsService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -121,7 +122,7 @@ class CustomerController extends Controller
         ]);
     }
 
-    public function show(Customer $customer): View
+    public function show(Customer $customer, CustomerInsightsService $customerInsightsService): View
     {
         $this->ensureVisible($customer);
 
@@ -155,9 +156,11 @@ class CustomerController extends Controller
 
         $latestOrderAt = $customer->orders()->max('created_at');
         $latestIdentityLastSeenAt = $customer->customerIdentities()->max('last_seen_at');
+        $customerInsights = $customerInsightsService->calculate($customer);
 
         return view('customers.show', [
             'customer' => $customer,
+            'customerInsights' => $customerInsights,
             'customerIdentities' => $customer->customerIdentities,
             'recentOrders' => $recentOrders,
             'duplicateOrders' => $duplicateOrders,

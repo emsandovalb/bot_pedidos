@@ -106,6 +106,22 @@ class CustomerManagementTest extends TestCase
             ->assertSeeText('Rechazado');
     }
 
+    public function test_customer_detail_shows_customer_insights_section(): void
+    {
+        [$user, $customer] = $this->makeScopedData();
+
+        $this->actingAs($user)
+            ->get(route('customers.show', $customer))
+            ->assertOk()
+            ->assertSeeText('Customer Insights')
+            ->assertSeeText('Segment')
+            ->assertSeeText('Favorite channel')
+            ->assertSeeText('Favorite hour')
+            ->assertSeeText('Average frequency')
+            ->assertSeeText('Inactive days')
+            ->assertSeeText('Favorite products');
+    }
+
     public function test_organization_scoping_prevents_seeing_another_organizations_customer(): void
     {
         [$user] = $this->makeScopedData();

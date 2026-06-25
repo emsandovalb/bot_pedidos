@@ -70,6 +70,87 @@
             </div>
         </section>
 
+        <section class="rounded-[28px] border border-slate-200/70 bg-white p-6 shadow-sm">
+            <div class="flex items-center justify-between gap-3">
+                <div>
+                    <h2 class="text-lg font-semibold text-brand-navy">Customer Insights</h2>
+                    <p class="mt-1 text-sm text-slate-500">Señales operativas calculadas en solo lectura sobre el historial del cliente.</p>
+                </div>
+            </div>
+
+            @php
+                $segmentClasses = [
+                    'NEW' => 'bg-sky-50 text-sky-800 ring-1 ring-sky-100',
+                    'FREQUENT' => 'bg-blue-50 text-blue-800 ring-1 ring-blue-100',
+                    'VIP' => 'bg-amber-50 text-amber-800 ring-1 ring-amber-100',
+                    'INACTIVE' => 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
+                ];
+            @endphp
+
+            <div class="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                <article class="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4">
+                    <div class="text-sm font-medium text-slate-500">Segment</div>
+                    <div class="mt-3">
+                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $segmentClasses[$customerInsights->segment] ?? 'bg-slate-100 text-slate-700 ring-1 ring-slate-200' }}">
+                            {{ $customerInsights->segment }}
+                        </span>
+                    </div>
+                    <div class="mt-3 text-sm text-slate-600">Total orders: {{ $customerInsights->total_orders }}</div>
+                </article>
+
+                <article class="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4">
+                    <div class="text-sm font-medium text-slate-500">Favorite channel</div>
+                    <div class="mt-3 text-2xl font-semibold text-brand-navy">{{ $customerInsights->favorite_channel['name'] ?? 'Unknown' }}</div>
+                    <div class="mt-2 text-sm text-slate-600">{{ number_format((float) ($customerInsights->favorite_channel['percentage'] ?? 0), 0) }}% of orders</div>
+                </article>
+
+                <article class="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4">
+                    <div class="text-sm font-medium text-slate-500">Favorite hour</div>
+                    <div class="mt-3 text-2xl font-semibold text-brand-navy">{{ $customerInsights->favorite_hour ?? 'Sin datos' }}</div>
+                    <div class="mt-2 text-sm text-slate-600">Most common order hour</div>
+                </article>
+
+                <article class="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4">
+                    <div class="text-sm font-medium text-slate-500">Average frequency</div>
+                    <div class="mt-3 text-2xl font-semibold text-brand-navy">
+                        {{ $customerInsights->average_days !== null ? number_format((float) $customerInsights->average_days, 1) . ' days' : 'Sin datos' }}
+                    </div>
+                    <div class="mt-2 text-sm text-slate-600">Average days between purchases</div>
+                </article>
+
+                <article class="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4">
+                    <div class="text-sm font-medium text-slate-500">Inactive days</div>
+                    <div class="mt-3 flex flex-wrap gap-2">
+                        @forelse ($customerInsights->inactive_days as $day)
+                            <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200">
+                                {{ $day }}
+                            </span>
+                        @empty
+                            <span class="text-sm text-slate-600">Sin datos</span>
+                        @endforelse
+                    </div>
+                </article>
+
+                <article class="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4">
+                    <div class="text-sm font-medium text-slate-500">Favorite products</div>
+                    <div class="mt-3 space-y-3">
+                        @forelse ($customerInsights->favorite_products as $favoriteProduct)
+                            <div class="flex items-center justify-between gap-3 rounded-xl bg-white px-3 py-2 ring-1 ring-slate-200">
+                                <span class="min-w-0 truncate text-sm font-medium text-brand-navy">{{ $favoriteProduct['product'] }}</span>
+                                <span class="inline-flex shrink-0 items-center rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-brand-primary ring-1 ring-blue-100">
+                                    {{ $favoriteProduct['times_ordered'] }}
+                                </span>
+                            </div>
+                        @empty
+                            <div class="rounded-xl border border-dashed border-slate-200 bg-white px-3 py-4 text-sm text-slate-600">
+                                No product history yet.
+                            </div>
+                        @endforelse
+                    </div>
+                </article>
+            </div>
+        </section>
+
         <section class="grid gap-6 xl:grid-cols-2">
             <div class="rounded-[28px] border border-slate-200/70 bg-white p-6 shadow-sm">
                 <div class="flex items-center justify-between gap-3">
