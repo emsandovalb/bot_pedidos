@@ -2,20 +2,20 @@
     <div class="space-y-6">
         <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
             <div class="max-w-3xl">
-                <div class="brand-badge bg-brand-primary/10 text-brand-primary">Catálogo de productos</div>
-                <h1 class="mt-3 text-3xl font-semibold tracking-tight text-brand-navy">Catálogo de productos</h1>
+                <div class="brand-badge bg-brand-primary/10 text-brand-primary">Límites operativos</div>
+                <h1 class="mt-3 text-3xl font-semibold tracking-tight text-brand-navy">Límites operativos</h1>
                 <p class="mt-1 max-w-2xl text-sm text-slate-600">Administra el catálogo por sucursal y referencia operativa.</p>
             </div>
 
             @if ($canManageLimits)
                 <a href="{{ route('limits.create', request()->only(['branch_id', 'draw_id'])) }}" class="brand-btn-primary">
-                    Crear registro
+                    Crear límite
                 </a>
             @endif
         </div>
 
         @if (session('status'))
-            <div class="rounded-2xl border border-brand-success/20 bg-green-50 px-4 py-3 text-sm text-green-800 shadow-sm">
+            <div class="rounded-2xl border border-brand-secondary/20 bg-green-50 px-4 py-3 text-sm text-green-800 shadow-sm">
                 {{ session('status') }}
             </div>
         @endif
@@ -56,7 +56,7 @@
 
         @if (! $canManageLimits)
             <div class="rounded-2xl border border-slate-200/80 bg-white p-5 text-sm text-slate-600 shadow-sm">
-                Acceso de solo lectura. Este catálogo puede verse, pero no editarse desde esta cuenta.
+                Acceso de solo lectura. Esta vista puede consultarse, pero no editarse desde esta cuenta.
             </div>
         @endif
 
@@ -67,9 +67,9 @@
                         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Sucursal</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Referencia</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Código</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Max amount</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Updated</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Actions</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Monto máximo</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Actualizado</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200 bg-white">

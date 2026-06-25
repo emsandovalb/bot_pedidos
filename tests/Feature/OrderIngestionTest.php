@@ -10,12 +10,15 @@ use App\Models\Organization;
 use App\Models\Product;
 use App\Models\ProductAlias;
 use App\Models\User;
+use App\Services\OrderDuplicateDetectionService;
 use App\Services\OrderIngestionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Hash;
+use Mockery;
+use RuntimeException;
 use Tests\TestCase;
 
 class OrderIngestionTest extends TestCase
@@ -158,6 +161,46 @@ class OrderIngestionTest extends TestCase
         $this->assertSame(Order::STATUS_PENDING_REVIEW, $incomingMessage->parse_status);
         $this->assertSame('Order parsed successfully.', $incomingMessage->status_reason);
         $this->assertNotNull($incomingMessage->processed_at);
+    }
+
+    public function test_order_ingestion_sets_duplicate_detection_metadata(): void
+    {
+        [$organization, $branch, $customer] = $this->makeOrganizationBranchCustomer();
+
+        $order = app(OrderIngestionService::class)->ingest(
+            organization: $organization,
+            branch: $branch,
+            customer: $customer,
+            rawMessageText: '2 bolsas de jardÃ­n',
+        );
+
+        $this->assertNotNull($order->duplicate_checked_at);
+        $this->assertNotEmpty($order->order_fingerprint);
+    }
+
+    public function test_order_ingestion_ignores_duplicate_detection_failures(): void
+    {
+        [$organization, $branch, $customer] = $this->makeOrganizationBranchCustomer();
+
+        $duplicateDetector = Mockery::mock(OrderDuplicateDetectionService::class);
+        $duplicateDetector->shouldReceive('detect')
+            ->once()
+            ->andThrow(new RuntimeException('Duplicate detector unavailable.'));
+
+        $this->app->instance(OrderDuplicateDetectionService::class, $duplicateDetector);
+
+        $order = app(OrderIngestionService::class)->ingest(
+            organization: $organization,
+            branch: $branch,
+            customer: $customer,
+            rawMessageText: '2 bolsas de jardÃ­n',
+        );
+
+        $this->assertDatabaseHas('orders', [
+            'id' => $order->id,
+            'raw_message_text' => '2 bolsas de jardÃ­n',
+        ]);
+        $this->assertNotNull($order->id);
     }
 
     public function test_order_status_history_is_created(): void

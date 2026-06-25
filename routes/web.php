@@ -4,12 +4,16 @@ use App\Http\Controllers\BranchController;
 use App\Http\Controllers\BranchDailyClosureController;
 use App\Http\Controllers\DailyOrderClosureController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\ChannelController;
+use App\Http\Controllers\ChannelOnboardingController;
 use App\Http\Controllers\IncomingMessageController;
 use App\Http\Controllers\IntakeRequestController;
 use App\Http\Controllers\NumberBoardController;
 use App\Http\Controllers\NumberLimitController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderReviewController;
+use App\Http\Controllers\SetupRequestController;
 use App\Http\Controllers\ProductImportController;
 use App\Http\Controllers\ProductAliasController;
 use App\Http\Controllers\ProductController;
@@ -26,6 +30,15 @@ Route::get('/', function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
+    Route::get('/channels', [ChannelController::class, 'index'])->name('channels.index');
+    Route::get('/channels/whatsapp', [ChannelController::class, 'whatsapp'])->name('channels.whatsapp');
+    Route::post('/channels/whatsapp/onboarding', [ChannelOnboardingController::class, 'update'])->name('channels.whatsapp.onboarding.update');
+    Route::get('/channels/whatsapp/status', [ChannelController::class, 'status'])->name('channels.whatsapp.status');
+    Route::get('/setup-requests', [SetupRequestController::class, 'index'])->name('setup-requests.index');
+    Route::post('/setup-requests', [SetupRequestController::class, 'store'])->name('setup-requests.store');
+    Route::get('/setup-requests/{setupRequest}', [SetupRequestController::class, 'show'])->name('setup-requests.show');
+    Route::patch('/setup-requests/{setupRequest}', [SetupRequestController::class, 'update'])->name('setup-requests.update');
     Route::get('/branches', [BranchController::class, 'index'])->name('branches.index');
     Route::get('/daily-order-closures', [DailyOrderClosureController::class, 'index'])->name('daily-order-closures.index');
     Route::get('/daily-order-closures/create', [DailyOrderClosureController::class, 'create'])->name('daily-order-closures.create');

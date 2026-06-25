@@ -8,7 +8,8 @@ use App\Models\IncomingMessage;
 use App\Models\User;
 use App\Services\IntakeIntentService;
 use App\Services\IntakeMessageService;
-use App\Services\OrderIngestionService;
+use App\Services\Messaging\DTO\IncomingMessageDTO;
+use App\Services\Messaging\MessagingIngestionService;
 use App\Services\Telegram\TelegramBotService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
@@ -23,7 +24,7 @@ class TelegramPollCommand extends Command
         TelegramBotService $telegramBotService,
         IntakeIntentService $intakeIntentService,
         IntakeMessageService $intakeMessageService,
-        OrderIngestionService $orderIngestionService,
+        MessagingIngestionService $messagingIngestionService,
     ): int {
         if (! $telegramBotService->enabled()) {
             $this->info('Telegram polling is disabled. Set TELEGRAM_ENABLED=true to process updates.');
@@ -70,7 +71,7 @@ class TelegramPollCommand extends Command
                     $telegramBotService,
                     $intakeIntentService,
                     $intakeMessageService,
-                    $orderIngestionService,
+                    $messagingIngestionService,
                     $user,
                     $branch,
                     $loop,
@@ -117,7 +118,7 @@ class TelegramPollCommand extends Command
         TelegramBotService $telegramBotService,
         IntakeIntentService $intakeIntentService,
         IntakeMessageService $intakeMessageService,
-        OrderIngestionService $orderIngestionService,
+        MessagingIngestionService $messagingIngestionService,
         User $user,
         Branch $branch,
         bool $continueOnError,
@@ -142,7 +143,7 @@ class TelegramPollCommand extends Command
             }
 
             $alreadyProcessed = IncomingMessage::query()
-                ->where('channel_type', Branch::CHANNEL_TYPE_TELEGRAM)
+                ->where('provider', Branch::CHANNEL_TYPE_TELEGRAM)
                 ->where('external_message_id', $updateId)
                 ->exists();
 
@@ -169,40 +170,35 @@ class TelegramPollCommand extends Command
                         continue;
                     }
 
-                    $customer = $this->resolveTelegramCustomer(
-                        branch: $branch,
-                        customerPhone: (string) $chatId,
-                        customerName: $telegramBotService->extractSenderName($update),
-                    );
-
-                    $incomingMessage = IncomingMessage::create([
-                        'organization_id' => $branch->organization_id,
-                        'branch_id' => $branch->id,
-                        'customer_id' => $customer->id,
-                        'channel_type' => Branch::CHANNEL_TYPE_TELEGRAM,
-                        'from_identifier' => (string) $chatId,
-                        'to_identifier' => $telegramBotService->getBotIdentifier(),
-                        'raw_text' => $messageText,
-                        'payload_json' => [
-                            'source' => Branch::CHANNEL_TYPE_TELEGRAM,
-                            'payload' => $update,
-                        ],
-                        'external_message_id' => (string) $updateId,
-                        'status' => IncomingMessage::STATUS_RECEIVED,
-                        'received_at' => now(),
-                    ]);
-
-                    $orderIngestionService->ingest(
+                    $result = $messagingIngestionService->ingest(
                         organization: $branch->organization,
                         branch: $branch,
-                        customer: $customer,
-                        rawMessageText: $messageText,
-                        sourceChannel: Branch::CHANNEL_TYPE_TELEGRAM,
-                        externalMessageId: (string) $updateId,
-                        incomingMessage: $incomingMessage,
+                        message: new IncomingMessageDTO(
+                            provider: Branch::CHANNEL_TYPE_TELEGRAM,
+                            external_message_id: (string) $updateId,
+                            external_chat_id: (string) $chatId,
+                            customer_name: $telegramBotService->extractSenderName($update),
+                            customer_phone: (string) $chatId,
+                            message: $messageText,
+                            received_at: now(),
+                            raw_payload: [
+                                'source' => Branch::CHANNEL_TYPE_TELEGRAM,
+                                'payload' => $update,
+                            ],
+                            attachments: [],
+                        ),
                     );
 
                     $this->rememberProcessedTelegramUpdateId($updateId);
+                    if ($result['duplicate']) {
+                        $duplicateCount++;
+                        continue;
+                    }
+
+                    if ($result['status'] === IncomingMessage::STATUS_FAILED) {
+                        throw new \RuntimeException($result['failure_reason'] ?? 'Telegram order ingestion failed.');
+                    }
+
                     $telegramBotService->sendMessage($chatId, $this->orderIngestionReply($messageText));
                     $processedCount++;
 

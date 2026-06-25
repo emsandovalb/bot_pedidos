@@ -14,6 +14,7 @@ class OrderReviewController extends Controller
             ->with([
                 'branch',
                 'customer',
+                'possibleDuplicateOf',
                 'orderItems' => fn ($query) => $query->orderBy('sort_order'),
                 'orderItems.product',
             ])
