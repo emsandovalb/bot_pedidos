@@ -13,6 +13,7 @@ use App\Services\Messaging\MessagingIngestionService;
 use App\Services\OrderIngestionService;
 use DateTimeImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Mockery;
 use RuntimeException;
 use Tests\TestCase;
@@ -176,6 +177,39 @@ class MessagingIngestionServiceTest extends TestCase
             'external_message_id' => 'msg-identity-1',
         ]);
         $this->assertDatabaseCount('orders', 1);
+    }
+
+    public function test_whatsapp_incoming_message_opens_customer_service_window(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-06-24 15:00:00'));
+
+        try {
+            [$organization, $branch] = $this->makeOrganizationAndBranch();
+            $message = new IncomingMessageDTO(
+                provider: 'whatsapp',
+                external_message_id: 'wa-window-1',
+                external_chat_id: 'wa-chat-1',
+                customer_name: 'Window Customer',
+                customer_phone: '+50255550003',
+                message: '2 bolsas de jardin',
+                received_at: new DateTimeImmutable('2026-06-24 15:00:00'),
+                raw_payload: ['entry' => [['id' => 'window']]],
+                attachments: [],
+            );
+
+            app(MessagingIngestionService::class)->ingest($organization, $branch, $message);
+
+            $identity = CustomerIdentity::query()
+                ->where('organization_id', $organization->id)
+                ->where('provider', 'whatsapp')
+                ->where('external_chat_id', 'wa-chat-1')
+                ->firstOrFail();
+
+            $this->assertSame('2026-06-24 15:00:00', $identity->last_customer_message_at?->format('Y-m-d H:i:s'));
+            $this->assertSame('2026-06-25 15:00:00', $identity->service_window_expires_at?->format('Y-m-d H:i:s'));
+        } finally {
+            Carbon::setTestNow();
+        }
     }
 
     /**

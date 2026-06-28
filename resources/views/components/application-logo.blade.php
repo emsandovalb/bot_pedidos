@@ -1,3 +1,11 @@
-<div {{ $attributes->merge(['class' => 'inline-flex items-center text-current']) }}>
-    <span class="text-[1.15rem] font-semibold tracking-[-0.02em] text-current">Benditio</span>
-</div>
+@props([
+    'src' => asset('images/benditio-logo.svg'),
+])
+
+<span {{ $attributes->merge(['class' => 'inline-flex items-center justify-start overflow-hidden']) }}>
+    <img
+        src="{{ $src }}"
+        alt="Benditio"
+        class="block h-full w-auto select-none"
+    >
+</span>

@@ -8,14 +8,10 @@
                 {{-- LEFT --}}
                 <section style="padding:44px 52px;color:#fff;display:flex;flex-direction:column;justify-content:space-between;box-sizing:border-box;">
                     <div>
-                        <div style="display:flex;align-items:center;gap:12px;">
-                            <div style="width:34px;height:34px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:4px;">
-                                <span style="background:#1270df;border-radius:5px;"></span>
-                                <span style="background:#3ccd68;border-radius:5px;"></span>
-                                <span style="background:#3ccd68;border-radius:5px;"></span>
-                                <span style="background:#1270df;border-radius:5px;"></span>
-                            </div>
-                            <span style="font-size:20px;font-weight:700;letter-spacing:-.01em;">Benditio</span>
+                        <div style="display:flex;align-items:center;">
+                            <a href="{{ url('/') }}" style="display:inline-flex;align-items:center;text-decoration:none;">
+                                <x-application-logo class="h-14 w-auto" />
+                            </a>
                         </div>
 
                         <h1 style="margin:46px 0 0;font-size:62px;line-height:.95;font-weight:900;letter-spacing:-.05em;">Convierte <span style="color:#3ccd68;">mensajes</span><br>en ventas.</h1>

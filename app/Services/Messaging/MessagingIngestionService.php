@@ -11,6 +11,7 @@ use App\Services\Messaging\DTO\IncomingMessageDTO;
 use App\Services\OrderIngestionService;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
 use InvalidArgumentException;
 use Throwable;
 
@@ -55,8 +56,11 @@ class MessagingIngestionService
             if ($existingMessage !== null) {
                 $existingMessage->loadMissing(['customer', 'order']);
                 $resolvedCustomer = $existingMessage->customer
-                    ?? $existingMessage->order?->customer
-                    ?? $this->resolveCustomer($organization, $branch, $message);
+                    ?? $existingMessage->order?->customer;
+
+                if ($resolvedCustomer === null) {
+                    $resolvedCustomer = $this->resolveCustomer($organization, $branch, $message)['customer'];
+                }
 
                 return [
                     'duplicate' => true,
@@ -68,7 +72,18 @@ class MessagingIngestionService
                 ];
             }
 
-            $customer = $this->resolveCustomer($organization, $branch, $message);
+            $customerContext = $this->resolveCustomer($organization, $branch, $message);
+            $customer = $customerContext['customer'];
+            $customerIdentity = $customerContext['customer_identity'];
+
+            if ($provider === 'whatsapp' && $customerIdentity !== null) {
+                $receivedAt = Carbon::instance($message->received_at);
+
+                $customerIdentity->forceFill([
+                    'last_customer_message_at' => $receivedAt,
+                    'service_window_expires_at' => $receivedAt->copy()->addHours(24),
+                ])->save();
+            }
 
             try {
                 $incomingMessage = IncomingMessage::create([
@@ -166,7 +181,10 @@ class MessagingIngestionService
         });
     }
 
-    private function resolveCustomer(Organization $organization, Branch $branch, IncomingMessageDTO $message): Customer
+    /**
+     * @return array{customer: Customer, customer_identity: \App\Models\CustomerIdentity}
+     */
+    private function resolveCustomer(Organization $organization, Branch $branch, IncomingMessageDTO $message): array
     {
         $resolution = $this->customerIdentityResolver->resolve(
             organizationId: $organization->id,
@@ -182,6 +200,7 @@ class MessagingIngestionService
 
         /** @var Customer $customer */
         $customer = $resolution['customer'];
+        $customerIdentity = $resolution['customer_identity'];
 
         $updates = [];
 
@@ -197,6 +216,9 @@ class MessagingIngestionService
             $customer->update($updates);
         }
 
-        return $customer->fresh();
+        return [
+            'customer' => $customer->fresh(),
+            'customer_identity' => $customerIdentity->fresh(['customer']),
+        ];
     }
 }

@@ -74,4 +74,9 @@ class Organization extends Model
     {
         return $this->hasMany(SetupRequest::class);
     }
+
+    public function notificationSettings(): HasMany
+    {
+        return $this->hasMany(NotificationSetting::class);
+    }
 }

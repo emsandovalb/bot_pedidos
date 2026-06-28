@@ -26,6 +26,8 @@ class CustomerIdentity extends Model
         'metadata_json',
         'first_seen_at',
         'last_seen_at',
+        'last_customer_message_at',
+        'service_window_expires_at',
     ];
 
     protected $attributes = [
@@ -39,6 +41,8 @@ class CustomerIdentity extends Model
             'metadata_json' => 'array',
             'first_seen_at' => 'datetime',
             'last_seen_at' => 'datetime',
+            'last_customer_message_at' => 'datetime',
+            'service_window_expires_at' => 'datetime',
             'is_primary' => 'boolean',
         ];
     }

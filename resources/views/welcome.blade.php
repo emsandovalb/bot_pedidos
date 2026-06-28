@@ -16,7 +16,12 @@
             <div class="relative mx-auto flex min-h-screen max-w-6xl items-center px-6 py-16">
                 <div class="grid w-full gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
                     <div class="space-y-8">
-                        <div class="brand-badge bg-brand-primary/10 text-brand-primary">Benditio</div>
+                        <div class="flex items-center gap-4">
+                            <a href="{{ url('/') }}" class="inline-flex items-center no-underline">
+                                <x-application-logo class="h-16 w-auto" />
+                            </a>
+                            <div class="brand-badge bg-brand-primary/10 text-brand-primary">Plataforma operativa</div>
+                        </div>
                         <div class="space-y-4">
                             <h1 class="text-5xl font-semibold tracking-tight text-brand-navy sm:text-6xl">Convierte mensajes en ventas.</h1>
                             <p class="max-w-2xl text-lg leading-8 text-slate-600">

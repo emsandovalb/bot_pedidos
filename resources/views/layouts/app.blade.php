@@ -116,7 +116,31 @@
 
                         <div class="px-2 pt-6">
                             <div class="px-2 text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                                Support
+                                Configuracion
+                            </div>
+                            <div class="mt-3 space-y-1">
+                                <a
+                                    href="{{ route('settings.notifications.index') }}"
+                                    @class([
+                                        'group relative flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-medium transition' => true,
+                                        'border-brand-primary bg-[linear-gradient(90deg,rgba(20,110,219,0.10),rgba(22,163,74,0.08))] text-brand-navy shadow-sm' => request()->routeIs('settings.notifications.*'),
+                                        'border-transparent text-slate-600 hover:bg-slate-50 hover:text-brand-navy' => ! request()->routeIs('settings.notifications.*'),
+                                    ])
+                                >
+                                    <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5 shrink-0 transition-colors {{ request()->routeIs('settings.notifications.*') ? 'text-brand-primary' : 'text-slate-400 group-hover:text-brand-primary' }}" aria-hidden="true">
+                                        <path d="M12 8v8m-4-4h8M5 20h14a1 1 0 0 0 1-1v-2.2a1 1 0 0 0-.3-.7l-1.4-1.4a1 1 0 0 1-.3-.7V9a1 1 0 0 0-.3-.7L13.4 5.3a1 1 0 0 0-.7-.3H8.3a1 1 0 0 0-.7.3L5.3 7.6A1 1 0 0 0 5 8.3V19a1 1 0 0 0 1 1Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <span class="flex-1">Notificaciones</span>
+                                    @if (request()->routeIs('settings.notifications.*'))
+                                        <span class="absolute inset-y-0 right-0 w-1 rounded-l-full bg-brand-primary"></span>
+                                    @endif
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="px-2 pt-6">
+                            <div class="px-2 text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                                Soporte
                             </div>
                             <div class="mt-3 space-y-1">
                                 <a

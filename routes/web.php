@@ -12,6 +12,7 @@ use App\Http\Controllers\IncomingMessageController;
 use App\Http\Controllers\IntakeRequestController;
 use App\Http\Controllers\NumberBoardController;
 use App\Http\Controllers\NumberLimitController;
+use App\Http\Controllers\NotificationSettingsController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderReviewController;
 use App\Http\Controllers\SetupRequestController;
@@ -53,6 +54,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/closures/{closure}', [BranchDailyClosureController::class, 'show'])->name('closures.show');
     Route::get('/closures/{closure}/export', [BranchDailyClosureController::class, 'export'])->name('closures.export');
     Route::get('/incoming-messages', [IncomingMessageController::class, 'index'])->name('incoming-messages.index');
+
+    Route::prefix('/settings/notifications')->name('settings.notifications.')->group(function () {
+        Route::get('/', [NotificationSettingsController::class, 'index'])->name('index');
+        Route::post('/', [NotificationSettingsController::class, 'update'])->name('update');
+    });
 
     Route::prefix('/orders')->name('orders.')->group(function () {
         Route::get('/', [OrderController::class, 'index'])->name('index');
