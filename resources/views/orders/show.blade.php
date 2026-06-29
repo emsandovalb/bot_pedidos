@@ -22,6 +22,7 @@
             ];
 
             $timelineEntries = $order->orderStatusHistories;
+            $notificationLogs = $order->notificationLogs;
             $recognizedItems = $order->orderItems->filter(fn ($item) => $item->product !== null);
             $detectedItems = $order->orderItems;
         @endphp
@@ -354,6 +355,60 @@
                         @empty
                             <div class="rounded-2xl border border-dashed border-emerald-200 bg-emerald-50/70 px-4 py-6 text-sm text-slate-600">
                                 No hay historial de estado todavía.
+                            </div>
+                        @endforelse
+                    </div>
+                </section>
+                <section class="rounded-[24px] border border-slate-200/80 border-l-4 border-l-blue-500 bg-white p-6 shadow-sm">
+                    <div class="flex items-center justify-between gap-3">
+                        <h2 class="text-base font-semibold text-brand-navy">Historial de notificaciones</h2>
+                        <span class="text-xs font-medium uppercase tracking-wide text-slate-500">{{ $notificationLogs->count() }} evento(s)</span>
+                    </div>
+
+                    <div class="mt-4 space-y-3">
+                        @forelse ($notificationLogs as $log)
+                            <div class="rounded-2xl border border-slate-200/80 bg-slate-50 p-4 transition hover:bg-white">
+                                <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                    <div>
+                                        <div class="text-sm font-semibold text-slate-900">
+                                            {{ \App\Models\NotificationSetting::eventLabel($log->event) }}
+                                        </div>
+                                        <div class="mt-1 text-xs text-slate-500">
+                                            {{ \App\Models\NotificationSetting::channelLabel($log->channel) }}
+                                            · {{ $log->status }}
+                                        </div>
+                                    </div>
+                                    <div class="text-xs text-slate-500">
+                                        {{ $log->evaluated_at?->format('d/m/Y H:i') ?? 'â€”' }}
+                                    </div>
+                                </div>
+
+                                @if ($log->reason)
+                                    <div class="mt-2 text-sm leading-6 text-slate-700">{{ $log->reason }}</div>
+                                @endif
+
+                                <div class="mt-3 grid gap-2 text-xs text-slate-500 sm:grid-cols-3">
+                                    <div>
+                                        <span class="font-medium text-slate-600">Provider message ID:</span>
+                                        {{ $log->provider_message_id ?? '—' }}
+                                    </div>
+                                    <div>
+                                        <span class="font-medium text-slate-600">Sent at:</span>
+                                        {{ $log->sent_at?->format('d/m/Y H:i') ?? '—' }}
+                                    </div>
+                                    <div>
+                                        <span class="font-medium text-slate-600">Error:</span>
+                                        {{ $log->error_message ?? '—' }}
+                                    </div>
+                                </div>
+
+                                <div class="mt-3 rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-700">
+                                    {{ \Illuminate\Support\Str::limit($log->message_body ?? 'Sin mensaje generado', 180) }}
+                                </div>
+                            </div>
+                        @empty
+                            <div class="rounded-2xl border border-dashed border-blue-200 bg-blue-50/70 px-4 py-6 text-sm text-slate-600">
+                                No hay historial de notificaciones todavia.
                             </div>
                         @endforelse
                     </div>

@@ -49,7 +49,9 @@ class OrderReviewTest extends TestCase
             ->assertSee('Producto reconocido')
             ->assertSee('Bolsas de jardin')
             ->assertSee('Coincidencia')
-            ->assertSee('Confianza');
+            ->assertSee('Confianza')
+            ->assertSee('Historial de notificaciones')
+            ->assertSee('Pedido creado');
     }
 
     public function test_order_detail_shows_unmatched_label_when_product_id_is_null(): void

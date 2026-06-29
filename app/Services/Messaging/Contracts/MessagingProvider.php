@@ -3,6 +3,7 @@
 namespace App\Services\Messaging\Contracts;
 
 use App\Services\Messaging\DTO\OutgoingMessageDTO;
+use App\Services\Messaging\DTO\MessagingSendResult;
 use Illuminate\Http\Request;
 
 interface MessagingProvider
@@ -11,7 +12,7 @@ interface MessagingProvider
 
     public function receiveWebhook(Request $request);
 
-    public function sendMessage(OutgoingMessageDTO $message);
+    public function sendMessage(OutgoingMessageDTO $message): MessagingSendResult;
 
     public function markAsRead(string $externalMessageId);
 

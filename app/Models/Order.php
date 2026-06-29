@@ -114,6 +114,11 @@ class Order extends Model
         return $this->hasMany(ManualReview::class);
     }
 
+    public function notificationLogs(): HasMany
+    {
+        return $this->hasMany(OrderNotificationLog::class);
+    }
+
     public function isPendingReview(): bool
     {
         return $this->status === self::STATUS_PENDING_REVIEW;

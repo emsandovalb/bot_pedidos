@@ -4,11 +4,18 @@ namespace Tests\Feature;
 
 use App\Models\Branch;
 use App\Models\Customer;
+use App\Models\CustomerIdentity;
+use App\Models\NotificationSetting;
 use App\Models\Order;
 use App\Models\Organization;
 use App\Models\User;
+use App\Services\Messaging\Contracts\MessagingProvider;
+use App\Services\Messaging\DTO\MessagingSendResult;
+use App\Services\Messaging\DTO\OutgoingMessageDTO;
+use App\Services\Messaging\Manager\MessagingManager;
 use App\Services\OrderIngestionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Tests\TestCase;
 
 class OrderWorkflowTest extends TestCase
@@ -32,6 +39,13 @@ class OrderWorkflowTest extends TestCase
             'from_status' => Order::STATUS_CONFIRMED,
             'to_status' => Order::STATUS_PREPARING,
             'changed_via' => 'admin_ui',
+        ]);
+
+        $this->assertDatabaseHas('order_notification_logs', [
+            'order_id' => $order->id,
+            'event' => 'order_preparing',
+            'channel' => 'telegram',
+            'status' => 'simulated',
         ]);
     }
 
@@ -89,6 +103,135 @@ class OrderWorkflowTest extends TestCase
 
         $this->assertSame(Order::STATUS_CANCELLED, $order->status);
         $this->assertNotNull($order->cancelled_at);
+    }
+
+    public function test_disabled_setting_creates_skipped_notification_log(): void
+    {
+        [$user, $order] = $this->makePendingReviewOrder();
+
+        NotificationSetting::query()->updateOrCreate(
+            [
+                'organization_id' => $user->organization_id,
+                'channel' => NotificationSetting::CHANNEL_TELEGRAM,
+                'event' => NotificationSetting::EVENT_ORDER_CONFIRMED,
+            ],
+            [
+                'is_enabled' => false,
+                'requires_open_service_window' => false,
+                'use_template_if_window_closed' => false,
+                'template_name' => null,
+                'message_body' => 'Pedido {order_id} confirmado',
+            ]
+        );
+
+        $this->actingAs($user)
+            ->post(route('orders.confirm', $order))
+            ->assertRedirect(route('orders.show', $order));
+
+        $this->assertDatabaseHas('order_notification_logs', [
+            'order_id' => $order->id,
+            'event' => 'order_confirmed',
+            'status' => 'skipped',
+        ]);
+    }
+
+    public function test_whatsapp_closed_window_creates_skipped_notification_log(): void
+    {
+        [$user, $order] = $this->makePreparingOrder();
+        $this->makeWhatsappContext($order, now()->subHour());
+
+        $this->actingAs($user)
+            ->post(route('orders.ready-for-dispatch', $order))
+            ->assertRedirect(route('orders.show', $order));
+
+        $this->assertDatabaseHas('order_notification_logs', [
+            'order_id' => $order->id,
+            'event' => 'order_ready_for_dispatch',
+            'channel' => 'whatsapp',
+            'status' => 'skipped',
+        ]);
+    }
+
+    public function test_whatsapp_open_window_creates_simulated_notification_log(): void
+    {
+        [$user, $order] = $this->makePreparingOrder();
+        $this->makeWhatsappContext($order, now()->addHour());
+
+        $this->actingAs($user)
+            ->post(route('orders.ready-for-dispatch', $order))
+            ->assertRedirect(route('orders.show', $order));
+
+        $this->assertDatabaseHas('order_notification_logs', [
+            'order_id' => $order->id,
+            'event' => 'order_ready_for_dispatch',
+            'channel' => 'whatsapp',
+            'status' => 'simulated',
+        ]);
+    }
+
+    public function test_notification_flow_does_not_call_real_provider_send(): void
+    {
+        [$user, $order] = $this->makeConfirmedOrder();
+
+        $fakeProvider = new class implements MessagingProvider
+        {
+            public bool $sendCalled = false;
+
+            public function verifyWebhook(Request $request): bool
+            {
+                return true;
+            }
+
+            public function receiveWebhook(Request $request)
+            {
+                return null;
+            }
+
+            public function sendMessage(OutgoingMessageDTO $message): MessagingSendResult
+            {
+                $this->sendCalled = true;
+
+                throw new \RuntimeException('sendMessage should not be called.');
+            }
+
+            public function markAsRead(string $externalMessageId)
+            {
+                return null;
+            }
+
+            public function healthCheck()
+            {
+                return [
+                    'provider' => $this->providerName(),
+                    'status' => 'ok',
+                ];
+            }
+
+            public function providerName(): string
+            {
+                return 'telegram';
+            }
+        };
+
+        $fakeMessagingManager = new class($fakeProvider) extends MessagingManager
+        {
+            public function __construct(private readonly MessagingProvider $provider)
+            {
+            }
+
+            public function driver(?string $provider = null): MessagingProvider
+            {
+                return $this->provider;
+            }
+        };
+
+        app()->instance(MessagingManager::class, $fakeMessagingManager);
+
+        $this->actingAs($user)
+            ->post(route('orders.prepare', $order))
+            ->assertRedirect(route('orders.show', $order));
+
+        $this->assertFalse($fakeProvider->sendCalled);
     }
 
     public function test_dispatched_order_cannot_be_cancelled(): void
@@ -228,6 +371,33 @@ class OrderWorkflowTest extends TestCase
             ->assertRedirect(route('orders.show', $order));
 
         return [$user, $order->refresh()];
+    }
+
+    private function makeWhatsappContext(Order $order, mixed $serviceWindowExpiresAt): void
+    {
+        $order->forceFill([
+            'source_channel' => 'whatsapp',
+        ])->save();
+
+        CustomerIdentity::create([
+            'organization_id' => $order->organization_id,
+            'customer_id' => $order->customer_id,
+            'provider' => 'whatsapp',
+            'external_user_id' => 'wa-user-' . $order->id,
+            'external_chat_id' => 'wa-chat-' . $order->id,
+            'provider_username' => 'customer.whatsapp',
+            'phone' => $order->customer->phone,
+            'normalized_phone' => $order->customer->phone,
+            'email' => null,
+            'display_name' => $order->customer->name,
+            'confidence_score' => 100,
+            'is_primary' => true,
+            'metadata_json' => null,
+            'first_seen_at' => now(),
+            'last_seen_at' => now(),
+            'last_customer_message_at' => now(),
+            'service_window_expires_at' => $serviceWindowExpiresAt,
+        ]);
     }
 
     /**

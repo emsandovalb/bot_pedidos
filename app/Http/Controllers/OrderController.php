@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ManualReview;
 use App\Models\Order;
 use App\Models\OrderStatusHistory;
+use App\Services\OrderNotificationDispatcher;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -14,6 +15,11 @@ use Illuminate\Validation\Rule;
 
 class OrderController extends Controller
 {
+    public function __construct(
+        private readonly OrderNotificationDispatcher $orderNotificationDispatcher,
+    ) {
+    }
+
     private const ORDER_STATUSES = [
         Order::STATUS_PENDING_REVIEW,
         Order::STATUS_CONFIRMED,
@@ -62,6 +68,7 @@ class OrderController extends Controller
                 'orderItems.product',
                 'orderStatusHistories' => fn ($query) => $query->orderBy('created_at'),
                 'orderStatusHistories.changedByUser',
+                'notificationLogs' => fn ($query) => $query->orderByDesc('evaluated_at'),
                 'manualReviews' => fn ($query) => $query->orderByDesc('reviewed_at'),
                 'manualReviews.reviewedByUser',
             ]),
@@ -384,6 +391,22 @@ class OrderController extends Controller
                 ],
                 'created_at' => now(),
             ]);
+
+            $this->orderNotificationDispatcher->dispatch($order, $this->eventFromStatus($toStatus));
         });
+    }
+
+    private function eventFromStatus(string $status): string
+    {
+        return match ($status) {
+            Order::STATUS_PENDING_REVIEW => 'order_created',
+            Order::STATUS_CONFIRMED => 'order_confirmed',
+            Order::STATUS_PREPARING => 'order_preparing',
+            Order::STATUS_READY_FOR_DISPATCH => 'order_ready_for_dispatch',
+            Order::STATUS_DISPATCHED => 'order_dispatched',
+            Order::STATUS_CANCELLED => 'order_cancelled',
+            Order::STATUS_REJECTED => 'order_rejected',
+            default => $status,
+        };
     }
 }

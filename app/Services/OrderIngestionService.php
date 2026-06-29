@@ -19,6 +19,7 @@ class OrderIngestionService
         private readonly OrderParserService $orderParserService,
         private readonly ProductMatchingService $productMatchingService,
         private readonly OrderDuplicateDetectionService $orderDuplicateDetectionService,
+        private readonly OrderNotificationDispatcher $orderNotificationDispatcher,
     ) {
     }
 
@@ -105,6 +106,8 @@ class OrderIngestionService
                     'processed_at' => now(),
                 ])->save();
             }
+
+            $this->orderNotificationDispatcher->dispatch($order, 'order_created');
 
             return $order->load('orderItems.product');
         });
