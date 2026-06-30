@@ -35,8 +35,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
     Route::get('/channels', [ChannelController::class, 'index'])->name('channels.index');
     Route::get('/channels/whatsapp', [ChannelController::class, 'whatsapp'])->name('channels.whatsapp');
+    Route::get('/channels/whatsapp/configuration', [ChannelController::class, 'whatsappConfiguration'])->name('channels.whatsapp.configuration');
+    Route::post('/channels/whatsapp/configuration', [ChannelController::class, 'saveWhatsappConfiguration'])->name('channels.whatsapp.configuration.save');
     Route::post('/channels/whatsapp/onboarding', [ChannelOnboardingController::class, 'update'])->name('channels.whatsapp.onboarding.update');
     Route::get('/channels/whatsapp/status', [ChannelController::class, 'status'])->name('channels.whatsapp.status');
+    Route::post('/channels/{provider}/health-check', [ChannelController::class, 'healthCheck'])->name('channels.health-check');
+    Route::post('/channels/{provider}/connect', [ChannelController::class, 'connect'])->name('channels.connect');
+    Route::post('/channels/{provider}/disconnect', [ChannelController::class, 'disconnect'])->name('channels.disconnect');
+    Route::get('/channels/{provider}', [ChannelController::class, 'show'])->name('channels.show');
     Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
     Route::get('/customers/{customer}', [CustomerController::class, 'show'])->name('customers.show');
     Route::get('/setup-requests', [SetupRequestController::class, 'index'])->name('setup-requests.index');

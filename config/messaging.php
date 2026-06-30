@@ -10,5 +10,6 @@ return [
     'providers' => [
         'telegram',
         'whatsapp',
+        'instagram',
     ],
 ];

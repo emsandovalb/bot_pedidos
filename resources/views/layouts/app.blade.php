@@ -71,18 +71,19 @@
 
                         <div class="px-2 pt-6">
                             <div class="px-2 text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                                Canales
+                                Channels
                             </div>
                             <div class="mt-3 space-y-1">
                                 @foreach ([
-                                    ['label' => 'Hub', 'href' => 'channels.index', 'active' => 'channels.index', 'icon' => 'M4 7h16M4 12h10M4 17h16', 'accent' => 'blue'],
-                                    ['label' => 'WhatsApp', 'href' => 'channels.whatsapp', 'active' => 'channels.whatsapp*', 'icon' => 'M12 2a10 10 0 1 0 5.1 18.6L22 22l-1.4-4.9A10 10 0 0 0 12 2Z', 'accent' => 'green', 'badge' => 'Principal'],
-                                    ['label' => 'Estado', 'href' => 'channels.whatsapp.status', 'active' => 'channels.whatsapp.status', 'icon' => 'M12 6v6l4 2', 'accent' => 'emerald'],
+                                    ['label' => 'WhatsApp', 'href' => 'channels.show', 'params' => ['whatsapp'], 'active' => 'channels.show', 'icon' => 'M12 2a10 10 0 1 0 5.1 18.6L22 22l-1.4-4.9A10 10 0 0 0 12 2Z', 'accent' => 'green', 'badge' => 'Setup'],
+                                    ['label' => 'Telegram', 'href' => 'channels.show', 'params' => ['telegram'], 'active' => 'channels.show', 'icon' => 'M21.8 4.7 3.6 11.4c-1 .4-1 1.8.1 2.1l4.7 1.4 1.8 5.2c.3.9 1.5 1.1 2.1.3l2.8-3.3 4.8 3.5c.8.6 1.9.1 2.1-.9l2.8-13.8c.2-1.1-.9-2-2-1.7Z', 'accent' => 'blue'],
+                                    ['label' => 'Instagram', 'href' => 'channels.show', 'params' => ['instagram'], 'active' => 'channels.show', 'icon' => 'M7.5 3.5h9A4 4 0 0 1 20.5 7.5v9a4 4 0 0 1-4 4h-9a4 4 0 0 1-4-4v-9a4 4 0 0 1 4-4Zm9.5 2.5a1 1 0 1 0 0 2 1 1 0 0 0 0-2ZM12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z', 'accent' => 'rose', 'badge' => 'Soon'],
                                 ] as $item)
                                     @php
-                                        $isChannelActive = request()->routeIs($item['active']);
+                                        $isChannelActive = request()->routeIs($item['active']) && request()->route('provider') === ($item['params'][0] ?? null);
                                         $activeStyles = match ($item['accent']) {
                                             'green' => 'border-emerald-300 bg-emerald-50/80 text-emerald-950 shadow-sm',
+                                            'rose' => 'border-rose-300 bg-rose-50/80 text-rose-950 shadow-sm',
                                             'emerald' => 'border-emerald-300 bg-emerald-50/70 text-emerald-950 shadow-sm',
                                             default => 'border-brand-primary bg-[linear-gradient(90deg,rgba(20,110,219,0.10),rgba(22,163,74,0.08))] text-brand-navy shadow-sm',
                                         };
@@ -90,7 +91,7 @@
                                     @endphp
 
                                     <a
-                                        href="{{ route($item['href']) }}"
+                                        href="{{ isset($item['params']) ? route($item['href'], $item['params']) : route($item['href']) }}"
                                         @class([
                                             'group relative flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-medium transition' => true,
                                             $activeStyles => $isChannelActive,
@@ -101,11 +102,11 @@
                                             <path d="{{ $item['icon'] }}" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
                                         </svg>
                                         <span class="flex-1">{{ $item['label'] }}</span>
-                                        @if (! empty($item['badge']))
-                                            <span class="rounded-full bg-white/80 px-2 py-0.5 text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-emerald-700 ring-1 ring-inset ring-emerald-200">
-                                                {{ $item['badge'] }}
-                                            </span>
-                                        @endif
+                                            @if (! empty($item['badge']))
+                                                <span class="rounded-full bg-white/80 px-2 py-0.5 text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-emerald-700 ring-1 ring-inset ring-emerald-200">
+                                                    {{ $item['badge'] }}
+                                                </span>
+                                            @endif
                                         @if ($isChannelActive)
                                             <span class="absolute inset-y-0 right-0 w-1 rounded-l-full bg-emerald-500"></span>
                                         @endif

@@ -12,6 +12,9 @@ use App\Models\User;
 use App\Services\Messaging\Contracts\MessagingProvider;
 use App\Services\Messaging\DTO\MessagingSendResult;
 use App\Services\Messaging\DTO\OutgoingMessageDTO;
+use App\Services\Messaging\DTO\ProviderCapabilities;
+use App\Services\Messaging\DTO\ProviderHealth;
+use App\Services\Messaging\DTO\ProviderValidationResult;
 use App\Services\Messaging\Manager\MessagingManager;
 use App\Services\OrderIngestionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -177,9 +180,74 @@ class OrderWorkflowTest extends TestCase
         {
             public bool $sendCalled = false;
 
+            public function providerName(): string
+            {
+                return 'telegram';
+            }
+
+            public function connect(): ProviderHealth
+            {
+                return $this->health();
+            }
+
+            public function disconnect(): ProviderHealth
+            {
+                return $this->health();
+            }
+
+            public function health(): ProviderHealth
+            {
+                return new ProviderHealth(
+                    provider: $this->providerName(),
+                    status: 'healthy',
+                    healthy: true,
+                    connected: true,
+                    last_ping: now(),
+                    latency_ms: 1,
+                    version: 'test',
+                    webhook_status: 'verified',
+                    token_status: 'configured',
+                );
+            }
+
+            public function capabilities(): ProviderCapabilities
+            {
+                return new ProviderCapabilities(
+                    provider: $this->providerName(),
+                    receive_messages: true,
+                    send_messages: true,
+                    interactive_buttons: true,
+                );
+            }
+
+            public function validateConfiguration(): ProviderValidationResult
+            {
+                return new ProviderValidationResult(true, [], [], now());
+            }
+
+            public function supports(string $capability): bool
+            {
+                return $this->capabilities()->toArray()[strtolower(trim($capability))] ?? false;
+            }
+
             public function verifyWebhook(Request $request): bool
             {
                 return true;
+            }
+
+            public function receive(Request $request)
+            {
+                return null;
+            }
+
+            public function send(OutgoingMessageDTO $message): MessagingSendResult
+            {
+                return $this->sendMessage($message);
+            }
+
+            public function refreshCredentials(): ProviderValidationResult
+            {
+                return $this->validateConfiguration();
             }
 
             public function receiveWebhook(Request $request)
@@ -201,15 +269,7 @@ class OrderWorkflowTest extends TestCase
 
             public function healthCheck()
             {
-                return [
-                    'provider' => $this->providerName(),
-                    'status' => 'ok',
-                ];
-            }
-
-            public function providerName(): string
-            {
-                return 'telegram';
+                return $this->health()->toArray();
             }
         };
 

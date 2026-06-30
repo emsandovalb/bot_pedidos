@@ -193,6 +193,35 @@ class ChannelControllerTest extends TestCase
             ->assertSeeText('Borrador');
     }
 
+    public function test_health_check_route_refreshes_provider_lifecycle(): void
+    {
+        config()->set('services.telegram.bot_token', 'telegram-test-token');
+
+        $user = $this->createOrganizationUser();
+
+        ChannelConnection::query()->create([
+            'organization_id' => $user->organization_id,
+            'channel' => ChannelConnection::CHANNEL_TELEGRAM,
+            'status' => ChannelConnection::STATUS_CONNECTED,
+            'provider' => 'telegram',
+            'provider_version' => 'v1',
+            'version' => 'v1',
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('channels.health-check', 'telegram'))
+            ->assertRedirect(route('channels.show', 'telegram'));
+
+        $connection = ChannelConnection::query()
+            ->where('organization_id', $user->organization_id)
+            ->where('channel', ChannelConnection::CHANNEL_TELEGRAM)
+            ->firstOrFail();
+
+        $this->assertSame('healthy', $connection->health_status);
+        $this->assertSame('configured', $connection->credentials_status);
+        $this->assertNotNull($connection->last_health_check_at);
+    }
+
     private function createOrganizationUser(): User
     {
         $organization = Organization::query()->create([

@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Services\Messaging\DTO\IncomingMessageDTO;
 use App\Services\Messaging\DTO\OutgoingMessageDTO;
 use App\Services\Messaging\Manager\MessagingManager;
+use App\Services\Messaging\Providers\InstagramProvider;
 use App\Services\Messaging\Providers\TelegramProvider;
 use App\Services\Messaging\Providers\WhatsAppCloudProvider;
 use DateTimeImmutable;
@@ -30,6 +31,16 @@ class MessagingManagerTest extends TestCase
 
         $this->assertInstanceOf(WhatsAppCloudProvider::class, $provider);
         $this->assertSame('whatsapp', $provider->providerName());
+    }
+
+    public function test_instagram_returns_instagram_provider_placeholder(): void
+    {
+        $manager = new MessagingManager();
+
+        $provider = $manager->driver('instagram');
+
+        $this->assertInstanceOf(InstagramProvider::class, $provider);
+        $this->assertSame('instagram', $provider->providerName());
     }
 
     public function test_dtos_instantiate_correctly(): void
