@@ -89,7 +89,7 @@
                             <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Health</div>
                             <div class="mt-1 text-sm font-semibold text-brand-navy">{{ $card['health_label'] }}</div>
                             <div class="mt-1 inline-flex rounded-full px-2 py-0.5 text-[0.7rem] font-semibold uppercase tracking-[0.12em] {{ $badgeBg }}">
-                                {{ $card['webhook_status'] }}
+                                {{ \Illuminate\Support\Str::headline($card['webhook_status']) }}
                             </div>
                         </div>
                     </div>
@@ -114,6 +114,15 @@
                         <div class="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4 sm:col-span-2">
                             <div class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Last health check</div>
                             <div class="mt-1 text-lg font-semibold text-brand-navy">{{ $card['last_health_check_at']?->format('d/m H:i') ?? 'Sin dato' }}</div>
+                        </div>
+                        <div class="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4 sm:col-span-2">
+                            <div class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Last verification</div>
+                            <div class="mt-1 text-lg font-semibold text-brand-navy">
+                                @php
+                                    $lastVerification = $card['last_webhook_verification_at'] ?? null;
+                                @endphp
+                                {{ $lastVerification?->format('d/m H:i') ?? 'Pending' }}
+                            </div>
                         </div>
                     </div>
 
@@ -147,6 +156,14 @@
                                 Reconnect
                             </button>
                         </form>
+                        @if ($card['verify_endpoint_route'] !== null)
+                            <form method="POST" action="{{ $card['verify_endpoint_route'] }}">
+                                @csrf
+                                <button type="submit" class="brand-btn-secondary w-full justify-center border-emerald-200 text-emerald-800 hover:border-emerald-300 hover:text-emerald-900">
+                                    Verify Endpoint
+                                </button>
+                            </form>
+                        @endif
                         <a href="{{ $card['configure_route'] }}" class="brand-btn-secondary justify-center">
                             Configure
                         </a>

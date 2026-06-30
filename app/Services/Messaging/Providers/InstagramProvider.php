@@ -8,6 +8,7 @@ use App\Services\Messaging\DTO\OutgoingMessageDTO;
 use App\Services\Messaging\DTO\ProviderCapabilities;
 use App\Services\Messaging\DTO\ProviderHealth;
 use App\Services\Messaging\DTO\ProviderValidationResult;
+use App\Services\Messaging\DTO\WebhookVerificationResult;
 use Illuminate\Http\Request;
 
 class InstagramProvider implements MessagingProvider
@@ -54,9 +55,15 @@ class InstagramProvider implements MessagingProvider
         return false;
     }
 
-    public function verifyWebhook(Request $request): bool
+    public function verifyWebhook(Request $request): WebhookVerificationResult
     {
-        return false;
+        return new WebhookVerificationResult(
+            success: false,
+            status: 501,
+            challenge: null,
+            provider: $this->providerName(),
+            message: 'Instagram webhook verification is not implemented yet.',
+        );
     }
 
     public function receive(Request $request)
@@ -74,9 +81,15 @@ class InstagramProvider implements MessagingProvider
         return $this->validateConfiguration();
     }
 
-    public function receiveWebhook(Request $request)
+    public function receiveWebhook(Request $request): WebhookVerificationResult
     {
-        return null;
+        return new WebhookVerificationResult(
+            success: false,
+            status: 501,
+            challenge: null,
+            provider: $this->providerName(),
+            message: 'Instagram webhook ingestion is not implemented yet.',
+        );
     }
 
     public function sendMessage(OutgoingMessageDTO $message): MessagingSendResult
@@ -105,7 +118,7 @@ class InstagramProvider implements MessagingProvider
             provider: $this->providerName(),
             status: $status,
             connected: $connected,
-            webhook_status: 'coming_soon',
+            webhook_status: 'failed',
             credentials_status: 'missing',
             last_error: 'Instagram provider is coming soon.',
             latency_ms: null,

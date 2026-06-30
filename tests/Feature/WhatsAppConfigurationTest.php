@@ -148,7 +148,7 @@ class WhatsAppConfigurationTest extends TestCase
         $this->assertSame('ready', $health->status);
         $this->assertTrue($health->healthy);
         $this->assertSame('configured', $health->credentials_status);
-        $this->assertSame('waiting_meta_verification', $health->webhook_status);
+        $this->assertSame('pending', $health->webhook_status);
         $this->assertSame(ChannelConnection::STATUS_READY_FOR_VERIFICATION, $connection->provider_configuration_status);
         $this->assertSame(ChannelConnection::STATUS_READY_FOR_VERIFICATION, $connection->provider_status);
         $this->assertNotNull($connection->provider_last_validation_at);

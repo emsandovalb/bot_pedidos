@@ -8,6 +8,8 @@ use App\Services\Messaging\DTO\OutgoingMessageDTO;
 use App\Services\Messaging\DTO\ProviderCapabilities;
 use App\Services\Messaging\DTO\ProviderHealth;
 use App\Services\Messaging\DTO\ProviderValidationResult;
+use App\Services\Messaging\DTO\WebhookVerificationResult;
+use App\Services\WhatsAppConfigurationService;
 use Illuminate\Http\Request;
 
 class WhatsAppProvider implements MessagingProvider
@@ -72,9 +74,61 @@ class WhatsAppProvider implements MessagingProvider
         return (bool) ($this->capabilities()->toArray()[strtolower(trim($capability))] ?? false);
     }
 
-    public function verifyWebhook(Request $request): bool
+    public function verifyWebhook(Request $request): WebhookVerificationResult
     {
-        return false;
+        $mode = strtolower(trim($this->requestValue($request, 'hub.mode')));
+        $verifyToken = $this->requestValue($request, 'hub.verify_token');
+        $challenge = $this->requestValue($request, 'hub.challenge');
+        $service = app(WhatsAppConfigurationService::class);
+        $connection = $service->resolveWebhookConfiguration($verifyToken);
+
+        if ($mode !== 'subscribe') {
+            return new WebhookVerificationResult(
+                success: false,
+                status: 403,
+                challenge: null,
+                provider: $this->providerName(),
+                message: 'Invalid webhook mode.',
+            );
+        }
+
+        if ($connection === null || ! $service->isReadyForWebhook($connection)) {
+            return new WebhookVerificationResult(
+                success: false,
+                status: 403,
+                challenge: null,
+                provider: $this->providerName(),
+                message: 'Webhook verification failed.',
+            );
+        }
+
+        if (! hash_equals((string) $connection->provider_verify_token, $verifyToken)) {
+            return new WebhookVerificationResult(
+                success: false,
+                status: 403,
+                challenge: null,
+                provider: $this->providerName(),
+                message: 'Webhook verification failed.',
+            );
+        }
+
+        if ($challenge === '') {
+            return new WebhookVerificationResult(
+                success: false,
+                status: 403,
+                challenge: null,
+                provider: $this->providerName(),
+                message: 'Missing webhook challenge.',
+            );
+        }
+
+        return new WebhookVerificationResult(
+            success: true,
+            status: 200,
+            challenge: $challenge,
+            provider: $this->providerName(),
+            message: null,
+        );
     }
 
     public function receive(Request $request)
@@ -92,9 +146,15 @@ class WhatsAppProvider implements MessagingProvider
         return $this->validateConfiguration();
     }
 
-    public function receiveWebhook(Request $request)
+    public function receiveWebhook(Request $request): WebhookVerificationResult
     {
-        return null;
+        return new WebhookVerificationResult(
+            success: false,
+            status: 501,
+            challenge: null,
+            provider: $this->providerName(),
+            message: 'WhatsApp webhook ingestion is not implemented yet.',
+        );
     }
 
     public function sendMessage(OutgoingMessageDTO $message): MessagingSendResult
@@ -123,7 +183,7 @@ class WhatsAppProvider implements MessagingProvider
             provider: $this->providerName(),
             status: $status,
             connected: $connected,
-            webhook_status: 'unconfigured',
+            webhook_status: $connected ? 'pending' : 'failed',
             credentials_status: 'missing',
             last_error: $error ?? 'WhatsApp Cloud is not integrated yet.',
             latency_ms: null,
@@ -137,5 +197,12 @@ class WhatsAppProvider implements MessagingProvider
             token_status: 'missing',
             last_health_check_at: now(),
         );
+    }
+
+    private function requestValue(Request $request, string $key): string
+    {
+        $fallbackKey = str_replace('.', '_', $key);
+
+        return trim((string) $request->query($key, $request->query($fallbackKey, '')));
     }
 }

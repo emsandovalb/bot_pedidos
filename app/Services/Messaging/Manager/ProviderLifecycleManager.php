@@ -3,14 +3,17 @@
 namespace App\Services\Messaging\Manager;
 
 use App\Models\ChannelConnection;
+use App\Models\WebhookEvent;
 use App\Services\Messaging\Contracts\MessagingProvider;
 use App\Services\Messaging\DTO\ProviderCapabilities;
 use App\Services\Messaging\DTO\ProviderHealth;
 use App\Services\Messaging\DTO\ProviderValidationResult;
+use App\Services\Messaging\DTO\WebhookVerificationResult;
 use App\Services\Messaging\Providers\InstagramProvider;
 use App\Services\Messaging\Providers\TelegramProvider;
 use App\Services\Messaging\Providers\WhatsAppCloudProvider;
 use App\Services\WhatsAppConfigurationService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use InvalidArgumentException;
 
@@ -76,6 +79,35 @@ class ProviderLifecycleManager
     {
         return $this->safeProvider($provider)?->capabilities()
             ?? $this->unknownCapabilities($provider);
+    }
+
+    public function verifyWebhook(?string $provider, Request $request): WebhookVerificationResult
+    {
+        $safeProvider = $this->safeProvider($provider);
+
+        if ($safeProvider === null) {
+            return $this->unknownWebhookVerification($provider);
+        }
+
+        $result = $safeProvider->verifyWebhook($request);
+
+        $this->logWebhookEvent($provider, 'verification', 'GET', $request, $result);
+        $this->persistWebhookVerificationState($provider, $request, $result);
+
+        return $result;
+    }
+
+    public function receiveWebhook(?string $provider, Request $request): WebhookVerificationResult
+    {
+        $safeProvider = $this->safeProvider($provider);
+
+        if ($safeProvider === null) {
+            return $this->unknownWebhookReception($provider);
+        }
+
+        $result = $safeProvider->receiveWebhook($request);
+
+        return $result;
     }
 
     /**
@@ -234,9 +266,11 @@ class ProviderLifecycleManager
         $connection = $service->loadConfiguration($organizationId);
         $validation = $service->validateConfiguration($connection);
         $readyForWebhook = $service->isReadyForWebhook($connection);
+        $webhookStatus = $validation->valid
+            ? (in_array($connection->webhook_status, [ChannelConnection::STATUS_VERIFIED, 'verified'], true) ? 'verified' : 'pending')
+            : 'failed';
 
         $healthStatus = $validation->valid ? 'ready' : 'warning';
-        $webhookStatus = $validation->valid ? 'waiting_meta_verification' : 'missing_credentials';
         $credentialsStatus = $validation->valid ? 'configured' : 'missing';
 
         $connection->forceFill([
@@ -269,6 +303,7 @@ class ProviderLifecycleManager
                 'ready_for_webhook' => $readyForWebhook,
                 'validation_warnings' => $validation->warnings,
                 'provider_metadata_json' => $connection->provider_metadata_json ?? [],
+                'webhook_status' => $webhookStatus,
             ],
             healthy: $validation->valid,
             last_ping: now(),
@@ -276,6 +311,99 @@ class ProviderLifecycleManager
             token_status: $validation->valid ? 'configured' : 'missing',
             last_health_check_at: now(),
         );
+    }
+
+    private function persistWebhookVerificationState(?string $provider, Request $request, WebhookVerificationResult $result): void
+    {
+        if ($this->providerName($provider) !== ChannelConnection::CHANNEL_WHATSAPP) {
+            return;
+        }
+
+        $service = $this->whatsappConfigurationService ?? app(WhatsAppConfigurationService::class);
+        $connection = $service->resolveWebhookConfiguration($this->requestValue($request, 'hub.verify_token'));
+
+        if ($connection === null) {
+            return;
+        }
+
+        $connection->forceFill([
+            'webhook_status' => $result->success ? 'verified' : 'failed',
+            'provider_status' => $result->success ? ChannelConnection::STATUS_VERIFIED : ChannelConnection::STATUS_ERROR,
+            'provider_metadata_json' => array_merge($connection->provider_metadata_json ?? [], [
+                'last_webhook_verification_at' => now(),
+                'last_webhook_verification_status' => $result->success ? 'verified' : 'failed',
+            ]),
+            'last_health_check_at' => now(),
+            'health_checked_at' => now(),
+            'last_sync_at' => now(),
+        ]);
+
+        $connection->save();
+    }
+
+    private function logWebhookEvent(?string $provider, string $eventType, string $method, Request $request, WebhookVerificationResult $result): void
+    {
+        $service = $this->whatsappConfigurationService ?? app(WhatsAppConfigurationService::class);
+        $connection = $this->providerName($provider) === ChannelConnection::CHANNEL_WHATSAPP
+            ? $service->resolveWebhookConfiguration((string) $request->query('hub.verify_token', ''))
+            : null;
+
+        WebhookEvent::query()->create([
+            'organization_id' => $connection?->organization_id,
+            'provider' => $this->providerName($provider),
+            'event_type' => $eventType,
+            'method' => $method,
+            'ip' => $request->ip(),
+            'status' => (string) $result->status,
+            'payload_json' => $this->sanitizedWebhookPayload($request, $eventType),
+            'created_at' => now(),
+        ]);
+    }
+
+    private function sanitizedWebhookPayload(Request $request, string $eventType): ?array
+    {
+        if ($eventType !== 'verification') {
+            return null;
+        }
+
+        return [
+            'hub_mode' => $this->requestValue($request, 'hub.mode'),
+            'has_challenge' => filled($this->requestValue($request, 'hub.challenge')),
+            'has_verify_token' => filled($this->requestValue($request, 'hub.verify_token')),
+        ];
+    }
+
+    private function unknownWebhookVerification(?string $provider = null): WebhookVerificationResult
+    {
+        $providerName = $this->providerName($provider);
+
+        return new WebhookVerificationResult(
+            success: false,
+            status: 404,
+            challenge: null,
+            provider: $providerName,
+            message: 'Unsupported messaging provider [' . $providerName . '].',
+        );
+    }
+
+    private function unknownWebhookReception(?string $provider = null): WebhookVerificationResult
+    {
+        $providerName = $this->providerName($provider);
+
+        return new WebhookVerificationResult(
+            success: false,
+            status: 404,
+            challenge: null,
+            provider: $providerName,
+            message: 'Unsupported messaging provider [' . $providerName . '].',
+        );
+    }
+
+    private function requestValue(Request $request, string $key): string
+    {
+        $fallbackKey = str_replace('.', '_', $key);
+
+        return trim((string) $request->query($key, $request->query($fallbackKey, '')));
     }
 
     private function providerName(?string $provider = null): string

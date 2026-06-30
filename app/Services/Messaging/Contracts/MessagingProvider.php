@@ -7,6 +7,7 @@ use App\Services\Messaging\DTO\OutgoingMessageDTO;
 use App\Services\Messaging\DTO\ProviderCapabilities;
 use App\Services\Messaging\DTO\ProviderHealth;
 use App\Services\Messaging\DTO\ProviderValidationResult;
+use App\Services\Messaging\DTO\WebhookVerificationResult;
 use Illuminate\Http\Request;
 
 interface MessagingProvider
@@ -25,7 +26,7 @@ interface MessagingProvider
 
     public function supports(string $capability): bool;
 
-    public function verifyWebhook(Request $request): bool;
+    public function verifyWebhook(Request $request): WebhookVerificationResult;
 
     public function receive(Request $request);
 
@@ -33,7 +34,7 @@ interface MessagingProvider
 
     public function refreshCredentials(): ProviderValidationResult;
 
-    public function receiveWebhook(Request $request);
+    public function receiveWebhook(Request $request): WebhookVerificationResult;
 
     public function sendMessage(OutgoingMessageDTO $message): MessagingSendResult;
 

@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Services\Messaging\DTO\ProviderCapabilities;
 use App\Services\Messaging\DTO\ProviderHealth;
 use App\Services\Messaging\DTO\ProviderValidationResult;
+use App\Services\Messaging\DTO\WebhookVerificationResult;
 use App\Services\Messaging\Manager\ProviderLifecycleManager;
 use App\Services\Messaging\Manager\MessagingManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -76,7 +77,7 @@ class ProviderLifecycleTest extends TestCase
         $this->assertTrue($health->connected);
         $this->assertSame('configured', $health->token_status);
         $this->assertSame('configured', $health->credentials_status);
-        $this->assertSame('verified', $health->webhook_status);
+        $this->assertSame('failed', $health->webhook_status);
         $this->assertNotEmpty($health->capabilities);
         $this->assertSame('telegram-bot-api', $health->metadata['transport'] ?? null);
     }

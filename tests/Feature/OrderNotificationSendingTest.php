@@ -16,6 +16,7 @@ use App\Services\Messaging\DTO\OutgoingMessageDTO;
 use App\Services\Messaging\DTO\ProviderCapabilities;
 use App\Services\Messaging\DTO\ProviderHealth;
 use App\Services\Messaging\DTO\ProviderValidationResult;
+use App\Services\Messaging\DTO\WebhookVerificationResult;
 use App\Services\Messaging\Manager\MessagingManager;
 use App\Services\OrderIngestionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -394,9 +395,14 @@ class OrderNotificationSendingTest extends TestCase
                 return $this->capabilities()->toArray()[strtolower(trim($capability))] ?? false;
             }
 
-            public function verifyWebhook(Request $request): bool
+            public function verifyWebhook(Request $request): WebhookVerificationResult
             {
-                return true;
+                return new WebhookVerificationResult(
+                    success: false,
+                    status: 501,
+                    provider: $this->providerName(),
+                    message: 'Not implemented.',
+                );
             }
 
             public function receive(Request $request)
@@ -414,9 +420,14 @@ class OrderNotificationSendingTest extends TestCase
                 return $this->validateConfiguration();
             }
 
-            public function receiveWebhook(Request $request)
+            public function receiveWebhook(Request $request): WebhookVerificationResult
             {
-                return null;
+                return new WebhookVerificationResult(
+                    success: false,
+                    status: 501,
+                    provider: $this->providerName(),
+                    message: 'Not implemented.',
+                );
             }
 
             public function sendMessage(OutgoingMessageDTO $message): MessagingSendResult

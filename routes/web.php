@@ -7,6 +7,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\ChannelController;
 use App\Http\Controllers\ChannelOnboardingController;
+use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\IncomingMessageController;
 use App\Http\Controllers\IntakeRequestController;
@@ -30,6 +31,9 @@ Route::get('/', function () {
         : redirect()->route('login');
 });
 
+Route::get('/webhooks/{provider}', [WebhookController::class, 'show'])->name('webhooks.show');
+Route::post('/webhooks/{provider}', [WebhookController::class, 'store'])->name('webhooks.store');
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
@@ -37,6 +41,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/channels/whatsapp', [ChannelController::class, 'whatsapp'])->name('channels.whatsapp');
     Route::get('/channels/whatsapp/configuration', [ChannelController::class, 'whatsappConfiguration'])->name('channels.whatsapp.configuration');
     Route::post('/channels/whatsapp/configuration', [ChannelController::class, 'saveWhatsappConfiguration'])->name('channels.whatsapp.configuration.save');
+    Route::post('/channels/whatsapp/verify-endpoint', [ChannelController::class, 'verifyEndpoint'])->name('channels.whatsapp.verify-endpoint');
     Route::post('/channels/whatsapp/onboarding', [ChannelOnboardingController::class, 'update'])->name('channels.whatsapp.onboarding.update');
     Route::get('/channels/whatsapp/status', [ChannelController::class, 'status'])->name('channels.whatsapp.status');
     Route::post('/channels/{provider}/health-check', [ChannelController::class, 'healthCheck'])->name('channels.health-check');

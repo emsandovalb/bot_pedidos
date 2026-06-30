@@ -43,6 +43,29 @@ class WhatsAppConfigurationService
         );
     }
 
+    public function resolveWebhookConfiguration(?string $verifyToken = null): ?ChannelConnection
+    {
+        $query = ChannelConnection::query()
+            ->where('channel', ChannelConnection::CHANNEL_WHATSAPP)
+            ->orderByDesc('updated_at')
+            ->orderByDesc('id');
+
+        if ($verifyToken !== null && $verifyToken !== '') {
+            $query->whereNotNull('provider_verify_token');
+        }
+
+        $connections = $query->get();
+
+        if ($verifyToken === null || $verifyToken === '') {
+            return $connections->first(fn (ChannelConnection $connection): bool => $this->isReadyForWebhook($connection));
+        }
+
+        return $connections->first(function (ChannelConnection $connection) use ($verifyToken): bool {
+            return $this->isReadyForWebhook($connection)
+                && hash_equals((string) $connection->provider_verify_token, $verifyToken);
+        });
+    }
+
     /**
      * @param  array<string, mixed>  $input
      */

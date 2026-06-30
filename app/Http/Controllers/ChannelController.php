@@ -307,6 +307,25 @@ class ChannelController extends Controller
         ]);
     }
 
+    public function verifyEndpoint(Request $request): RedirectResponse
+    {
+        $organizationId = $request->user()?->organization_id;
+
+        abort_if($organizationId === null, 403);
+
+        $validation = $this->whatsAppConfigurationService->validateConfiguration(
+            $this->whatsAppConfigurationService->loadConfiguration($organizationId)
+        );
+
+        $this->providerLifecycleManager->refreshHealth('whatsapp', $organizationId);
+
+        return redirect()
+            ->route('channels.index')
+            ->with('status', $validation->valid
+                ? 'WhatsApp endpoint validated locally.'
+                : 'WhatsApp endpoint validation failed locally.');
+    }
+
     /**
      * @return array<int, array<string, mixed>>
      */
@@ -316,8 +335,13 @@ class ChannelController extends Controller
             ->map(function (string $provider): array {
                 $provider = $this->normalizeProvider($provider);
                 $connection = $this->providerConnection($provider);
-                $health = $this->messagingManager->health($provider);
+                $organizationId = request()->user()?->organization_id;
+                $health = $this->messagingManager->health($provider, $organizationId);
                 $capabilities = $this->messagingManager->capabilities($provider);
+                $lastWebhookVerificationAt = data_get($connection?->provider_metadata_json ?? [], 'last_webhook_verification_at');
+                $lastWebhookVerificationAt = is_string($lastWebhookVerificationAt)
+                    ? \Illuminate\Support\Carbon::parse($lastWebhookVerificationAt)
+                    : ($lastWebhookVerificationAt instanceof \DateTimeInterface ? $lastWebhookVerificationAt : null);
 
                 return [
                     'slug' => $provider,
@@ -335,12 +359,14 @@ class ChannelController extends Controller
                     'webhook_status' => $connection?->webhook_status ?? $health->webhook_status,
                     'credentials_status' => $connection?->credentials_status ?? $health->credentials_status,
                     'last_health_check_at' => $connection?->last_health_check_at ?? $connection?->health_checked_at ?? $health->last_health_check_at,
+                    'last_webhook_verification_at' => $lastWebhookVerificationAt,
                     'last_received_message_at' => $connection?->last_received_message_at ?? $connection?->last_message_received_at,
                     'last_sent_message_at' => $connection?->last_sent_message_at ?? $connection?->last_message_sent_at,
                     'route' => route('channels.show', $provider),
                     'health_check_route' => route('channels.health-check', $provider),
                     'connect_route' => route('channels.connect', $provider),
                     'disconnect_route' => route('channels.disconnect', $provider),
+                    'verify_endpoint_route' => $provider === 'whatsapp' ? route('channels.whatsapp.verify-endpoint') : null,
                     'configure_route' => $provider === 'whatsapp'
                         ? route('channels.whatsapp.configuration')
                         : route('channels.show', [$provider]) . '#connection',
@@ -666,11 +692,7 @@ class ChannelController extends Controller
             ],
             [
                 'title' => 'Webhook Verified',
-                'detail' => $health->webhook_status === 'coming_soon'
-                    ? 'Coming Soon'
-                    : ($provider === 'whatsapp'
-                        ? 'Aun no se verifica ningun webhook de Meta.'
-                        : 'Verificacion soportada por el adaptador actual.'),
+                'detail' => 'Current webhook state: ' . \Illuminate\Support\Str::headline($health->webhook_status),
                 'time' => 'Ahora',
             ],
             [

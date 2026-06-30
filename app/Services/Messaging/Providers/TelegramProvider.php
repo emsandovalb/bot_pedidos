@@ -8,6 +8,7 @@ use App\Services\Messaging\DTO\OutgoingMessageDTO;
 use App\Services\Messaging\DTO\ProviderCapabilities;
 use App\Services\Messaging\DTO\ProviderHealth;
 use App\Services\Messaging\DTO\ProviderValidationResult;
+use App\Services\Messaging\DTO\WebhookVerificationResult;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
@@ -29,7 +30,7 @@ class TelegramProvider implements MessagingProvider
             provider: $this->providerName(),
             status: $connected ? 'connected' : 'warning',
             connected: $connected,
-            webhook_status: $connected ? 'verified' : 'unconfigured',
+            webhook_status: $connected ? 'failed' : 'failed',
             credentials_status: $connected ? 'configured' : 'missing',
             last_error: $validation->errors[0] ?? null,
             latency_ms: $connected ? 35 : null,
@@ -51,7 +52,7 @@ class TelegramProvider implements MessagingProvider
             provider: $this->providerName(),
             status: 'disconnected',
             connected: false,
-            webhook_status: 'unverified',
+            webhook_status: 'failed',
             credentials_status: 'configured',
             last_error: null,
             latency_ms: null,
@@ -76,7 +77,7 @@ class TelegramProvider implements MessagingProvider
             provider: $this->providerName(),
             status: $connected ? 'healthy' : 'warning',
             connected: $connected,
-            webhook_status: $connected ? 'verified' : 'unconfigured',
+            webhook_status: 'failed',
             credentials_status: $connected ? 'configured' : 'missing',
             last_error: $validation->errors[0] ?? null,
             latency_ms: $connected ? 35 : null,
@@ -145,9 +146,15 @@ class TelegramProvider implements MessagingProvider
         return $this->capabilities()->toArray()[strtolower(trim($capability))] ?? false;
     }
 
-    public function verifyWebhook(Request $request): bool
+    public function verifyWebhook(Request $request): WebhookVerificationResult
     {
-        return true;
+        return new WebhookVerificationResult(
+            success: false,
+            status: 501,
+            challenge: null,
+            provider: $this->providerName(),
+            message: 'Telegram webhook verification is not implemented yet.',
+        );
     }
 
     public function receive(Request $request)
@@ -165,10 +172,15 @@ class TelegramProvider implements MessagingProvider
         return $this->validateConfiguration();
     }
 
-    public function receiveWebhook(Request $request)
+    public function receiveWebhook(Request $request): WebhookVerificationResult
     {
-        // TODO: Adapter only. Existing Telegram ingestion stays on the current workflow.
-        return null;
+        return new WebhookVerificationResult(
+            success: false,
+            status: 501,
+            challenge: null,
+            provider: $this->providerName(),
+            message: 'Telegram webhook ingestion is not implemented yet.',
+        );
     }
 
     public function sendMessage(OutgoingMessageDTO $message): MessagingSendResult
