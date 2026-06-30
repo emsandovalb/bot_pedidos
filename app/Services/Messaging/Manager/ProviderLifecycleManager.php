@@ -8,6 +8,7 @@ use App\Services\Messaging\Contracts\MessagingProvider;
 use App\Services\Messaging\DTO\ProviderCapabilities;
 use App\Services\Messaging\DTO\ProviderHealth;
 use App\Services\Messaging\DTO\ProviderValidationResult;
+use App\Services\Messaging\DTO\WebhookReceiveResult;
 use App\Services\Messaging\DTO\WebhookVerificationResult;
 use App\Services\Messaging\Providers\InstagramProvider;
 use App\Services\Messaging\Providers\TelegramProvider;
@@ -97,7 +98,7 @@ class ProviderLifecycleManager
         return $result;
     }
 
-    public function receiveWebhook(?string $provider, Request $request): WebhookVerificationResult
+    public function receiveWebhook(?string $provider, Request $request): WebhookReceiveResult|WebhookVerificationResult
     {
         $safeProvider = $this->safeProvider($provider);
 

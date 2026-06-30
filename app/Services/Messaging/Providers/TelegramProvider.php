@@ -8,6 +8,7 @@ use App\Services\Messaging\DTO\OutgoingMessageDTO;
 use App\Services\Messaging\DTO\ProviderCapabilities;
 use App\Services\Messaging\DTO\ProviderHealth;
 use App\Services\Messaging\DTO\ProviderValidationResult;
+use App\Services\Messaging\DTO\WebhookReceiveResult;
 use App\Services\Messaging\DTO\WebhookVerificationResult;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
@@ -172,7 +173,7 @@ class TelegramProvider implements MessagingProvider
         return $this->validateConfiguration();
     }
 
-    public function receiveWebhook(Request $request): WebhookVerificationResult
+    public function receiveWebhook(Request $request): WebhookReceiveResult|WebhookVerificationResult
     {
         return new WebhookVerificationResult(
             success: false,
