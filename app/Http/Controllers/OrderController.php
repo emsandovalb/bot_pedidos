@@ -101,33 +101,40 @@ class OrderController extends Controller
 
         $validated = $request->validate([
             'notes' => ['nullable', 'string', 'max:5000'],
-            'items' => ['required', 'array'],
+            'items' => ['nullable', 'array'],
             'items.*.quantity' => ['required', 'numeric', 'gt:0'],
             'items.*.unit' => ['nullable', 'string', 'max:255'],
             'items.*.raw_text' => ['nullable', 'string', 'max:5000'],
             'items.*.notes' => ['nullable', 'string', 'max:5000'],
+            'items_json' => ['nullable', 'string'],
         ]);
 
         DB::transaction(function () use ($order, $validated, $beforeSnapshot): void {
+            $notes = array_key_exists('notes', $validated) ? $validated['notes'] : $order->notes;
+
             $order->update([
-                'notes' => $validated['notes'] ?? null,
+                'notes' => $notes,
                 'reviewed_by' => auth()->id(),
                 'reviewed_at' => now(),
             ]);
 
-            foreach ($validated['items'] as $itemId => $itemData) {
-                $item = $order->orderItems->firstWhere('id', (int) $itemId);
+            if (! empty($validated['items_json'])) {
+                $this->syncItemsFromJson($order, $validated['items_json']);
+            } else {
+                foreach ($validated['items'] ?? [] as $itemId => $itemData) {
+                    $item = $order->orderItems->firstWhere('id', (int) $itemId);
 
-                if ($item === null) {
-                    continue;
+                    if ($item === null) {
+                        continue;
+                    }
+
+                    $item->update([
+                        'quantity' => $itemData['quantity'],
+                        'unit' => $itemData['unit'] ?? null,
+                        'raw_text' => $itemData['raw_text'] ?? null,
+                        'notes' => $itemData['notes'] ?? null,
+                    ]);
                 }
-
-                $item->update([
-                    'quantity' => $itemData['quantity'],
-                    'unit' => $itemData['unit'] ?? null,
-                    'raw_text' => $itemData['raw_text'] ?? null,
-                    'notes' => $itemData['notes'] ?? null,
-                ]);
             }
 
             $order->refresh()->load('orderItems');
@@ -356,6 +363,73 @@ class OrderController extends Controller
                 })
                 ->all(),
         ];
+    }
+
+    private function syncItemsFromJson(Order $order, string $itemsJson): void
+    {
+        $decoded = json_decode($itemsJson, true);
+
+        abort_unless(is_array($decoded), 422, 'The order items payload is invalid.');
+
+        $existingItems = $order->orderItems->keyBy(fn ($item) => (string) $item->id);
+        $keptItemIds = [];
+
+        foreach ($decoded as $index => $itemData) {
+            if (! is_array($itemData)) {
+                continue;
+            }
+
+            $itemId = isset($itemData['id']) && $itemData['id'] !== '' ? (string) $itemData['id'] : null;
+            $isDeleted = filter_var($itemData['delete'] ?? false, FILTER_VALIDATE_BOOL);
+
+            if ($itemId !== null && $existingItems->has($itemId)) {
+                $item = $existingItems->get($itemId);
+
+                if ($isDeleted) {
+                    $item?->delete();
+                    continue;
+                }
+
+                $item?->update([
+                    'quantity' => ($itemData['quantity'] ?? '') !== '' ? $itemData['quantity'] : $item->quantity,
+                    'unit' => $itemData['unit'] ?? null,
+                    'raw_text' => $itemData['raw_text'] ?? null,
+                    'notes' => $itemData['notes'] ?? null,
+                    'sort_order' => $index,
+                ]);
+
+                $keptItemIds[] = $itemId;
+
+                continue;
+            }
+
+            if ($isDeleted) {
+                continue;
+            }
+
+            $quantity = $itemData['quantity'] ?? 1;
+            $rawText = trim((string) ($itemData['raw_text'] ?? ''));
+            $unit = trim((string) ($itemData['unit'] ?? ''));
+            $notes = trim((string) ($itemData['notes'] ?? ''));
+
+            if ($rawText === '' && $unit === '' && $notes === '') {
+                continue;
+            }
+
+            $order->orderItems()->create([
+                'quantity' => $quantity,
+                'unit' => $unit !== '' ? $unit : null,
+                'raw_text' => $rawText !== '' ? $rawText : null,
+                'notes' => $notes !== '' ? $notes : null,
+                'sort_order' => $index,
+            ]);
+        }
+
+        $keptItemIds = array_unique($keptItemIds);
+
+        foreach ($existingItems->keys()->diff($keptItemIds) as $itemId) {
+            $existingItems->get($itemId)?->delete();
+        }
     }
 
     /**

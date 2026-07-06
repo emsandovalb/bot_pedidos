@@ -19,7 +19,7 @@
                 </thead>
                 <tbody class="divide-y divide-slate-200 bg-white">
                     @forelse ($messages as $message)
-                        <tr>
+                        <tr id="incoming-message-{{ $message->id }}">
                             <td class="px-4 py-3 text-sm text-slate-600">{{ $message->received_at?->format('Y-m-d H:i') }}</td>
                             <td class="px-4 py-3 text-sm text-slate-600">{{ $message->from_identifier }}</td>
                             <td class="px-4 py-3 text-sm text-slate-600">{{ $message->to_identifier }}</td>

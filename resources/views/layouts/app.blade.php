@@ -44,6 +44,7 @@
                         @foreach ([
                             ['label' => 'Panel', 'href' => 'dashboard', 'active' => 'dashboard', 'icon' => 'M4 11.5 12 5l8 6.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1v-8.5Z'],
                             ['label' => 'Analítica', 'href' => 'analytics.index', 'active' => 'analytics.*', 'icon' => 'M4 19V5M4 19h16M8 16v-4m4 4V8m4 8v-6'],
+                            ['label' => 'Operaciones', 'href' => 'operations.index', 'active' => 'operations.*', 'icon' => 'M3.5 7.5h17M6 4.5h12M6 10.5h12M6 15.5h12M6 20.5h12'],
                             ['label' => 'Pedidos', 'href' => 'orders.index', 'active' => 'orders.*', 'icon' => 'M4 6h16M4 12h16M4 18h10'],
                             ['label' => 'Revisión de pedidos', 'href' => 'order-reviews.index', 'active' => 'order-reviews.*', 'icon' => 'M9 11h6M9 15h6M7 4h7l4 4v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z'],
                             ['label' => 'Clientes', 'href' => 'customers.index', 'active' => 'customers.*', 'icon' => 'M17 21a4 4 0 0 0-8 0M12 14a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm7-2a3 3 0 0 0-3-3m-4-5a3 3 0 0 1 0 6'],
@@ -162,6 +163,32 @@
                                 </a>
                             </div>
                         </div>
+
+                        @if (app()->environment('local') || config('app.debug'))
+                            <div class="px-2 pt-6">
+                                <div class="px-2 text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                                    Developer
+                                </div>
+                                <div class="mt-3 space-y-1">
+                                    <a
+                                        href="{{ route('developer.webhook-simulator') }}"
+                                        @class([
+                                            'group relative flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-medium transition' => true,
+                                            'border-cyan-300 bg-cyan-50/80 text-cyan-950 shadow-sm' => request()->routeIs('developer.webhook-simulator*'),
+                                            'border-transparent text-slate-600 hover:bg-slate-50 hover:text-brand-navy' => ! request()->routeIs('developer.webhook-simulator*'),
+                                        ])
+                                    >
+                                        <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5 shrink-0 transition-colors {{ request()->routeIs('developer.webhook-simulator*') ? 'text-cyan-600' : 'text-slate-400 group-hover:text-cyan-600' }}" aria-hidden="true">
+                                            <path d="M8 7V4m8 3V4M6 11h12M5 20h14a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1Zm3-5h.01M12 15h.01M16 15h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                        <span class="flex-1">Developer Toolkit</span>
+                                        @if (request()->routeIs('developer.webhook-simulator*'))
+                                            <span class="absolute inset-y-0 right-0 w-1 rounded-l-full bg-cyan-500"></span>
+                                        @endif
+                                    </a>
+                                </div>
+                            </div>
+                        @endif
                     </nav>
 
                     <div class="border-t border-slate-200/80 px-4 py-5">
@@ -199,7 +226,7 @@
                                 <div class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 shadow-sm">
                                     {{ now()->format('M d, Y') }}
                                 </div>
-                                <a href="{{ route('orders.index', ['status' => \App\Models\Order::STATUS_PENDING_REVIEW]) }}" class="brand-btn-primary">
+                                <a href="{{ route('operations.index') }}" class="brand-btn-primary">
                                     Pedidos pendientes
                                 </a>
                             </div>

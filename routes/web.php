@@ -14,6 +14,7 @@ use App\Http\Controllers\IntakeRequestController;
 use App\Http\Controllers\NumberBoardController;
 use App\Http\Controllers\NumberLimitController;
 use App\Http\Controllers\NotificationSettingsController;
+use App\Http\Controllers\OperationsController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderReviewController;
 use App\Http\Controllers\SetupRequestController;
@@ -21,6 +22,7 @@ use App\Http\Controllers\ProductImportController;
 use App\Http\Controllers\ProductAliasController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PilotPageController;
+use App\Http\Controllers\Developer\WebhookSimulatorController;
 use App\Http\Controllers\SimulatorController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -65,6 +67,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/closures/{closure}', [BranchDailyClosureController::class, 'show'])->name('closures.show');
     Route::get('/closures/{closure}/export', [BranchDailyClosureController::class, 'export'])->name('closures.export');
     Route::get('/incoming-messages', [IncomingMessageController::class, 'index'])->name('incoming-messages.index');
+    Route::get('/operations', [OperationsController::class, 'index'])->name('operations.index');
+
+    Route::get('/developer/webhook-simulator', [WebhookSimulatorController::class, 'index'])->name('developer.webhook-simulator');
+    Route::post('/developer/webhook-simulator/send', [WebhookSimulatorController::class, 'send'])->name('developer.webhook-simulator.send');
+    Route::post('/developer/webhook-simulator/generate', [WebhookSimulatorController::class, 'generate'])->name('developer.webhook-simulator.generate');
+    Route::post('/developer/webhook-simulator/reset', [WebhookSimulatorController::class, 'reset'])->name('developer.webhook-simulator.reset');
 
     Route::prefix('/settings/notifications')->name('settings.notifications.')->group(function () {
         Route::get('/', [NotificationSettingsController::class, 'index'])->name('index');
