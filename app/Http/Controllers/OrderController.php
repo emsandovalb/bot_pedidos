@@ -6,17 +6,21 @@ use App\Models\ManualReview;
 use App\Models\Order;
 use App\Models\OrderStatusHistory;
 use App\Services\OrderNotificationDispatcher;
+use App\Services\OrderWorkflowActionPresenter;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class OrderController extends Controller
 {
     public function __construct(
         private readonly OrderNotificationDispatcher $orderNotificationDispatcher,
+        private readonly OrderWorkflowActionPresenter $orderWorkflowActionPresenter,
     ) {
     }
 
@@ -159,7 +163,7 @@ class OrderController extends Controller
             ->with('status', 'Order updated successfully.');
     }
 
-    public function confirm(Order $order): RedirectResponse
+    public function confirm(Order $order): RedirectResponse|JsonResponse
     {
         $this->ensureVisible($order);
         $this->assertTransitionAllowed($order, [Order::STATUS_PENDING_REVIEW], 'confirm');
@@ -176,12 +180,10 @@ class OrderController extends Controller
             reason: 'Order confirmed from admin UI.',
         );
 
-        return redirect()
-            ->route('orders.show', $order)
-            ->with('status', 'Order confirmed.');
+        return $this->transitionResponse($order, 'Order confirmed.');
     }
 
-    public function reject(Order $order): RedirectResponse
+    public function reject(Order $order): RedirectResponse|JsonResponse
     {
         $this->ensureVisible($order);
         $this->assertTransitionAllowed($order, [Order::STATUS_PENDING_REVIEW], 'reject');
@@ -198,12 +200,10 @@ class OrderController extends Controller
             reason: 'Order rejected from admin UI.',
         );
 
-        return redirect()
-            ->route('orders.show', $order)
-            ->with('status', 'Order rejected.');
+        return $this->transitionResponse($order, 'Order rejected.');
     }
 
-    public function cancel(Order $order): RedirectResponse
+    public function cancel(Order $order): RedirectResponse|JsonResponse
     {
         $this->ensureVisible($order);
         $this->assertTransitionAllowed(
@@ -231,12 +231,10 @@ class OrderController extends Controller
             reason: 'Order cancelled from admin UI.',
         );
 
-        return redirect()
-            ->route('orders.show', $order)
-            ->with('status', 'Order cancelled.');
+        return $this->transitionResponse($order, 'Order cancelled.');
     }
 
-    public function prepare(Order $order): RedirectResponse
+    public function prepare(Order $order): RedirectResponse|JsonResponse
     {
         $this->ensureVisible($order);
         $this->assertTransitionAllowed($order, [Order::STATUS_CONFIRMED], 'prepare');
@@ -252,12 +250,10 @@ class OrderController extends Controller
             reason: 'Order moved to preparing from admin UI.',
         );
 
-        return redirect()
-            ->route('orders.show', $order)
-            ->with('status', 'Order moved to preparing.');
+        return $this->transitionResponse($order, 'Order moved to preparing.');
     }
 
-    public function readyForDispatch(Order $order): RedirectResponse
+    public function readyForDispatch(Order $order): RedirectResponse|JsonResponse
     {
         $this->ensureVisible($order);
         $this->assertTransitionAllowed($order, [Order::STATUS_PREPARING], 'ready for dispatch');
@@ -272,12 +268,10 @@ class OrderController extends Controller
             reason: 'Order marked ready for dispatch from admin UI.',
         );
 
-        return redirect()
-            ->route('orders.show', $order)
-            ->with('status', 'Order marked ready for dispatch.');
+        return $this->transitionResponse($order, 'Order marked ready for dispatch.');
     }
 
-    public function dispatch(Order $order): RedirectResponse
+    public function dispatch(Order $order): RedirectResponse|JsonResponse
     {
         $this->ensureVisible($order);
         $this->assertTransitionAllowed($order, [Order::STATUS_READY_FOR_DISPATCH], 'dispatch');
@@ -291,9 +285,7 @@ class OrderController extends Controller
             reason: 'Order dispatched from admin UI.',
         );
 
-        return redirect()
-            ->route('orders.show', $order)
-            ->with('status', 'Order marked dispatched.');
+        return $this->transitionResponse($order, 'Order marked dispatched.');
     }
 
     private function scopedQuery(): Builder
@@ -481,6 +473,62 @@ class OrderController extends Controller
             Order::STATUS_CANCELLED => 'order_cancelled',
             Order::STATUS_REJECTED => 'order_rejected',
             default => $status,
+        };
+    }
+
+    private function statusLabel(string $status): string
+    {
+        return match ($status) {
+            Order::STATUS_PENDING_REVIEW => 'Nuevos',
+            Order::STATUS_CONFIRMED => 'Confirmado',
+            Order::STATUS_PREPARING => 'Preparando',
+            Order::STATUS_READY_FOR_DISPATCH => 'Listo',
+            Order::STATUS_DISPATCHED => 'Despachado',
+            Order::STATUS_CANCELLED => 'Cancelado',
+            Order::STATUS_REJECTED => 'Rechazado',
+            default => Str::headline(str_replace('_', ' ', $status)),
+        };
+    }
+
+    private function transitionResponse(Order $order, string $message): RedirectResponse|JsonResponse
+    {
+        if (request()->expectsJson()) {
+            $workflow = $this->orderWorkflowActionPresenter->present($order);
+
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'order' => [
+                    'id' => $order->id,
+                    'status' => $order->status,
+                    'status_label' => $this->statusLabel($order->status),
+                    'status_tone' => $this->statusTone($order->status),
+                    'updated_at' => $order->updated_at?->toIso8601String(),
+                    'allowed_actions' => $workflow['allowed_actions'],
+                    'primary_action' => $workflow['primary_action'],
+                    'secondary_actions' => $workflow['secondary_actions'],
+                    'terminal_message' => $workflow['terminal_message'],
+                ],
+                'next_actions' => $workflow['allowed_actions'],
+            ]);
+        }
+
+        return redirect()
+            ->route('orders.show', $order)
+            ->with('status', $message);
+    }
+
+    private function statusTone(string $status): string
+    {
+        return match ($status) {
+            Order::STATUS_PENDING_REVIEW => 'bg-amber-50 text-amber-800 ring-1 ring-amber-100',
+            Order::STATUS_CONFIRMED => 'bg-blue-50 text-blue-800 ring-1 ring-blue-100',
+            Order::STATUS_PREPARING => 'bg-violet-50 text-violet-800 ring-1 ring-violet-100',
+            Order::STATUS_READY_FOR_DISPATCH => 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100',
+            Order::STATUS_DISPATCHED => 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
+            Order::STATUS_CANCELLED => 'bg-red-50 text-red-800 ring-1 ring-red-100',
+            Order::STATUS_REJECTED => 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
+            default => 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
         };
     }
 }

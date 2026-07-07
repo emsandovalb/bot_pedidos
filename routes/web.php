@@ -68,11 +68,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/closures/{closure}/export', [BranchDailyClosureController::class, 'export'])->name('closures.export');
     Route::get('/incoming-messages', [IncomingMessageController::class, 'index'])->name('incoming-messages.index');
     Route::get('/operations', [OperationsController::class, 'index'])->name('operations.index');
+    Route::get('/operations/feed', [OperationsController::class, 'feed'])->name('operations.feed');
 
     Route::get('/developer/webhook-simulator', [WebhookSimulatorController::class, 'index'])->name('developer.webhook-simulator');
     Route::post('/developer/webhook-simulator/send', [WebhookSimulatorController::class, 'send'])->name('developer.webhook-simulator.send');
     Route::post('/developer/webhook-simulator/generate', [WebhookSimulatorController::class, 'generate'])->name('developer.webhook-simulator.generate');
     Route::post('/developer/webhook-simulator/reset', [WebhookSimulatorController::class, 'reset'])->name('developer.webhook-simulator.reset');
+    Route::post('/developer/toolkit/scenarios/small-hardware-store', [WebhookSimulatorController::class, 'generateSmallHardwareStoreScenario'])->name('developer.toolkit.scenarios.small-hardware-store');
+    Route::post('/developer/toolkit/reset-demo-data', [WebhookSimulatorController::class, 'resetDemoData'])->name('developer.toolkit.reset-demo-data');
 
     Route::prefix('/settings/notifications')->name('settings.notifications.')->group(function () {
         Route::get('/', [NotificationSettingsController::class, 'index'])->name('index');

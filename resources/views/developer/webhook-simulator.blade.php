@@ -53,20 +53,32 @@
                                 @endif
                             </div>
 
-                            <div class="grid gap-3 sm:grid-cols-3 xl:w-[420px]">
-                                <div class="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
-                                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Orders</div>
-                                    <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $result['generated_orders'] ?? $result['processed_count'] ?? 0 }}</div>
-                                </div>
-                                <div class="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
-                                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Customers</div>
-                                    <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $result['generated_customers'] ?? 0 }}</div>
-                                </div>
-                                <div class="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
-                                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Duplicates</div>
-                                    <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $result['duplicate_count'] ?? $result['ignored_count'] ?? 0 }}</div>
-                                </div>
+                        <div class="grid gap-3 sm:grid-cols-2 xl:w-[640px] xl:grid-cols-3">
+                            <div class="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
+                                <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Orders</div>
+                                <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $result['orders_created'] ?? $result['generated_orders'] ?? $result['processed_count'] ?? 0 }}</div>
                             </div>
+                            <div class="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
+                                <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Customers</div>
+                                <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $result['customers_created'] ?? $result['generated_customers'] ?? 0 }}</div>
+                            </div>
+                            <div class="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
+                                <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">WhatsApp</div>
+                                <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $result['whatsapp_orders'] ?? $result['whatsapp_count'] ?? 0 }}</div>
+                            </div>
+                            <div class="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
+                                <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Telegram</div>
+                                <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $result['telegram_orders'] ?? $result['telegram_count'] ?? 0 }}</div>
+                            </div>
+                            <div class="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
+                                <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Duplicates</div>
+                                <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $result['duplicate_orders'] ?? $result['duplicate_count'] ?? $result['ignored_count'] ?? 0 }}</div>
+                            </div>
+                            <div class="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
+                                <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">VIP / recurrent</div>
+                                <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $result['vip_customers'] ?? $result['vip_count'] ?? 0 }}</div>
+                            </div>
+                        </div>
                         </div>
 
                         <div class="mt-4 flex flex-wrap gap-3">
@@ -202,7 +214,7 @@
 
                     <div class="mt-6 grid gap-4 lg:grid-cols-2">
                         @foreach ($scenarios as $key => $scenario)
-                            <form method="POST" action="{{ route('developer.webhook-simulator.generate') }}" class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 shadow-sm">
+                            <form method="POST" action="{{ $key === 'ferreteria_pequena' ? route('developer.toolkit.scenarios.small-hardware-store') : route('developer.webhook-simulator.generate') }}" class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 shadow-sm">
                                 @csrf
                                 <input type="hidden" name="action" value="scenario">
                                 <input type="hidden" name="scenario" value="{{ $key }}">
@@ -213,9 +225,11 @@
                                         <div class="text-lg font-semibold text-brand-navy">{{ $scenario['label'] }}</div>
                                         <div class="mt-1 text-sm text-slate-600">{{ $scenario['estimated_time'] ?? 'Batch friendly' }}</div>
                                     </div>
-                                    <button type="submit" class="rounded-2xl bg-brand-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-700">
-                                        Generate
-                                    </button>
+                                    @if ($key !== 'ferreteria_pequena')
+                                        <button type="submit" class="rounded-2xl bg-brand-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-700">
+                                            Generate
+                                        </button>
+                                    @endif
                                 </div>
 
                                 <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2">
@@ -241,6 +255,21 @@
                                     <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Channels</div>
                                     <div class="mt-1">{{ implode(' / ', array_map(fn ($provider, $count) => ucfirst($provider) . ' ' . $count, array_keys($scenario['provider_mix'] ?? []), array_values($scenario['provider_mix'] ?? []))) }}</div>
                                 </div>
+
+                                @if ($key === 'ferreteria_pequena')
+                                    <p class="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+                                        Este escenario crea datos demo marcados para pruebas y no toca datos reales.
+                                    </p>
+
+                                    <div class="mt-4 flex flex-wrap gap-3">
+                                        <button type="submit" class="rounded-2xl bg-brand-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-700">
+                                            Generar escenario
+                                        </button>
+                                        <button type="submit" formaction="{{ route('developer.toolkit.reset-demo-data') }}" formmethod="POST" class="rounded-2xl border border-amber-300 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-900 transition hover:border-amber-400 hover:bg-amber-100">
+                                            Reiniciar datos demo
+                                        </button>
+                                    </div>
+                                @endif
                             </form>
                         @endforeach
                     </div>

@@ -25,7 +25,7 @@ class OperationsCenterTest extends TestCase
             ->get(route('operations.index'))
             ->assertOk()
             ->assertSeeText('Benditio Operations Center')
-            ->assertSeeText('Smart Inbox');
+            ->assertSeeText('Bandeja inteligente');
     }
 
     public function test_inbox_renders_orders_and_selection_is_preselected_by_query(): void
@@ -37,7 +37,7 @@ class OperationsCenterTest extends TestCase
             ->assertOk()
             ->assertSeeText($selectedOrder->customer->name)
             ->assertSeeText($selectedOrder->raw_message_text)
-            ->assertSeeText('Customer context');
+            ->assertSeeText('Contexto del cliente');
     }
 
     public function test_customer_panel_shows_context_for_selected_order(): void
@@ -47,11 +47,11 @@ class OperationsCenterTest extends TestCase
         $this->actingAs($user)
             ->get(route('operations.index', ['order' => $selectedOrder->id]))
             ->assertOk()
-            ->assertSeeText('Customer context')
-            ->assertSeeText('Total orders')
-            ->assertSeeText('Favorite products')
-            ->assertSeeText('Open notifications')
-            ->assertSeeText('Recent activity');
+            ->assertSeeText('Contexto del cliente')
+            ->assertSeeText('Total de pedidos')
+            ->assertSeeText('Productos favoritos')
+            ->assertSeeText('Notificaciones abiertas')
+            ->assertSeeText('Actividad reciente');
     }
 
     public function test_filters_scope_the_inbox(): void

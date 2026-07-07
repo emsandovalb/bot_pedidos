@@ -11,6 +11,7 @@ use App\Models\Order;
 use App\Models\OrderStatusHistory;
 use App\Models\Organization;
 use App\Services\Messaging\DTO\IncomingMessageDTO;
+use App\Services\Developer\ScenarioGeneratorService;
 use App\Services\Messaging\Manager\ProviderLifecycleManager;
 use App\Services\Messaging\MessagingIngestionService;
 use App\Services\WhatsAppConfigurationService;
@@ -34,6 +35,7 @@ class WebhookSimulatorController extends Controller
         private readonly ProviderLifecycleManager $providerLifecycleManager,
         private readonly WhatsAppConfigurationService $whatsAppConfigurationService,
         private readonly MessagingIngestionService $messagingIngestionService,
+        private readonly ScenarioGeneratorService $scenarioGeneratorService,
     ) {
     }
 
@@ -118,7 +120,9 @@ class WebhookSimulatorController extends Controller
         $formState = $this->defaultFormState($connection, $provider);
 
         $result = match ($validated['action']) {
-            'scenario' => $this->generateScenario($organization, $provider, (string) ($validated['scenario'] ?? 'ferreteria_pequena')),
+            'scenario' => (string) ($validated['scenario'] ?? 'ferreteria_pequena') === 'ferreteria_pequena'
+                ? $this->scenarioGeneratorService->generateSmallHardwareStoreScenario($organization)
+                : $this->generateScenario($organization, $provider, (string) ($validated['scenario'] ?? 'ferreteria_pequena')),
             'quick' => $this->generateQuickOrders($organization, $provider, (int) ($validated['count'] ?? 1)),
             'customers' => $this->generateCustomersOnly($organization, (int) ($validated['customer_count'] ?? 10)),
             'qa' => $this->generateQaCase($organization, $provider, (string) ($validated['qa_case'] ?? 'busy_day')),
@@ -128,6 +132,38 @@ class WebhookSimulatorController extends Controller
             organization: $organization,
             connection: $connection->fresh(),
             formState: $formState,
+            result: $result,
+        );
+    }
+
+    public function generateSmallHardwareStoreScenario(Request $request): View
+    {
+        $this->ensureDeveloperEnvironment();
+
+        $organization = $this->organizationFor($request);
+        $connection = $this->prepareConnection($organization->id);
+        $result = $this->scenarioGeneratorService->generateSmallHardwareStoreScenario($organization);
+
+        return $this->renderToolkitPage(
+            organization: $organization,
+            connection: $connection->fresh(),
+            formState: $this->defaultFormState($connection),
+            result: $result,
+        );
+    }
+
+    public function resetDemoData(Request $request): View
+    {
+        $this->ensureDeveloperEnvironment();
+
+        $organization = $this->organizationFor($request);
+        $connection = $this->prepareConnection($organization->id);
+        $result = $this->scenarioGeneratorService->resetGeneratedDemoData($organization);
+
+        return $this->renderToolkitPage(
+            organization: $organization,
+            connection: $connection->fresh(),
+            formState: $this->defaultFormState($connection),
             result: $result,
         );
     }
@@ -1416,7 +1452,7 @@ class WebhookSimulatorController extends Controller
         return [
             'ferreteria_pequena' => [
                 'slug' => 'ferreteria_pequena',
-                'label' => 'Ferreteria pequena',
+                'label' => 'Ferretería pequeña',
                 'category' => 'ferreteria',
                 'customers' => 15,
                 'orders' => 30,
@@ -1729,7 +1765,7 @@ class WebhookSimulatorController extends Controller
                     },
                 ])
                 ->get()
-                ->filter(static fn (Customer $customer): bool => (int) ($customer->toolkit_orders_count ?? 0) >= 20)
+                ->filter(static fn (Customer $customer): bool => (int) ($customer->toolkit_orders_count ?? 0) >= 3)
                 ->count(),
             'duplicates' => Order::query()
                 ->where('organization_id', $organizationId)
@@ -1759,7 +1795,7 @@ class WebhookSimulatorController extends Controller
                 },
             ])
             ->get()
-            ->filter(static fn (Customer $customer): bool => (int) ($customer->toolkit_orders_count ?? 0) >= 20)
+            ->filter(static fn (Customer $customer): bool => (int) ($customer->toolkit_orders_count ?? 0) >= 3)
             ->count();
     }
 

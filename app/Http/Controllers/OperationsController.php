@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderNotificationLog;
+use App\Services\OrderWorkflowActionPresenter;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -15,6 +17,11 @@ use Illuminate\Support\Str;
 
 class OperationsController extends Controller
 {
+    public function __construct(
+        private readonly OrderWorkflowActionPresenter $orderWorkflowActionPresenter,
+    ) {
+    }
+
     private const STATUS_FILTERS = [
         'all',
         'nuevos',
@@ -37,14 +44,84 @@ class OperationsController extends Controller
 
     public function index(Request $request): View
     {
-        $filters = $request->validate([
-            'search' => ['nullable', 'string', 'max:255'],
-            'status' => ['nullable', 'string', 'max:32'],
-            'channel' => ['nullable', 'string', 'max:32'],
-            'priority' => ['nullable', 'string', 'max:32'],
-            'order' => ['nullable', 'integer'],
-        ]);
+        $payload = $this->buildOperationsPayload($request);
 
+        return view('operations.index', [
+            'orders' => $payload['orders'],
+            'ordersData' => $payload['ordersData'],
+            'feedData' => $payload['feedData'],
+            'filters' => $payload['filters'],
+            'selectedOrderId' => $payload['selectedOrderId'],
+            'selectedOrder' => $payload['selectedOrder'],
+            'statusFilters' => self::STATUS_FILTERS,
+            'channelFilters' => self::CHANNEL_FILTERS,
+            'priorityFilters' => self::PRIORITY_FILTERS,
+        ]);
+    }
+
+    public function feed(Request $request): JsonResponse
+    {
+        return response()->json($this->buildFeedPayload($request));
+    }
+
+    /**
+     * @return array{
+     *     orders: \Illuminate\Contracts\Pagination\LengthAwarePaginator,
+     *     ordersData: array<int, array<string, mixed>>,
+     *     feedData: array<string, mixed>,
+     *     filters: array<string, mixed>,
+     *     selectedOrderId: int,
+     *     selectedOrder: array<string, mixed>|null
+     * }
+     */
+    private function buildOperationsPayload(Request $request): array
+    {
+        $filters = $this->validateFilters($request);
+        $baseQuery = $this->buildInboxQuery($filters);
+
+        $orders = (clone $baseQuery)->paginate(25)->withQueryString();
+        $visibleOrders = $orders->getCollection();
+        $customerContexts = $this->buildCustomerContexts($visibleOrders);
+
+        $ordersData = $visibleOrders
+            ->map(function (Order $order) use ($customerContexts): array {
+                return $this->serializeOrder($order, $customerContexts[(int) $order->customer_id] ?? null);
+            })
+            ->values()
+            ->all();
+
+        $selectedOrderId = $this->resolveSelectedOrderId($request, $ordersData);
+        $selectedOrder = collect($ordersData)->firstWhere('id', $selectedOrderId) ?? ($ordersData[0] ?? null);
+
+        return [
+            'orders' => $orders,
+            'ordersData' => $ordersData,
+            'feedData' => $this->buildFeedPayloadFromQuery($baseQuery, $visibleOrders, $customerContexts),
+            'filters' => $filters,
+            'selectedOrderId' => $selectedOrderId,
+            'selectedOrder' => $selectedOrder,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function buildFeedPayload(Request $request): array
+    {
+        $filters = $this->validateFilters($request);
+        $baseQuery = $this->buildInboxQuery($filters);
+        $orders = (clone $baseQuery)->paginate(25)->withQueryString();
+        $visibleOrders = $orders->getCollection();
+        $customerContexts = $this->buildCustomerContexts($visibleOrders);
+
+        return $this->buildFeedPayloadFromQuery($baseQuery, $visibleOrders, $customerContexts);
+    }
+
+    /**
+     * @param  array<string, mixed>  $filters
+     */
+    private function buildInboxQuery(array $filters): Builder
+    {
         $query = $this->scopedQuery()
             ->with([
                 'branch:id,name',
@@ -66,7 +143,7 @@ class OperationsController extends Controller
             (string) ($filters['priority'] ?? ''),
         );
 
-        $query
+        return $query
             ->orderByRaw(
                 "CASE
                     WHEN status = '" . Order::STATUS_PENDING_REVIEW . "' AND reviewed_at IS NULL THEN 0
@@ -79,30 +156,52 @@ class OperationsController extends Controller
             )
             ->orderByDesc('created_at')
             ->orderByDesc('id');
+    }
 
-        $orders = $query->paginate(25)->withQueryString();
-        $visibleOrders = $orders->getCollection();
-        $customerContexts = $this->buildCustomerContexts($visibleOrders);
+    /**
+     * @param  Collection<int, Order>  $visibleOrders
+     * @param  array<int, array<string, mixed>>  $customerContexts
+     * @return array<string, mixed>
+     */
+    private function buildFeedPayloadFromQuery(Builder $query, Collection $visibleOrders, array $customerContexts): array
+    {
+        $latestOrderId = (int) (clone $query)->max('id');
+        $pendingReviewCount = (clone $query)->where('status', Order::STATUS_PENDING_REVIEW)->count();
+        $confirmedCount = (clone $query)->where('status', Order::STATUS_CONFIRMED)->count();
+        $preparingCount = (clone $query)->where('status', Order::STATUS_PREPARING)->count();
+        $readyForDispatchCount = (clone $query)->where('status', Order::STATUS_READY_FOR_DISPATCH)->count();
+        $dispatchedCount = (clone $query)->where('status', Order::STATUS_DISPATCHED)->count();
 
-        $ordersData = $visibleOrders
-            ->map(function (Order $order) use ($customerContexts): array {
-                return $this->serializeOrder($order, $customerContexts[(int) $order->customer_id] ?? null);
-            })
-            ->values()
-            ->all();
+        return [
+            'latest_order_id' => $latestOrderId,
+            'server_time' => now()->toIso8601String(),
+            'counts' => [
+                'pending_review' => $pendingReviewCount,
+                'confirmed' => $confirmedCount,
+                'preparing' => $preparingCount,
+                'ready_for_dispatch' => $readyForDispatchCount,
+                'dispatched' => $dispatchedCount,
+            ],
+            'inbox' => $visibleOrders
+                ->map(function (Order $order) use ($customerContexts): array {
+                    return $this->serializeInboxOrder($order, $customerContexts[(int) $order->customer_id] ?? null);
+                })
+                ->values()
+                ->all(),
+        ];
+    }
 
-        $selectedOrderId = $this->resolveSelectedOrderId($request, $ordersData);
-        $selectedOrder = collect($ordersData)->firstWhere('id', $selectedOrderId) ?? ($ordersData[0] ?? null);
-
-        return view('operations.index', [
-            'orders' => $orders,
-            'ordersData' => $ordersData,
-            'filters' => $filters,
-            'selectedOrderId' => $selectedOrderId,
-            'selectedOrder' => $selectedOrder,
-            'statusFilters' => self::STATUS_FILTERS,
-            'channelFilters' => self::CHANNEL_FILTERS,
-            'priorityFilters' => self::PRIORITY_FILTERS,
+    /**
+     * @return array<string, mixed>
+     */
+    private function validateFilters(Request $request): array
+    {
+        return $request->validate([
+            'search' => ['nullable', 'string', 'max:255'],
+            'status' => ['nullable', 'string', 'max:32'],
+            'channel' => ['nullable', 'string', 'max:32'],
+            'priority' => ['nullable', 'string', 'max:32'],
+            'order' => ['nullable', 'integer'],
         ]);
     }
 
@@ -464,6 +563,8 @@ class OperationsController extends Controller
      */
     private function serializeOrder(Order $order, ?array $customerContext): array
     {
+        $workflow = $this->orderWorkflowActionPresenter->present($order);
+
         $customerContext ??= [
             'name' => $order->customer?->name ?? 'Sin cliente',
             'phone' => $order->customer?->phone ?? 'Sin telefono',
@@ -506,6 +607,10 @@ class OperationsController extends Controller
             'duplicate' => $order->possible_duplicate_of_order_id !== null,
             'vip' => ($customerContext['segment'] ?? 'Inactive') === 'VIP',
             'parser_confidence' => $order->parser_confidence !== null ? (float) $order->parser_confidence : null,
+            'allowed_actions' => $workflow['allowed_actions'],
+            'primary_action' => $workflow['primary_action'],
+            'secondary_actions' => $workflow['secondary_actions'],
+            'terminal_message' => $workflow['terminal_message'],
             'items' => $order->orderItems
                 ->map(function ($item): array {
                     return [
@@ -520,17 +625,50 @@ class OperationsController extends Controller
                 })
                 ->values()
                 ->all(),
-            'actions' => [
-                'confirm' => route('orders.confirm', $order),
-                'prepare' => route('orders.prepare', $order),
-                'ready' => route('orders.ready-for-dispatch', $order),
-                'dispatch' => route('orders.dispatch', $order),
-                'reject' => route('orders.reject', $order),
-                'cancel' => route('orders.cancel', $order),
-                'update' => route('orders.update', $order),
-                'show' => route('orders.show', $order),
-            ],
+            'update_url' => route('orders.update', $order),
+            'show_url' => route('orders.show', $order),
             'customer_context' => $enrichedCustomerContext,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function serializeInboxOrder(Order $order, ?array $customerContext): array
+    {
+        $customerContext ??= [
+            'segment' => 'Inactive',
+            'name' => $order->customer?->name ?? 'Sin cliente',
+            'phone' => $order->customer?->phone ?? 'Sin telefono',
+            'total_orders' => 0,
+            'favorite_products' => [],
+            'favorite_channel' => ['name' => 'Unknown', 'percentage' => 0.0],
+            'last_order' => null,
+            'open_notifications' => 0,
+            'recent_activity' => [],
+        ];
+
+        return [
+            'id' => $order->id,
+            'status' => $order->status,
+            'status_label' => $this->statusLabel($order->status),
+            'status_tone' => $this->statusTone($order->status),
+            'channel' => $this->channelLabel($order->source_channel),
+            'channel_key' => $order->source_channel,
+            'customer_name' => $order->customer?->name ?? 'Sin cliente',
+            'customer_phone' => $order->customer?->phone ?? 'Sin telefono',
+            'branch_name' => $order->branch?->name ?? 'Sin sucursal',
+            'elapsed_label' => $this->elapsedLabel($order->created_at),
+            'created_at_label' => $order->created_at?->format('d/m/Y H:i') ?? 'Sin fecha',
+            'preview' => Str::limit($order->raw_message_text ?? 'Sin mensaje original', 120),
+            'items_count' => $order->orderItems->count(),
+            'recognized_items_count' => (int) ($order->recognized_order_items_count ?? 0),
+            'unread' => $order->reviewed_at === null,
+            'duplicate' => $order->possible_duplicate_of_order_id !== null,
+            'vip' => ($customerContext['segment'] ?? 'Inactive') === 'VIP',
+            'parser_confidence' => $order->parser_confidence !== null ? (float) $order->parser_confidence : null,
+            'update_url' => route('orders.update', $order),
+            'show_url' => route('orders.show', $order),
         ];
     }
 
