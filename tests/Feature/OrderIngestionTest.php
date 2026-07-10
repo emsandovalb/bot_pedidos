@@ -10,6 +10,7 @@ use App\Models\Organization;
 use App\Models\Product;
 use App\Models\ProductAlias;
 use App\Models\User;
+use App\Services\Fulfillment\FulfillmentPlannerService;
 use App\Services\OrderDuplicateDetectionService;
 use App\Services\OrderIngestionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -201,6 +202,56 @@ class OrderIngestionTest extends TestCase
             'raw_message_text' => '2 bolsas de jardÃ­n',
         ]);
         $this->assertNotNull($order->id);
+    }
+
+    public function test_parsing_failure_does_not_block_order_creation(): void
+    {
+        [$organization, $branch, $customer] = $this->makeOrganizationBranchCustomer();
+
+        $planner = Mockery::mock(FulfillmentPlannerService::class)->makePartial();
+        $planner->shouldReceive('parseIntentFromMessage')
+            ->once()
+            ->andThrow(new RuntimeException('Parser unavailable.'));
+
+        $this->app->instance(FulfillmentPlannerService::class, $planner);
+
+        $order = app(OrderIngestionService::class)->ingest(
+            organization: $organization,
+            branch: $branch,
+            customer: $customer,
+            rawMessageText: 'Ocupo 20 bloques para manana temprano, yo paso por ellos y pago por SINPE',
+        );
+
+        $this->assertNotNull($order->id);
+        $this->assertDatabaseHas('orders', [
+            'id' => $order->id,
+            'raw_message_text' => 'Ocupo 20 bloques para manana temprano, yo paso por ellos y pago por SINPE',
+        ]);
+        $this->assertSame(config('fulfillment.defaults.delivery_method', 'unknown'), $order->fulfillmentPlan->delivery_method);
+    }
+
+    public function test_order_ingestion_enriches_fulfillment_plan(): void
+    {
+        [$organization, $branch, $customer] = $this->makeOrganizationBranchCustomer();
+
+        $order = app(OrderIngestionService::class)->ingest(
+            organization: $organization,
+            branch: $branch,
+            customer: $customer,
+            rawMessageText: 'Ocupo 20 bloques para manana temprano, yo paso por ellos y pago por SINPE',
+        );
+
+        $plan = $order->fresh(['fulfillmentPlan'])?->fulfillmentPlan;
+
+        $this->assertNotNull($plan);
+        $this->assertSame('2026-07-11', $plan->requested_date?->toDateString());
+        $this->assertSame('morning', $plan->requested_time_window);
+        $this->assertSame('pickup', $plan->delivery_method);
+        $this->assertSame('sinpe', $plan->payment_method);
+        $this->assertSame('normal', $plan->priority_level);
+        $this->assertSame(config('fulfillment.priority_scores.normal', 40), $plan->priority_score);
+        $this->assertGreaterThan(0, $plan->planner_confidence);
+        $this->assertArrayHasKey('fulfillment_intent', $plan->metadata_json);
     }
 
     public function test_order_status_history_is_created(): void

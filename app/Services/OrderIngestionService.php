@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderStatusHistory;
 use App\Models\Organization;
+use App\Services\Fulfillment\FulfillmentPlannerService;
 use App\Services\OrderDuplicateDetectionService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -20,6 +21,7 @@ class OrderIngestionService
         private readonly ProductMatchingService $productMatchingService,
         private readonly OrderDuplicateDetectionService $orderDuplicateDetectionService,
         private readonly OrderNotificationDispatcher $orderNotificationDispatcher,
+        private readonly FulfillmentPlannerService $fulfillmentPlannerService,
     ) {
     }
 
@@ -113,6 +115,15 @@ class OrderIngestionService
         });
 
         try {
+            $this->fulfillmentPlannerService->parseIntentFromMessage($order, $rawMessageText);
+        } catch (\Throwable $exception) {
+            Log::warning('Fulfillment intent enrichment failed.', [
+                'order_id' => $order->id,
+                'exception' => $exception->getMessage(),
+            ]);
+        }
+
+        try {
             $duplicateResult = $this->orderDuplicateDetectionService->detect($order);
             $duplicateUpdates = [
                 'duplicate_checked_at' => now(),
@@ -133,6 +144,6 @@ class OrderIngestionService
             ]);
         }
 
-        return $order->fresh(['customer', 'incomingMessage', 'orderItems.product', 'possibleDuplicateOf']);
+        return $order->fresh(['customer', 'incomingMessage', 'orderItems.product', 'possibleDuplicateOf', 'fulfillmentPlan']);
     }
 }
