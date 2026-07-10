@@ -23,6 +23,7 @@
             ordersBaseUrl: @js(url('/orders')),
             pollIntervalMs: @js(config('operations.live_queue_poll_interval_ms', 8000)),
             orderDetails: @js($selectedOrderDetails),
+            agendaData: @js($agendaData ?? ['sections' => [], 'metrics' => []]),
             filters: @js($filters),
         })"
         x-init="init()"
@@ -135,161 +136,323 @@
                 </div>
             </div>
         </section>
+        <section class="space-y-6">
+            <div class="rounded-[30px] border border-slate-200/80 bg-white/90 p-6 shadow-[0_18px_50px_-34px_rgba(15,23,42,0.35)]">
+                <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                    <div>
+                        <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Agenda</div>
+                        <h2 class="mt-2 text-2xl font-semibold text-brand-navy">Production schedule</h2>
+                        <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+                            Fulfillment-first view. Critical work stays on top, today and tomorrow are time grouped, and completed orders remain visible for quick verification.
+                        </p>
+                    </div>
 
-        <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <template x-for="summary in boardTotals" :key="summary.key">
-                <div class="rounded-[24px] border px-4 py-4 shadow-sm" :class="summary.tone">
-                    <div class="flex items-center justify-between gap-3">
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" @click="setView('agenda')" class="brand-btn-primary" :class="activeView === 'agenda' ? '' : 'opacity-70'">Agenda</button>
+                        <button type="button" @click="setView('kanban')" class="brand-btn-secondary" :class="activeView === 'kanban' ? 'border-brand-primary text-brand-primary' : ''">Kanban</button>
+                    </div>
+                </div>
+
+                <div class="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
+                    <template x-for="metric in [
+                        { key: 'orders_today', label: 'Orders Today', tone: 'border-blue-200 bg-blue-50/70 text-blue-800' },
+                        { key: 'deliveries', label: 'Deliveries', tone: 'border-emerald-200 bg-emerald-50/70 text-emerald-800' },
+                        { key: 'pickups', label: 'Pickups', tone: 'border-slate-200 bg-slate-50 text-slate-700' },
+                        { key: 'urgent', label: 'Urgent', tone: 'border-orange-200 bg-orange-50/70 text-orange-800' },
+                        { key: 'completed', label: 'Completed', tone: 'border-violet-200 bg-violet-50/70 text-violet-800' },
+                        { key: 'average_sla_remaining', label: 'Average SLA Remaining', tone: 'border-amber-200 bg-amber-50/70 text-amber-800' },
+                    ]" :key="metric.key">
+                        <div class="rounded-[22px] border px-4 py-4 shadow-sm" :class="metric.tone">
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500" x-text="metric.label"></div>
+                            <div class="mt-2 text-2xl font-semibold text-brand-navy" x-text="metric.key === 'average_sla_remaining' ? (agendaMetrics[metric.key] === null ? '—' : agendaMetrics[metric.key] + ' min') : agendaMetrics[metric.key]"></div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <div class="rounded-[30px] border border-slate-200/80 bg-white/90 p-5 shadow-[0_18px_50px_-34px_rgba(15,23,42,0.35)]">
+                <div class="grid gap-3 lg:grid-cols-[minmax(0,1.25fr)_repeat(3,minmax(0,auto))]">
+                    <label class="block">
+                        <span class="sr-only">Busqueda de cliente</span>
+                        <input
+                            type="search"
+                            x-model="filters.customer"
+                            @input.debounce.200ms="applyFilter('customer', $event.target.value)"
+                            placeholder="Buscar cliente"
+                            class="brand-input w-full rounded-2xl px-4 py-3 text-sm"
+                        >
+                    </label>
+
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" @click="setFilter('time', 'today')" class="brand-btn-secondary" :class="filters.time === 'today' ? 'border-brand-primary text-brand-primary' : ''">Today</button>
+                        <button type="button" @click="setFilter('time', 'tomorrow')" class="brand-btn-secondary" :class="filters.time === 'tomorrow' ? 'border-brand-primary text-brand-primary' : ''">Tomorrow</button>
+                        <button type="button" @click="setFilter('time', 'no_commitment')" class="brand-btn-secondary" :class="filters.time === 'no_commitment' ? 'border-brand-primary text-brand-primary' : ''">No Commitment</button>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" @click="setFilter('delivery', 'pickup')" class="brand-btn-secondary" :class="filters.delivery === 'pickup' ? 'border-brand-primary text-brand-primary' : ''">Pickup</button>
+                        <button type="button" @click="setFilter('delivery', 'delivery')" class="brand-btn-secondary" :class="filters.delivery === 'delivery' ? 'border-brand-primary text-brand-primary' : ''">Delivery</button>
+                        <button type="button" @click="setFilter('delivery', 'express')" class="brand-btn-secondary" :class="filters.delivery === 'express' ? 'border-brand-primary text-brand-primary' : ''">Express</button>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2 lg:justify-end">
+                        <button type="button" @click="setFilter('payment', 'sinpe')" class="brand-btn-secondary" :class="filters.payment === 'sinpe' ? 'border-brand-primary text-brand-primary' : ''">SINPE</button>
+                        <button type="button" @click="setFilter('payment', 'cash')" class="brand-btn-secondary" :class="filters.payment === 'cash' ? 'border-brand-primary text-brand-primary' : ''">Cash</button>
+                        <button type="button" @click="toggleFilter('vip')" class="brand-btn-secondary" :class="filters.vip ? 'border-emerald-300 bg-emerald-50 text-emerald-800' : ''">VIP</button>
+                        <button type="button" @click="toggleFilter('urgent')" class="brand-btn-secondary" :class="filters.urgent ? 'border-orange-300 bg-orange-50 text-orange-800' : ''">Urgent</button>
+                        <button type="button" @click="toggleFilter('duplicates')" class="brand-btn-secondary" :class="filters.duplicates ? 'border-amber-300 bg-amber-50 text-amber-800' : ''">Duplicates</button>
+                        <button type="button" @click="clearFilters()" class="brand-btn-secondary">Clear</button>
+                    </div>
+                </div>
+            </div>
+
+            <template x-for="section in agendaSections" :key="section.key">
+                <section class="rounded-[30px] border bg-white/90 p-5 shadow-[0_18px_50px_-34px_rgba(15,23,42,0.35)]" :class="section.tone">
+                    <div class="flex items-start justify-between gap-3">
                         <div>
-                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500" x-text="summary.label"></div>
-                            <div class="mt-1 text-2xl font-semibold text-brand-navy" x-text="summary.count"></div>
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500" x-text="section.label"></div>
+                            <div class="mt-1 text-sm text-slate-500" x-text="section.emptyMessage"></div>
                         </div>
-                        <div class="rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-slate-500 ring-1 ring-inset ring-slate-200">
-                            Promedio: <span x-text="summary.average_wait_label"></span>
-                        </div>
+                        <div class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-500 ring-1 ring-inset ring-slate-200" x-text="section.groups.reduce((total, group) => total + group.cards.length, 0) + ' orders'"></div>
                     </div>
-                </div>
-            </template>
-        </section>
 
-        <section class="md:hidden space-y-3">
-            <template x-for="order in visibleOrders" :key="order.id">
-                <div x-data="operationsCard(order)">
-                    <button
-                        type="button"
-                        @click="$dispatch('operations-select-order', { orderId: order.id, order })"
-                        class="block w-full rounded-[24px] border border-slate-200/80 bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-                        :class="[
-                            activeId === order.id ? 'border-brand-primary ring-2 ring-blue-100' : '',
-                            flashOrderIds.includes(order.id) ? 'border-emerald-200 bg-emerald-50/80' : '',
-                            cardAccentClass(order),
-                        ]"
-                    >
-                        <div class="flex items-start justify-between gap-3">
-                            <div class="min-w-0">
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <div class="text-sm font-semibold text-brand-navy" x-text="order.customer_name"></div>
-                                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold" :class="badgeForChannel(order).tone">
-                                        <span x-text="badgeForChannel(order).glyph"></span>
-                                    </span>
-                                </div>
-                                <div class="mt-1 text-xs text-slate-500" x-text="order.preview"></div>
-                            </div>
-                            <div class="text-right text-xs text-slate-500">
-                                <div x-text="order.elapsed_label"></div>
-                                <div class="mt-1 inline-flex items-center rounded-full px-2.5 py-1 font-semibold" :class="order.channel_key === 'telegram' ? 'bg-sky-50 text-sky-800 ring-1 ring-sky-100' : 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100'" x-text="order.channel"></div>
-                            </div>
-                        </div>
-
-                        <div class="mt-3 flex flex-wrap items-center gap-2">
-                            <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold" :class="order.status_tone" x-text="order.status_label"></span>
-                            <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200" x-text="order.items_count + ' articulo(s)'"></span>
-                            <span class="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-slate-500 ring-1 ring-slate-200" x-text="'#' + order.id"></span>
-                        </div>
-                    </button>
-                </div>
-            </template>
-
-            <template x-if="visibleOrders.length === 0">
-                <div class="rounded-[24px] border border-dashed border-slate-300 bg-white px-6 py-14 text-center shadow-sm">
-                    <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-blue-50 text-3xl text-brand-primary">
-                        <svg viewBox="0 0 24 24" fill="none" class="h-8 w-8" aria-hidden="true">
-                            <path d="M4 7.5h16v11H4v-11Zm0 0 8 6 8-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                    </div>
-                    <h2 class="mt-5 text-lg font-semibold text-brand-navy">No hay pedidos visibles</h2>
-                    <p class="mt-2 text-sm leading-6 text-slate-600">Ajusta los filtros para volver a ver la cola activa.</p>
-                </div>
-            </template>
-        </section>
-
-        <section class="hidden md:block">
-            <div class="overflow-x-auto rounded-[30px] border border-slate-200/80 bg-white/90 shadow-[0_18px_50px_-34px_rgba(15,23,42,0.35)]">
-                <div class="grid gap-4 p-4 md:grid-cols-2 xl:grid-cols-4 min-w-[760px] lg:min-w-[1120px]">
-                    <template x-for="column in boardColumns" :key="column.key">
-                        <div x-data="operationsColumn(column)" class="min-w-0">
-                            <div class="flex h-full flex-col rounded-[26px] border border-slate-200/80 bg-slate-50/80">
-                                <div class="flex items-start justify-between gap-3 border-b border-slate-200/70 px-4 py-4" :class="column.tone">
-                                    <div>
-                                        <div class="flex items-center gap-2">
-                                            <span class="inline-flex h-2.5 w-2.5 rounded-full" :class="column.dot"></span>
-                                            <h2 class="text-sm font-semibold uppercase tracking-[0.18em] text-slate-600" x-text="column.label"></h2>
-                                        </div>
-                                        <div class="mt-1 text-xl font-semibold text-brand-navy">
-                                            <span x-text="column.count"></span>
-                                            <span class="text-sm font-medium text-slate-500">pedidos</span>
-                                        </div>
-                                    </div>
-                                    <div class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-500 ring-1 ring-inset ring-slate-200">
-                                        Promedio: <span x-text="column.average_wait_label"></span>
-                                    </div>
+                    <div class="mt-4 space-y-4">
+                        <template x-for="group in section.groups" :key="section.key + '-' + group.label">
+                            <div class="rounded-[24px] border border-slate-200/80 bg-white p-4">
+                                <div class="flex items-center justify-between gap-3">
+                                    <div class="text-sm font-semibold text-brand-navy" x-text="group.label"></div>
+                                    <div class="text-xs text-slate-500" x-text="group.cards.length + ' pedidos'"></div>
                                 </div>
 
-                                <div class="flex-1 space-y-3 p-4">
-                                    <template x-for="order in column.orders" :key="order.id">
+                                <div class="mt-4 space-y-3">
+                                    <template x-for="order in group.cards" :key="order.id">
                                         <div x-data="operationsCard(order)">
                                             <button
                                                 type="button"
                                                 @click="$dispatch('operations-select-order', { orderId: order.id, order })"
-                                                class="block w-full rounded-[22px] border border-slate-200/80 bg-white p-4 text-left shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                                                class="block w-full rounded-[22px] border border-slate-200/80 bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
                                                 :class="[
                                                     activeId === order.id ? 'border-brand-primary ring-2 ring-blue-100' : '',
                                                     flashOrderIds.includes(order.id) ? 'border-emerald-200 bg-emerald-50/80' : '',
-                                                    cardAccentClass(order),
+                                                    agendaCardAccentClass(order),
                                                 ]"
                                             >
                                                 <div class="flex items-start justify-between gap-3">
                                                     <div class="min-w-0 flex-1">
                                                         <div class="flex flex-wrap items-center gap-2">
                                                             <div class="text-sm font-semibold text-brand-navy" x-text="order.customer_name"></div>
-                                                            <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold" :class="badgeForChannel(order).tone">
-                                                                <span x-text="badgeForChannel(order).glyph"></span>
+                                                            <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold" :class="order.channel_key === 'telegram' ? 'bg-sky-50 text-sky-800 ring-1 ring-sky-100' : 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100'">
+                                                                <span x-text="agendaChannelGlyph(order)"></span>
                                                             </span>
                                                             <template x-if="order.vip">
                                                                 <span class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-800 ring-1 ring-emerald-100">VIP</span>
                                                             </template>
                                                             <template x-if="order.duplicate">
-                                                                <span class="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800 ring-1 ring-amber-100">Duplicado</span>
+                                                                <span class="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800 ring-1 ring-amber-100">Duplicated</span>
                                                             </template>
                                                         </div>
 
-                                                        <div class="mt-1 text-xs leading-5 text-slate-500" x-text="order.preview"></div>
+                                                        <div class="mt-1 text-xs leading-5 text-slate-500" x-text="agendaCustomerSummary(order)"></div>
                                                     </div>
 
                                                     <div class="text-right text-xs text-slate-500">
-                                                        <div class="font-semibold text-slate-700" x-text="order.elapsed_label"></div>
+                                                        <div class="font-semibold text-slate-700" x-text="order.commitment_time ? order.commitment_time.slice(0, 5) : 'Sin hora'"></div>
                                                         <div class="mt-1 text-[11px]" x-text="'#' + order.id"></div>
                                                     </div>
                                                 </div>
 
-                                                <div class="mt-3 flex flex-wrap items-center gap-2">
-                                                    <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold" :class="order.status_tone" x-text="order.status_label"></span>
-                                                    <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200" x-text="order.items_count + ' articulo(s)'"></span>
-                                                    <span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold" :class="badgeForPriority(order).tone" x-text="badgeForPriority(order).label"></span>
-                                                    <span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold" :class="badgeForConfidence(order).tone" x-text="'Parser ' + badgeForConfidence(order).label"></span>
+                                                <div class="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+                                                    <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold" :class="order.workflow_status_tone" x-text="order.workflow_status_label"></span>
+                                                    <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold" :class="agendaPriorityTone(order)" x-text="agendaPriorityLabel(order)"></span>
+                                                    <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold" :class="agendaRiskTone(order)" x-text="agendaRiskLabel(order)"></span>
+                                                    <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200" x-text="agendaDeliveryLabel(order)"></span>
+                                                    <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200" x-text="agendaPaymentLabel(order)"></span>
+                                                    <span class="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-slate-500 ring-1 ring-slate-200" x-text="order.parser_confidence !== null ? 'Parser ' + Number(order.parser_confidence).toFixed(2) : 'Parser n/a'"></span>
+                                                </div>
+
+                                                <div class="mt-3 flex flex-wrap gap-2">
+                                                    <template x-for="label in agendaSmartLabels(order)" :key="label">
+                                                        <span class="inline-flex items-center rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-600 ring-1 ring-slate-200" x-text="label"></span>
+                                                    </template>
                                                 </div>
                                             </button>
                                         </div>
                                     </template>
 
-                                    <template x-if="column.orders.length === 0">
-                                        <div class="flex min-h-[180px] flex-col items-center justify-center rounded-[22px] border border-dashed border-slate-300 bg-white px-6 py-10 text-center">
-                                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 text-slate-400 ring-1 ring-slate-200">
+                                    <template x-if="group.cards.length === 0">
+                                        <div class="rounded-[22px] border border-dashed border-slate-300 bg-white px-6 py-10 text-center">
+                                            <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 text-slate-400 ring-1 ring-slate-200">
                                                 <svg viewBox="0 0 24 24" fill="none" class="h-6 w-6" aria-hidden="true">
                                                     <path d="M4 7.5h16v11H4v-11Zm0 0 8 6 8-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
                                                 </svg>
                                             </div>
-                                            <h3 class="mt-4 text-sm font-semibold text-brand-navy" x-text="$root.columnEmptyLabel(column.key)"></h3>
-                                            <p class="mt-1 text-xs leading-5 text-slate-500">The column stays quiet until the next production wave arrives.</p>
+                                            <div class="mt-3 text-sm font-semibold text-brand-navy" x-text="section.emptyMessage"></div>
                                         </div>
                                     </template>
                                 </div>
                             </div>
-                        </div>
-                    </template>
-                </div>
-            </div>
+                        </template>
+                    </div>
+                </section>
+            </template>
         </section>
+
+        <div x-show="activeView === 'kanban'" x-cloak>
+            <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <template x-for="summary in boardTotals" :key="summary.key">
+                    <div class="rounded-[24px] border px-4 py-4 shadow-sm" :class="summary.tone">
+                        <div class="flex items-center justify-between gap-3">
+                            <div>
+                                <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500" x-text="summary.label"></div>
+                                <div class="mt-1 text-2xl font-semibold text-brand-navy" x-text="summary.count"></div>
+                            </div>
+                            <div class="rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-slate-500 ring-1 ring-inset ring-slate-200">
+                                Promedio: <span x-text="summary.average_wait_label"></span>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </section>
+
+            <section class="md:hidden space-y-3">
+                <template x-for="order in visibleOrders" :key="order.id">
+                    <div x-data="operationsCard(order)">
+                        <button
+                            type="button"
+                            @click="$dispatch('operations-select-order', { orderId: order.id, order })"
+                            class="block w-full rounded-[24px] border border-slate-200/80 bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                            :class="[
+                                activeId === order.id ? 'border-brand-primary ring-2 ring-blue-100' : '',
+                                flashOrderIds.includes(order.id) ? 'border-emerald-200 bg-emerald-50/80' : '',
+                                cardAccentClass(order),
+                            ]"
+                        >
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="min-w-0">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <div class="text-sm font-semibold text-brand-navy" x-text="order.customer_name"></div>
+                                        <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold" :class="badgeForChannel(order).tone">
+                                            <span x-text="badgeForChannel(order).glyph"></span>
+                                        </span>
+                                    </div>
+                                    <div class="mt-1 text-xs text-slate-500" x-text="order.preview"></div>
+                                </div>
+                                <div class="text-right text-xs text-slate-500">
+                                    <div x-text="order.elapsed_label"></div>
+                                    <div class="mt-1 inline-flex items-center rounded-full px-2.5 py-1 font-semibold" :class="order.channel_key === 'telegram' ? 'bg-sky-50 text-sky-800 ring-1 ring-sky-100' : 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100'" x-text="order.channel"></div>
+                                </div>
+                            </div>
+
+                            <div class="mt-3 flex flex-wrap items-center gap-2">
+                                <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold" :class="order.status_tone" x-text="order.status_label"></span>
+                                <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200" x-text="order.items_count + ' articulo(s)'"></span>
+                                <span class="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-slate-500 ring-1 ring-slate-200" x-text="'#' + order.id"></span>
+                            </div>
+                        </button>
+                    </div>
+                </template>
+
+                <template x-if="visibleOrders.length === 0">
+                    <div class="rounded-[24px] border border-dashed border-slate-300 bg-white px-6 py-14 text-center shadow-sm">
+                        <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-blue-50 text-3xl text-brand-primary">
+                            <svg viewBox="0 0 24 24" fill="none" class="h-8 w-8" aria-hidden="true">
+                                <path d="M4 7.5h16v11H4v-11Zm0 0 8 6 8-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                        <h2 class="mt-5 text-lg font-semibold text-brand-navy">No hay pedidos visibles</h2>
+                        <p class="mt-2 text-sm leading-6 text-slate-600">Ajusta los filtros para volver a ver la cola activa.</p>
+                    </div>
+                </template>
+            </section>
+
+            <section class="hidden md:block">
+                <div class="overflow-x-auto rounded-[30px] border border-slate-200/80 bg-white/90 shadow-[0_18px_50px_-34px_rgba(15,23,42,0.35)]">
+                    <div class="grid gap-4 p-4 md:grid-cols-2 xl:grid-cols-4 min-w-[760px] lg:min-w-[1120px]">
+                        <template x-for="column in boardColumns" :key="column.key">
+                            <div x-data="operationsColumn(column)" class="min-w-0">
+                                <div class="flex h-full flex-col rounded-[26px] border border-slate-200/80 bg-slate-50/80">
+                                    <div class="flex items-start justify-between gap-3 border-b border-slate-200/70 px-4 py-4" :class="column.tone">
+                                        <div>
+                                            <div class="flex items-center gap-2">
+                                                <span class="inline-flex h-2.5 w-2.5 rounded-full" :class="column.dot"></span>
+                                                <h2 class="text-sm font-semibold uppercase tracking-[0.18em] text-slate-600" x-text="column.label"></h2>
+                                            </div>
+                                            <div class="mt-1 text-xl font-semibold text-brand-navy">
+                                                <span x-text="column.count"></span>
+                                                <span class="text-sm font-medium text-slate-500">pedidos</span>
+                                            </div>
+                                        </div>
+                                        <div class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-500 ring-1 ring-inset ring-slate-200">
+                                            Promedio: <span x-text="column.average_wait_label"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex-1 space-y-3 p-4">
+                                        <template x-for="order in column.orders" :key="order.id">
+                                            <div x-data="operationsCard(order)">
+                                                <button
+                                                    type="button"
+                                                    @click="$dispatch('operations-select-order', { orderId: order.id, order })"
+                                                    class="block w-full rounded-[22px] border border-slate-200/80 bg-white p-4 text-left shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                                                    :class="[
+                                                        activeId === order.id ? 'border-brand-primary ring-2 ring-blue-100' : '',
+                                                        flashOrderIds.includes(order.id) ? 'border-emerald-200 bg-emerald-50/80' : '',
+                                                        cardAccentClass(order),
+                                                    ]"
+                                                >
+                                                    <div class="flex items-start justify-between gap-3">
+                                                        <div class="min-w-0 flex-1">
+                                                            <div class="flex flex-wrap items-center gap-2">
+                                                                <div class="text-sm font-semibold text-brand-navy" x-text="order.customer_name"></div>
+                                                                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold" :class="badgeForChannel(order).tone">
+                                                                    <span x-text="badgeForChannel(order).glyph"></span>
+                                                                </span>
+                                                                <template x-if="order.vip">
+                                                                    <span class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-800 ring-1 ring-emerald-100">VIP</span>
+                                                                </template>
+                                                                <template x-if="order.duplicate">
+                                                                    <span class="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800 ring-1 ring-amber-100">Duplicado</span>
+                                                                </template>
+                                                            </div>
+
+                                                            <div class="mt-1 text-xs leading-5 text-slate-500" x-text="order.preview"></div>
+                                                        </div>
+
+                                                        <div class="text-right text-xs text-slate-500">
+                                                            <div class="font-semibold text-slate-700" x-text="order.elapsed_label"></div>
+                                                            <div class="mt-1 text-[11px]" x-text="'#' + order.id"></div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="mt-3 flex flex-wrap items-center gap-2">
+                                                        <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold" :class="order.status_tone" x-text="order.status_label"></span>
+                                                        <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200" x-text="order.items_count + ' articulo(s)'"></span>
+                                                        <span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold" :class="badgeForPriority(order).tone" x-text="badgeForPriority(order).label"></span>
+                                                        <span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold" :class="badgeForConfidence(order).tone" x-text="'Parser ' + badgeForConfidence(order).label"></span>
+                                                    </div>
+                                                </button>
+                                            </div>
+                                        </template>
+
+                                        <template x-if="column.orders.length === 0">
+                                            <div class="flex min-h-[180px] flex-col items-center justify-center rounded-[22px] border border-dashed border-slate-300 bg-white px-6 py-10 text-center">
+                                                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 text-slate-400 ring-1 ring-slate-200">
+                                                    <svg viewBox="0 0 24 24" fill="none" class="h-6 w-6" aria-hidden="true">
+                                                        <path d="M4 7.5h16v11H4v-11Zm0 0 8 6 8-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                                    </svg>
+                                                </div>
+                                                <h3 class="mt-4 text-sm font-semibold text-brand-navy" x-text="$root.columnEmptyLabel(column.key)"></h3>
+                                                <p class="mt-1 text-xs leading-5 text-slate-500">The column stays quiet until the next production wave arrives.</p>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </section>
+        </div>
 
         <div
             x-show="drawerOpen"

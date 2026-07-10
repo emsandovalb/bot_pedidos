@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderNotificationLog;
 use App\Services\OrderWorkflowActionPresenter;
+use App\Services\Operations\OperationsAgenda;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -19,6 +20,7 @@ class OperationsController extends Controller
 {
     public function __construct(
         private readonly OrderWorkflowActionPresenter $orderWorkflowActionPresenter,
+        private readonly OperationsAgenda $operationsAgenda,
     ) {
     }
 
@@ -49,6 +51,7 @@ class OperationsController extends Controller
         return view('operations.index', [
             'ordersData' => $payload['ordersData'],
             'feedData' => $payload['feedData'],
+            'agendaData' => $payload['agendaData'],
             'filters' => $payload['filters'],
             'selectedOrderId' => $payload['selectedOrderId'],
             'selectedOrder' => $payload['selectedOrder'],
@@ -112,12 +115,15 @@ class OperationsController extends Controller
             ->values()
             ->all();
 
+        $agendaData = $this->operationsAgenda->build(collect($ordersData), now());
+
         $selectedOrderId = $this->resolveSelectedOrderId($request, $ordersData);
         $selectedOrder = collect($ordersData)->firstWhere('id', $selectedOrderId) ?? ($ordersData[0] ?? null);
 
         return [
             'ordersData' => $ordersData,
-            'feedData' => $this->buildFeedPayloadFromQuery($baseQuery, $visibleOrders, $customerContexts),
+            'agendaData' => $agendaData,
+            'feedData' => $this->buildFeedPayloadFromOrders(collect($ordersData), $agendaData),
             'filters' => $filters,
             'selectedOrderId' => $selectedOrderId,
             'selectedOrder' => $selectedOrder,
@@ -133,8 +139,14 @@ class OperationsController extends Controller
         $baseQuery = $this->buildInboxQuery($filters);
         $visibleOrders = (clone $baseQuery)->get();
         $customerContexts = $this->buildCustomerContexts($visibleOrders);
+        $ordersData = $visibleOrders
+            ->map(function (Order $order) use ($customerContexts): array {
+                return $this->serializeOrder($order, $customerContexts[(int) $order->customer_id] ?? null);
+            })
+            ->values();
+        $agendaData = $this->operationsAgenda->build($ordersData, now());
 
-        return $this->buildFeedPayloadFromQuery($baseQuery, $visibleOrders, $customerContexts);
+        return $this->buildFeedPayloadFromOrders($ordersData, $agendaData);
     }
 
     /**
@@ -148,21 +160,13 @@ class OperationsController extends Controller
                 'customer:id,name,phone',
                 'incomingMessage:id,status,received_at',
                 'possibleDuplicateOf:id,customer_id,status,created_at',
-                'fulfillmentPlan',
+                'fulfillmentPlan:id,order_id,requested_date,requested_time_window,delivery_method,payment_method,pickup_branch_id,delivery_address,delivery_notes,priority_score,priority_level,priority_reason,commitment_date,commitment_time,sla_minutes,remaining_sla_minutes,risk_level,risk_reason,decision_version,planner_confidence,planner_notes,metadata_json',
                 'orderItems' => fn ($query) => $query->orderBy('sort_order')->orderBy('id'),
                 'orderItems.product:id,name',
             ])
             ->withCount([
                 'orderItems as recognized_order_items_count' => fn ($query) => $query->whereNotNull('product_id'),
             ]);
-
-        $this->applySearchFilter($query, (string) ($filters['search'] ?? ''));
-        $this->applyQuickFilters(
-            $query,
-            (string) ($filters['status'] ?? 'all'),
-            (string) ($filters['channel'] ?? ''),
-            (string) ($filters['priority'] ?? ''),
-        );
 
         return $query
             ->orderByRaw(
@@ -180,22 +184,23 @@ class OperationsController extends Controller
     }
 
     /**
-     * @param  Collection<int, Order>  $visibleOrders
-     * @param  array<int, array<string, mixed>>  $customerContexts
+     * @param  Collection<int, array<string, mixed>>  $orders
+     * @param  array{sections:array<int, array<string, mixed>>, metrics:array<string, mixed>}  $agendaData
      * @return array<string, mixed>
      */
-    private function buildFeedPayloadFromQuery(Builder $query, Collection $visibleOrders, array $customerContexts): array
+    private function buildFeedPayloadFromOrders(Collection $orders, array $agendaData): array
     {
-        $latestOrderId = (int) (clone $query)->max('id');
-        $pendingReviewCount = (clone $query)->where('status', Order::STATUS_PENDING_REVIEW)->count();
-        $confirmedCount = (clone $query)->where('status', Order::STATUS_CONFIRMED)->count();
-        $preparingCount = (clone $query)->where('status', Order::STATUS_PREPARING)->count();
-        $readyForDispatchCount = (clone $query)->where('status', Order::STATUS_READY_FOR_DISPATCH)->count();
-        $dispatchedCount = (clone $query)->where('status', Order::STATUS_DISPATCHED)->count();
+        $latestOrderId = (int) ($orders->max('id') ?? 0);
+        $pendingReviewCount = $orders->where('status', Order::STATUS_PENDING_REVIEW)->count();
+        $confirmedCount = $orders->where('status', Order::STATUS_CONFIRMED)->count();
+        $preparingCount = $orders->where('status', Order::STATUS_PREPARING)->count();
+        $readyForDispatchCount = $orders->where('status', Order::STATUS_READY_FOR_DISPATCH)->count();
+        $dispatchedCount = $orders->where('status', Order::STATUS_DISPATCHED)->count();
 
         return [
             'latest_order_id' => $latestOrderId,
             'server_time' => now()->toIso8601String(),
+            'agenda' => $agendaData,
             'counts' => [
                 'pending_review' => $pendingReviewCount,
                 'confirmed' => $confirmedCount,
@@ -203,12 +208,7 @@ class OperationsController extends Controller
                 'ready_for_dispatch' => $readyForDispatchCount,
                 'dispatched' => $dispatchedCount,
             ],
-            'inbox' => $visibleOrders
-                ->map(function (Order $order) use ($customerContexts): array {
-                    return $this->serializeInboxOrder($order, $customerContexts[(int) $order->customer_id] ?? null);
-                })
-                ->values()
-                ->all(),
+            'inbox' => $orders->values()->all(),
         ];
     }
 
@@ -633,6 +633,7 @@ class OperationsController extends Controller
             'created_at_label' => $order->created_at?->format('d/m/Y H:i') ?? 'Sin fecha',
             'preview' => Str::limit($order->raw_message_text ?? 'Sin mensaje original', 120),
             'original_message' => $order->raw_message_text ?? 'Sin mensaje original',
+            'summary' => $this->productSummary($order),
             'created_at_iso' => $order->created_at?->toIso8601String(),
             'items_count' => $order->orderItems->count(),
             'recognized_items_count' => (int) ($order->recognized_order_items_count ?? 0),
@@ -641,6 +642,17 @@ class OperationsController extends Controller
             'possible_duplicate' => $order->possible_duplicate_of_order_id !== null,
             'vip' => ($customerContext['segment'] ?? 'Inactive') === 'VIP',
             'parser_confidence' => $order->parser_confidence !== null ? (float) $order->parser_confidence : null,
+            'delivery_method' => $order->fulfillmentPlan?->delivery_method,
+            'payment_method' => $order->fulfillmentPlan?->payment_method,
+            'commitment_date' => $order->fulfillmentPlan?->commitment_date?->toDateString(),
+            'commitment_time' => $order->fulfillmentPlan?->commitment_time,
+            'remaining_sla_minutes' => $order->fulfillmentPlan?->remaining_sla_minutes,
+            'risk_level' => $order->fulfillmentPlan?->risk_level,
+            'priority_level' => $order->fulfillmentPlan?->priority_level,
+            'priority_score' => $order->fulfillmentPlan?->priority_score,
+            'priority_reason' => $order->fulfillmentPlan?->priority_reason,
+            'risk_reason' => $order->fulfillmentPlan?->risk_reason,
+            'requested_time_window' => $order->fulfillmentPlan?->requested_time_window,
             'open_notifications' => (int) ($customerContext['open_notifications'] ?? 0),
             'allowed_actions' => $workflow['allowed_actions'],
             'primary_action' => $workflow['primary_action'],
@@ -705,6 +717,18 @@ class OperationsController extends Controller
             'duplicate' => $order->possible_duplicate_of_order_id !== null,
             'vip' => ($customerContext['segment'] ?? 'Inactive') === 'VIP',
             'parser_confidence' => $order->parser_confidence !== null ? (float) $order->parser_confidence : null,
+            'summary' => $this->productSummary($order),
+            'delivery_method' => $order->fulfillmentPlan?->delivery_method,
+            'payment_method' => $order->fulfillmentPlan?->payment_method,
+            'commitment_date' => $order->fulfillmentPlan?->commitment_date?->toDateString(),
+            'commitment_time' => $order->fulfillmentPlan?->commitment_time,
+            'remaining_sla_minutes' => $order->fulfillmentPlan?->remaining_sla_minutes,
+            'risk_level' => $order->fulfillmentPlan?->risk_level,
+            'priority_level' => $order->fulfillmentPlan?->priority_level,
+            'priority_score' => $order->fulfillmentPlan?->priority_score,
+            'priority_reason' => $order->fulfillmentPlan?->priority_reason,
+            'risk_reason' => $order->fulfillmentPlan?->risk_reason,
+            'requested_time_window' => $order->fulfillmentPlan?->requested_time_window,
             'update_url' => route('orders.update', $order),
             'show_url' => route('orders.show', $order),
         ];
@@ -798,5 +822,22 @@ class OperationsController extends Controller
         $label = Str::of((string) $rawText)->squish()->toString();
 
         return $label !== '' ? $label : 'Sin texto';
+    }
+
+    private function productSummary(Order $order): string
+    {
+        $parts = $order->orderItems
+            ->take(3)
+            ->map(function ($item): string {
+                $label = $this->resolveItemLabel($item->product_id, $item->raw_text, $item->product?->name);
+                $quantity = (float) ($item->quantity ?? 1);
+
+                return $quantity > 1 ? $quantity . ' x ' . $label : $label;
+            })
+            ->filter(static fn (string $value): bool => $value !== '')
+            ->values()
+            ->all();
+
+        return $parts !== [] ? implode(', ', $parts) : 'Sin resumen';
     }
 }

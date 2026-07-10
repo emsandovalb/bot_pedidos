@@ -46,8 +46,12 @@ const DEFAULT_FILTERS = {
     customer: '',
     channel: 'all',
     priority: 'all',
+    time: 'all',
+    delivery: 'all',
+    payment: 'all',
     vip: false,
     duplicates: false,
+    urgent: false,
     status: 'all',
 };
 
@@ -101,6 +105,133 @@ function isUrgentOrder(order, referenceTimeMs) {
         || order.parser_confidence === null
         || Number(order.parser_confidence) < 0.5
     );
+}
+
+function isAgendaUrgent(order) {
+    if (String(order.risk_level ?? '') === 'critical' || String(order.risk_level ?? '') === 'high') {
+        return true;
+    }
+
+    if (order.remaining_sla_minutes !== null && order.remaining_sla_minutes !== undefined) {
+        return Number(order.remaining_sla_minutes) < 60;
+    }
+
+    return false;
+}
+
+function agendaPriorityWeight(order) {
+    const risk = String(order.risk_level ?? '');
+
+    if (risk === 'critical') {
+        return 0;
+    }
+
+    if (risk === 'high') {
+        return 1;
+    }
+
+    if (String(order.priority_level ?? '') === 'urgent') {
+        return 2;
+    }
+
+    if (String(order.priority_level ?? '') === 'low') {
+        return 4;
+    }
+
+    return 3;
+}
+
+function commitmentDateKey(order) {
+    return String(order.commitment_date ?? '');
+}
+
+function hasCommitment(order) {
+    return commitmentDateKey(order) !== '';
+}
+
+function commitmentMinutes(order) {
+    const value = String(order.commitment_time ?? '');
+    const match = value.match(/^(\d{2}):(\d{2})/);
+
+    if (!match) {
+        return Number.POSITIVE_INFINITY;
+    }
+
+    return (Number(match[1]) * 60) + Number(match[2]);
+}
+
+function timeWindowLabel(order) {
+    const explicit = String(order.requested_time_window ?? '').trim().toLowerCase();
+    if (explicit !== '') {
+        return explicit.replaceAll('_', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
+    }
+
+    const time = String(order.commitment_time ?? '');
+    const match = time.match(/^(\d{2}):/);
+    if (!match) {
+        return 'Anytime';
+    }
+
+    const hour = Number(match[1]);
+    if (hour < 10) return 'Morning';
+    if (hour < 12) return 'Before Noon';
+    if (hour < 17) return 'Afternoon';
+    if (hour < 20) return 'Evening';
+    return 'Anytime';
+}
+
+function agendaSectionKeyForOrder(order, referenceDate) {
+    const commitmentDate = commitmentDateKey(order);
+    const today = referenceDate.toISOString().slice(0, 10);
+    const tomorrow = new Date(referenceDate.getTime() + (24 * 60 * 60 * 1000)).toISOString().slice(0, 10);
+
+    if (String(order.risk_level ?? '') === 'critical') {
+        return 'critical';
+    }
+
+    if (String(order.risk_level ?? '') === 'high') {
+        return 'due_soon';
+    }
+
+    if (String(order.status ?? '') === 'dispatched' && commitmentDate === today) {
+        return 'completed';
+    }
+
+    if (commitmentDate === today) {
+        return 'today';
+    }
+
+    if (commitmentDate === tomorrow) {
+        return 'tomorrow';
+    }
+
+    if (commitmentDate === '') {
+        return 'no_commitment';
+    }
+
+    return 'today';
+}
+
+function sectionLabel(key) {
+    return ({
+        critical: 'Critical',
+        due_soon: 'Due Soon',
+        today: 'Today',
+        tomorrow: 'Tomorrow',
+        no_commitment: 'No Commitment',
+        completed: 'Completed Today',
+    })[key] ?? 'Agenda';
+}
+
+function sectionTone(key) {
+    return ({
+        critical: 'border-rose-200 bg-rose-50/80 text-rose-800',
+        due_soon: 'border-orange-200 bg-orange-50/80 text-orange-800',
+        today: 'border-blue-200 bg-blue-50/80 text-blue-800',
+        tomorrow: 'border-sky-200 bg-sky-50/80 text-sky-800',
+        no_commitment: 'border-slate-200 bg-slate-50 text-slate-700',
+        completed: 'border-emerald-200 bg-emerald-50/80 text-emerald-800',
+    })[key] ?? 'border-slate-200 bg-white text-slate-700';
 }
 
 function columnForStatus(status) {
@@ -206,7 +337,19 @@ export function createOperationsBoard(config = {}) {
         pollIntervalMs: Number(config.pollIntervalMs ?? 8000),
         snapshotUrlBase: config.snapshotUrlBase ?? '/operations/orders',
         orderDetails: config.orderDetails ?? {},
+        agendaData: config.agendaData ?? {
+            sections: [],
+            metrics: {
+                orders_today: 0,
+                deliveries: 0,
+                pickups: 0,
+                urgent: 0,
+                completed: 0,
+                average_sla_remaining: null,
+            },
+        },
         filters: { ...DEFAULT_FILTERS },
+        activeView: 'agenda',
         drawerOpen: false,
         drawerLoading: false,
         drawerError: '',
@@ -239,9 +382,12 @@ export function createOperationsBoard(config = {}) {
 
         init() {
             this.orderDetails = this.normalizeOrderDetails(this.orderDetails);
+            this.agendaData = this.normalizeAgendaData(this.agendaData);
             this.selectedOrder = this.selectedOrder ? this.decorateSelectedOrder(this.selectedOrder) : null;
             this.activeId = this.activeId ?? this.selectedOrder?.id ?? this.orders[0]?.id ?? null;
-            this.drawerOpen = new URL(window.location.href).searchParams.has('order');
+            const url = new URL(window.location.href);
+            this.drawerOpen = url.searchParams.has('order');
+            this.activeView = url.searchParams.get('view') === 'kanban' ? 'kanban' : 'agenda';
             this.applyInitialFilters(config.filters ?? {});
 
             if (! this.selectedOrder && this.activeId !== null) {
@@ -281,6 +427,92 @@ export function createOperationsBoard(config = {}) {
 
         get visibleOrders() {
             return this.orders.filter((order) => this.matchesFilters(order));
+        },
+
+        get agendaVisibleOrders() {
+            return this.visibleOrders.filter((order) => this.matchesFilters(order));
+        },
+
+        get agendaMetrics() {
+            const orders = this.agendaVisibleOrders;
+            const completed = orders.filter((order) => String(order.status ?? '') === 'dispatched' && commitmentDateKey(order) === this.todayKey()).length;
+            const averageSla = this.averageSlaRemaining(orders);
+
+            return {
+                orders_today: orders.filter((order) => commitmentDateKey(order) === this.todayKey()).length,
+                deliveries: orders.filter((order) => String(order.delivery_method ?? '') === 'delivery').length,
+                pickups: orders.filter((order) => String(order.delivery_method ?? '') === 'pickup').length,
+                urgent: orders.filter((order) => isAgendaUrgent(order)).length,
+                completed,
+                average_sla_remaining: averageSla,
+            };
+        },
+
+        get agendaSections() {
+            const orders = this.agendaVisibleOrders.slice();
+            const referenceDate = this.referenceDate();
+            const sectionKeys = ['critical', 'due_soon', 'today', 'tomorrow', 'no_commitment', 'completed'];
+
+            return sectionKeys.map((key) => {
+                const cards = orders.filter((order) => agendaSectionKeyForOrder(order, referenceDate) === key);
+                const sorted = key === 'critical' || key === 'due_soon'
+                    ? cards.sort((left, right) => {
+                        const leftRemaining = Number(left.remaining_sla_minutes ?? Number.POSITIVE_INFINITY);
+                        const rightRemaining = Number(right.remaining_sla_minutes ?? Number.POSITIVE_INFINITY);
+
+                        if (leftRemaining !== rightRemaining) {
+                            return leftRemaining - rightRemaining;
+                        }
+
+                        return sortOldestFirst(left, right);
+                    })
+                    : cards.sort((left, right) => {
+                        const leftRank = this.timeWindowRank(left);
+                        const rightRank = this.timeWindowRank(right);
+
+                        if (leftRank !== rightRank) {
+                            return leftRank - rightRank;
+                        }
+
+                        const leftPriority = agendaPriorityWeight(left);
+                        const rightPriority = agendaPriorityWeight(right);
+
+                        if (leftPriority !== rightPriority) {
+                            return leftPriority - rightPriority;
+                        }
+
+                        const leftCommitment = commitmentMinutes(left);
+                        const rightCommitment = commitmentMinutes(right);
+
+                        if (leftCommitment !== rightCommitment) {
+                            return leftCommitment - rightCommitment;
+                        }
+
+                        return (left.customer_name ?? '').localeCompare(right.customer_name ?? '');
+                    });
+
+                const groups = key === 'critical' || key === 'due_soon' || key === 'no_commitment' || key === 'completed'
+                    ? [{
+                        label: sectionLabel(key),
+                        cards: sorted,
+                    }]
+                    : this.groupAgendaCards(sorted);
+
+                return {
+                    key,
+                    label: sectionLabel(key),
+                    tone: sectionTone(key),
+                    emptyMessage: ({
+                        critical: 'No hay pedidos críticos.',
+                        due_soon: 'No hay pedidos en riesgo alto.',
+                        today: 'No hay pedidos para hoy.',
+                        tomorrow: 'No hay pedidos para mañana.',
+                        no_commitment: 'No hay pedidos sin compromiso.',
+                        completed: 'No hay pedidos completados hoy.',
+                    })[key] ?? 'No hay pedidos.',
+                    groups,
+                };
+            });
         },
 
         get boardColumns() {
@@ -326,6 +558,65 @@ export function createOperationsBoard(config = {}) {
             return this.visibleOrders.length;
         },
 
+        normalizeAgendaData(agendaData) {
+            return {
+                sections: Array.isArray(agendaData?.sections) ? agendaData.sections : [],
+                metrics: agendaData?.metrics ?? {},
+            };
+        },
+
+        referenceDate() {
+            const parsed = parseTimestamp(this.serverTime);
+            return new Date(parsed ?? Date.now());
+        },
+
+        todayKey() {
+            return this.referenceDate().toISOString().slice(0, 10);
+        },
+
+        tomorrowKey() {
+            return new Date(this.referenceDate().getTime() + (24 * 60 * 60 * 1000)).toISOString().slice(0, 10);
+        },
+
+        timeWindowRank(order) {
+            return ({
+                Morning: 0,
+                'Before Noon': 1,
+                Afternoon: 2,
+                Evening: 3,
+                Anytime: 4,
+            })[timeWindowLabel(order)] ?? 4;
+        },
+
+        groupAgendaCards(cards) {
+            const groups = [];
+            const labels = ['Morning', 'Before Noon', 'Afternoon', 'Evening', 'Anytime'];
+
+            for (const label of labels) {
+                const bucket = cards.filter((order) => timeWindowLabel(order) === label);
+                if (bucket.length > 0) {
+                    groups.push({
+                        label,
+                        cards: bucket,
+                    });
+                }
+            }
+
+            return groups;
+        },
+
+        averageSlaRemaining(orders) {
+            const values = orders
+                .map((order) => Number(order.remaining_sla_minutes))
+                .filter((value) => Number.isFinite(value));
+
+            if (values.length === 0) {
+                return null;
+            }
+
+            return Math.round(values.reduce((total, value) => total + value, 0) / values.length);
+        },
+
         applyInitialFilters(filters = {}) {
             this.filters = {
                 ...DEFAULT_FILTERS,
@@ -333,9 +624,13 @@ export function createOperationsBoard(config = {}) {
                 customer: String(filters.customer ?? '').trim(),
                 channel: String(filters.channel ?? 'all'),
                 priority: String(filters.priority ?? 'all'),
+                time: String(filters.time ?? 'all'),
+                delivery: String(filters.delivery ?? 'all'),
+                payment: String(filters.payment ?? 'all'),
                 status: String(filters.status ?? 'all'),
                 vip: this.parseBooleanFilter(filters.vip),
                 duplicates: this.parseBooleanFilter(filters.duplicates),
+                urgent: this.parseBooleanFilter(filters.urgent),
             };
         },
 
@@ -385,6 +680,22 @@ export function createOperationsBoard(config = {}) {
             normalized.parser_confidence = normalized.parser_confidence === null || normalized.parser_confidence === undefined
                 ? null
                 : Number(normalized.parser_confidence);
+            normalized.delivery_method = normalized.delivery_method ?? null;
+            normalized.payment_method = normalized.payment_method ?? null;
+            normalized.commitment_date = normalized.commitment_date ?? null;
+            normalized.commitment_time = normalized.commitment_time ?? null;
+            normalized.remaining_sla_minutes = normalized.remaining_sla_minutes === null || normalized.remaining_sla_minutes === undefined
+                ? null
+                : Number(normalized.remaining_sla_minutes);
+            normalized.risk_level = normalized.risk_level ?? null;
+            normalized.priority_level = normalized.priority_level ?? null;
+            normalized.priority_score = normalized.priority_score === null || normalized.priority_score === undefined
+                ? null
+                : Number(normalized.priority_score);
+            normalized.priority_reason = normalized.priority_reason ?? null;
+            normalized.risk_reason = normalized.risk_reason ?? null;
+            normalized.requested_time_window = normalized.requested_time_window ?? null;
+            normalized.summary = normalized.summary ?? normalized.preview;
             normalized.open_notifications = toNumber(normalized.open_notifications);
             normalized.recent_activity = Array.isArray(normalized.recent_activity) ? normalized.recent_activity : [];
             normalized.update_url = normalized.update_url ?? this.buildOrderUrl(normalized.id);
@@ -701,6 +1012,18 @@ export function createOperationsBoard(config = {}) {
                     duplicate: normalized.duplicate,
                     vip: normalized.vip,
                     parser_confidence: normalized.parser_confidence,
+                    summary: normalized.summary,
+                    delivery_method: normalized.delivery_method,
+                    payment_method: normalized.payment_method,
+                    commitment_date: normalized.commitment_date,
+                    commitment_time: normalized.commitment_time,
+                    remaining_sla_minutes: normalized.remaining_sla_minutes,
+                    risk_level: normalized.risk_level,
+                    priority_level: normalized.priority_level,
+                    priority_score: normalized.priority_score,
+                    priority_reason: normalized.priority_reason,
+                    risk_reason: normalized.risk_reason,
+                    requested_time_window: normalized.requested_time_window,
                     update_url: normalized.update_url,
                     show_url: normalized.show_url,
                 });
@@ -852,8 +1175,10 @@ export function createOperationsBoard(config = {}) {
         },
 
         applyFilter(key, value) {
-            if (key === 'vip' || key === 'duplicates') {
+            if (key === 'vip' || key === 'duplicates' || key === 'urgent') {
                 this.filters[key] = this.parseBooleanFilter(value);
+            } else if (key === 'time' || key === 'delivery' || key === 'payment' || key === 'channel' || key === 'priority' || key === 'status') {
+                this.filters[key] = String(value ?? 'all');
             } else {
                 this.filters[key] = String(value ?? '');
             }
@@ -868,6 +1193,17 @@ export function createOperationsBoard(config = {}) {
             void this.liveQueue?.refresh();
         },
 
+        setFilter(key, value) {
+            if (this.filters[key] === value) {
+                this.filters[key] = 'all';
+            } else {
+                this.filters[key] = value;
+            }
+
+            this.syncUrlFromState({ preserveDrawer: true });
+            void this.liveQueue?.refresh();
+        },
+
         clearFilters() {
             const currentStatus = this.filters.status;
             this.filters = {
@@ -878,9 +1214,14 @@ export function createOperationsBoard(config = {}) {
             void this.liveQueue?.refresh();
         },
 
+        setView(view) {
+            this.activeView = view === 'kanban' ? 'kanban' : 'agenda';
+            this.syncUrlFromState({ preserveDrawer: true });
+        },
+
         syncUrlFromState({ preserveDrawer = true } = {}) {
             const url = new URL(window.location.href);
-            const managedKeys = ['search', 'customer', 'channel', 'priority', 'vip', 'duplicates', 'page'];
+            const managedKeys = ['search', 'customer', 'channel', 'priority', 'time', 'delivery', 'payment', 'vip', 'duplicates', 'urgent', 'page', 'view'];
 
             for (const key of managedKeys) {
                 url.searchParams.delete(key);
@@ -902,6 +1243,18 @@ export function createOperationsBoard(config = {}) {
                 url.searchParams.set('priority', this.filters.priority);
             }
 
+            if (this.filters.time !== 'all') {
+                url.searchParams.set('time', this.filters.time);
+            }
+
+            if (this.filters.delivery !== 'all') {
+                url.searchParams.set('delivery', this.filters.delivery);
+            }
+
+            if (this.filters.payment !== 'all') {
+                url.searchParams.set('payment', this.filters.payment);
+            }
+
             if (this.filters.vip) {
                 url.searchParams.set('vip', '1');
             }
@@ -909,6 +1262,12 @@ export function createOperationsBoard(config = {}) {
             if (this.filters.duplicates) {
                 url.searchParams.set('duplicates', '1');
             }
+
+            if (this.filters.urgent) {
+                url.searchParams.set('urgent', '1');
+            }
+
+            url.searchParams.set('view', this.activeView);
 
             if (preserveDrawer && this.drawerOpen && this.activeId !== null) {
                 url.searchParams.set('order', String(this.activeId));
@@ -921,6 +1280,27 @@ export function createOperationsBoard(config = {}) {
 
         matchesFilters(order) {
             if (! order) {
+                return false;
+            }
+
+            if (this.filters.time !== 'all') {
+                const commitmentDate = commitmentDateKey(order);
+                if (this.filters.time === 'today' && commitmentDate !== this.todayKey()) {
+                    return false;
+                }
+                if (this.filters.time === 'tomorrow' && commitmentDate !== this.tomorrowKey()) {
+                    return false;
+                }
+                if (this.filters.time === 'no_commitment' && commitmentDate !== '') {
+                    return false;
+                }
+            }
+
+            if (this.filters.delivery !== 'all' && String(order.delivery_method ?? '') !== this.filters.delivery) {
+                return false;
+            }
+
+            if (this.filters.payment !== 'all' && String(order.payment_method ?? '') !== this.filters.payment) {
                 return false;
             }
 
@@ -941,6 +1321,10 @@ export function createOperationsBoard(config = {}) {
             }
 
             if (this.filters.duplicates && ! order.duplicate) {
+                return false;
+            }
+
+            if (this.filters.urgent && ! isAgendaUrgent(order)) {
                 return false;
             }
 
@@ -1022,6 +1406,152 @@ export function createOperationsBoard(config = {}) {
                 ready: 'border-l-emerald-500',
                 dispatched: 'border-l-slate-400',
             })[this.columnKeyForOrder(order)] ?? 'border-l-slate-300';
+        },
+
+        agendaCardAccentClass(order) {
+            const risk = String(order.risk_level ?? '');
+
+            if (risk === 'critical') {
+                return 'border-l-rose-500';
+            }
+
+            if (risk === 'high' || isAgendaUrgent(order)) {
+                return 'border-l-orange-400';
+            }
+
+            if (String(order.priority_level ?? '') === 'low') {
+                return 'border-l-slate-300';
+            }
+
+            return 'border-l-blue-500';
+        },
+
+        agendaRiskTone(order) {
+            const risk = String(order.risk_level ?? '');
+
+            return ({
+                critical: 'bg-rose-50 text-rose-800 ring-1 ring-rose-100',
+                high: 'bg-orange-50 text-orange-800 ring-1 ring-orange-100',
+                medium: 'bg-amber-50 text-amber-800 ring-1 ring-amber-100',
+                low: 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
+            })[risk] ?? 'bg-slate-100 text-slate-700 ring-1 ring-slate-200';
+        },
+
+        agendaRiskLabel(order) {
+            const risk = String(order.risk_level ?? '');
+
+            if (risk === 'critical') {
+                return 'SLA Expired';
+            }
+
+            if (risk === 'high') {
+                return order.remaining_sla_minutes !== null && order.remaining_sla_minutes !== undefined
+                    ? `Due in ${Number(order.remaining_sla_minutes)} min`
+                    : 'High risk';
+            }
+
+            if (risk === 'medium') {
+                return 'Medium';
+            }
+
+            return 'Normal';
+        },
+
+        agendaPriorityTone(order) {
+            if (String(order.risk_level ?? '') === 'critical' || String(order.risk_level ?? '') === 'high') {
+                return 'bg-amber-50 text-amber-800 ring-1 ring-amber-100';
+            }
+
+            if (String(order.priority_level ?? '') === 'urgent') {
+                return 'bg-orange-50 text-orange-800 ring-1 ring-orange-100';
+            }
+
+            if (String(order.priority_level ?? '') === 'low') {
+                return 'bg-slate-100 text-slate-700 ring-1 ring-slate-200';
+            }
+
+            return 'bg-blue-50 text-blue-800 ring-1 ring-blue-100';
+        },
+
+        agendaPriorityLabel(order) {
+            if (String(order.risk_level ?? '') === 'critical' || String(order.risk_level ?? '') === 'high') {
+                return 'Urgent';
+            }
+
+            if (String(order.priority_level ?? '') === 'low') {
+                return 'Low';
+            }
+
+            return 'Normal';
+        },
+
+        agendaDeliveryLabel(order) {
+            return ({
+                pickup: 'Pickup',
+                delivery: 'Delivery',
+                express: 'Express',
+                third_party: 'Terceros',
+            })[String(order.delivery_method ?? '')] ?? 'Sin entrega';
+        },
+
+        agendaPaymentLabel(order) {
+            return ({
+                sinpe: 'SINPE',
+                cash: 'Cash',
+                card: 'Card',
+                transfer: 'Transferencia',
+            })[String(order.payment_method ?? '')] ?? 'Sin pago';
+        },
+
+        agendaChannelGlyph(order) {
+            return ({
+                whatsapp: 'WA',
+                telegram: 'TG',
+            })[String(order.channel_key ?? '').toLowerCase()] ?? 'CH';
+        },
+
+        agendaTimeWindowLabel(order) {
+            return timeWindowLabel(order);
+        },
+
+        agendaSlaLabel(order) {
+            if (order.remaining_sla_minutes === null || order.remaining_sla_minutes === undefined) {
+                return 'Sin SLA';
+            }
+
+            const remaining = Number(order.remaining_sla_minutes);
+            if (remaining < 0) {
+                return 'SLA Expired';
+            }
+
+            if (remaining < 60) {
+                return `Due in ${remaining} min`;
+            }
+
+            return `Due in ${Math.round(remaining / 60)} h`;
+        },
+
+        agendaSmartLabels(order) {
+            const labels = [
+                this.agendaDeliveryLabel(order),
+                this.agendaPaymentLabel(order),
+                this.agendaTimeWindowLabel(order),
+                this.agendaSlaLabel(order),
+            ];
+
+            if (order.vip) {
+                labels.push('VIP');
+            }
+
+            if (order.duplicate) {
+                labels.push('Duplicated');
+            }
+
+            return labels.filter((label) => label !== 'Sin entrega' && label !== 'Sin pago' && label !== 'Sin SLA');
+        },
+
+        agendaCustomerSummary(order) {
+            return order.summary ?? order.preview ?? 'Sin resumen';
         },
 
         columnToneClass(columnKey) {

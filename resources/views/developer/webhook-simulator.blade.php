@@ -10,10 +10,10 @@
                     <div class="max-w-3xl">
                         <div class="brand-badge bg-cyan-100 text-cyan-800">Developer only</div>
                         <h1 class="mt-3 text-3xl font-semibold tracking-tight text-brand-navy sm:text-4xl">
-                            Developer Toolkit
+                            Business Scenario Simulator
                         </h1>
                         <p class="mt-2 max-w-2xl text-sm text-slate-600 sm:text-base">
-                            Local scenario generator for UX testing, QA, demonstrations and future automation. It reuses the real ingestion path and stays hidden outside local or debug environments.
+                            Local business day simulator for QA, demonstrations and operational testing. It reuses the real ingestion path and stays hidden outside local or debug environments.
                         </p>
                     </div>
 
@@ -79,6 +79,42 @@
                                 <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $result['vip_customers'] ?? $result['vip_count'] ?? 0 }}</div>
                             </div>
                         </div>
+                        @if (! empty($result['metrics']) && is_array($result['metrics']))
+                            <div class="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                                <div class="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
+                                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Customers</div>
+                                    <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $result['metrics']['customers'] ?? 0 }}</div>
+                                </div>
+                                <div class="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
+                                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Delivery / Pickup</div>
+                                    <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ ($result['metrics']['delivery'] ?? 0) }} / {{ ($result['metrics']['pickup'] ?? 0) }}</div>
+                                </div>
+                                <div class="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
+                                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Today / Tomorrow</div>
+                                    <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ ($result['metrics']['today'] ?? 0) }} / {{ ($result['metrics']['tomorrow'] ?? 0) }}</div>
+                                </div>
+                                <div class="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
+                                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Urgent / Duplicates</div>
+                                    <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ ($result['metrics']['urgent'] ?? 0) }} / {{ ($result['metrics']['duplicates'] ?? 0) }}</div>
+                                </div>
+                                <div class="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
+                                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Avg parser confidence</div>
+                                    <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $result['metrics']['average_parser_confidence'] !== null ? number_format((float) $result['metrics']['average_parser_confidence'], 2) : '—' }}</div>
+                                </div>
+                                <div class="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
+                                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Avg priority score</div>
+                                    <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $result['metrics']['average_priority_score'] !== null ? number_format((float) $result['metrics']['average_priority_score'], 2) : '—' }}</div>
+                                </div>
+                                <div class="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
+                                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Avg SLA</div>
+                                    <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $result['metrics']['average_sla'] !== null ? number_format((float) $result['metrics']['average_sla'], 2) : '—' }}</div>
+                                </div>
+                                <div class="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
+                                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Execution time</div>
+                                    <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $result['execution_ms'] ?? 0 }} ms</div>
+                                </div>
+                            </div>
+                        @endif
                         </div>
 
                         <div class="mt-4 flex flex-wrap gap-3">
@@ -103,7 +139,7 @@
                 <section class="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                         <div>
-                            <h2 class="text-xl font-semibold text-brand-navy">Webhook Playground</h2>
+                            <h2 class="text-xl font-semibold text-brand-navy">Custom Ingestion Playground</h2>
                             <p class="mt-1 text-sm text-slate-600">Switch provider and the payload shape, required fields and examples update automatically.</p>
                         </div>
 
@@ -201,7 +237,181 @@
                 <section class="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                         <div>
-                            <h2 class="text-xl font-semibold text-brand-navy">Scenario Generator</h2>
+                            <h2 class="text-xl font-semibold text-brand-navy">Business Scenarios</h2>
+                            <p class="mt-1 text-sm text-slate-600">Generate realistic business days through the live ingestion path, then inspect the resulting metrics.</p>
+                        </div>
+
+                        <div class="grid gap-2 text-xs text-slate-500 sm:grid-cols-3">
+                            <div class="rounded-2xl bg-slate-50 px-3 py-2">Real ingestion</div>
+                            <div class="rounded-2xl bg-slate-50 px-3 py-2">Live queue</div>
+                            <div class="rounded-2xl bg-slate-50 px-3 py-2">Operations agenda</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 grid gap-4 lg:grid-cols-2">
+                        @foreach ($businessScenarios as $scenario)
+                            <form method="POST" action="{{ route('developer.webhook-simulator.generate') }}" class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 shadow-sm">
+                                @csrf
+                                <input type="hidden" name="action" value="business_scenario">
+                                <input type="hidden" name="scenario" value="{{ $scenario['key'] }}">
+
+                                <div class="flex items-start justify-between gap-4">
+                                    <div>
+                                        <div class="text-lg font-semibold text-brand-navy">{{ $scenario['label'] }}</div>
+                                        <div class="mt-1 text-sm text-slate-600">{{ $scenario['description'] }}</div>
+                                    </div>
+                                    <button type="submit" class="rounded-2xl bg-brand-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-700">
+                                        Generate Day
+                                    </button>
+                                </div>
+
+                                <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+                                    <div class="rounded-2xl bg-white px-4 py-3">
+                                        <dt class="text-xs uppercase tracking-[0.18em] text-slate-400">Customers</dt>
+                                        <dd class="mt-1 font-semibold text-brand-navy">{{ $scenario['customers'] }}</dd>
+                                    </div>
+                                    <div class="rounded-2xl bg-white px-4 py-3">
+                                        <dt class="text-xs uppercase tracking-[0.18em] text-slate-400">Orders</dt>
+                                        <dd class="mt-1 font-semibold text-brand-navy">{{ $scenario['orders'] }}</dd>
+                                    </div>
+                                    <div class="rounded-2xl bg-white px-4 py-3">
+                                        <dt class="text-xs uppercase tracking-[0.18em] text-slate-400">WhatsApp</dt>
+                                        <dd class="mt-1 font-semibold text-brand-navy">{{ $scenario['provider_mix']['whatsapp'] ?? 0 }}</dd>
+                                    </div>
+                                    <div class="rounded-2xl bg-white px-4 py-3">
+                                        <dt class="text-xs uppercase tracking-[0.18em] text-slate-400">Telegram</dt>
+                                        <dd class="mt-1 font-semibold text-brand-navy">{{ $scenario['provider_mix']['telegram'] ?? 0 }}</dd>
+                                    </div>
+                                </dl>
+                            </form>
+                        @endforeach
+                    </div>
+                </section>
+
+                <section class="grid gap-6 lg:grid-cols-2">
+                    <div class="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm">
+                        <div class="flex items-start justify-between gap-4">
+                            <div>
+                                <h2 class="text-xl font-semibold text-brand-navy">Create Custom Customer Message</h2>
+                                <p class="mt-1 text-sm text-slate-600">Inject a single customer message through the same ingestion pipeline used in production.</p>
+                            </div>
+                            <div class="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                                Current provider: <span class="font-semibold text-brand-navy" x-text="providerLabel()"></span>
+                            </div>
+                        </div>
+
+                        <form method="POST" action="{{ route('developer.webhook-simulator.generate') }}" class="mt-5 space-y-4">
+                            @csrf
+                            <input type="hidden" name="action" value="business_custom_message">
+
+                            <div class="grid gap-4 md:grid-cols-2">
+                                <label class="block">
+                                    <span class="text-sm font-semibold text-slate-700">Customer</span>
+                                    <select name="customer_mode" class="mt-2 w-full rounded-2xl border-slate-300 bg-white px-4 py-3 text-sm shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                                        <option value="new">New customer</option>
+                                        <option value="existing">Existing customer</option>
+                                    </select>
+                                </label>
+
+                                <label class="block">
+                                    <span class="text-sm font-semibold text-slate-700">Provider</span>
+                                    <select name="provider" class="mt-2 w-full rounded-2xl border-slate-300 bg-white px-4 py-3 text-sm shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                                        <option value="whatsapp">WhatsApp</option>
+                                        <option value="telegram">Telegram</option>
+                                        <option value="instagram">Instagram placeholder</option>
+                                    </select>
+                                </label>
+                            </div>
+
+                            <div class="grid gap-4 md:grid-cols-2">
+                                <label class="block">
+                                    <span class="text-sm font-semibold text-slate-700">Customer name</span>
+                                    <input type="text" name="customer_name" value="{{ $formState['customer_name'] ?? 'Maria Lopez' }}" class="mt-2 w-full rounded-2xl border-slate-300 bg-white px-4 py-3 text-sm shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                                </label>
+
+                                <label class="block">
+                                    <span class="text-sm font-semibold text-slate-700">Customer phone / chat id</span>
+                                    <input type="text" name="customer_phone" value="{{ $formState['customer_phone'] ?? '50255510001' }}" class="mt-2 w-full rounded-2xl border-slate-300 bg-white px-4 py-3 text-sm shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                                </label>
+                            </div>
+
+                            <label class="block">
+                                <span class="text-sm font-semibold text-slate-700">Message</span>
+                                <textarea name="message" rows="4" class="mt-2 w-full rounded-[1.5rem] border-slate-300 bg-white px-4 py-3 text-sm shadow-sm focus:border-brand-primary focus:ring-brand-primary" placeholder="Ocupo 20 bloques para manana temprano. Yo paso por ellos. Pago por SINPE."></textarea>
+                            </label>
+
+                            <button type="submit" class="inline-flex items-center justify-center rounded-2xl bg-brand-primary px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-700">
+                                Inject Message
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm">
+                            <h2 class="text-xl font-semibold text-brand-navy">Random Message Generator</h2>
+                            <p class="mt-1 text-sm text-slate-600">Generate mixed realistic messages for products, delivery, pickup, dates, payments and urgency.</p>
+
+                            <form method="POST" action="{{ route('developer.webhook-simulator.generate') }}" class="mt-5">
+                                @csrf
+                                <input type="hidden" name="action" value="business_random_messages">
+                                <div class="flex flex-wrap gap-3">
+                                    @foreach ([10, 25, 50, 100] as $count)
+                                        <button type="submit" name="business_count" value="{{ $count }}" class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-brand-primary/30 hover:text-brand-primary">
+                                            Generate {{ $count }} Messages
+                                        </button>
+                                    @endforeach
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm">
+                            <h2 class="text-xl font-semibold text-brand-navy">Simulate Business Day</h2>
+                            <p class="mt-1 text-sm text-slate-600">Replay a timed sequence that naturally updates the live queue and operations agenda.</p>
+
+                            <form method="POST" action="{{ route('developer.webhook-simulator.generate') }}" class="mt-5">
+                                @csrf
+                                <input type="hidden" name="action" value="business_day">
+                                <div class="flex flex-wrap gap-3">
+                                    @foreach ($simulationSpeeds as $speed)
+                                        <button type="submit" name="speed" value="{{ $speed }}" class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-brand-primary/30 hover:text-brand-primary">
+                                            {{ $speed }}x
+                                        </button>
+                                    @endforeach
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm">
+                    <h2 class="text-xl font-semibold text-brand-navy">Reset</h2>
+                    <p class="mt-1 text-sm text-slate-600">Clear only generated simulation data. Real customers and real operations data stay untouched.</p>
+
+                    <div class="mt-5 grid gap-3 lg:grid-cols-3">
+                        @foreach ([
+                            'today' => 'Today simulation',
+                            'demo_customers' => 'Demo customers',
+                            'demo_orders' => 'Demo orders',
+                            'messages' => 'Messages',
+                            'notifications' => 'Notifications',
+                            'webhook_logs' => 'Webhook logs',
+                        ] as $scope => $label)
+                            <form method="POST" action="{{ route('developer.webhook-simulator.generate') }}" onsubmit="return confirm('Reset {{ $label }}?');">
+                                @csrf
+                                <input type="hidden" name="action" value="business_reset">
+                                <input type="hidden" name="business_reset_scope" value="{{ $scope }}">
+                                <button type="submit" class="w-full rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900 transition hover:border-amber-400 hover:bg-amber-100">
+                                    Reset {{ $label }}
+                                </button>
+                            </form>
+                        @endforeach
+                    </div>
+                </section>
+
+                <section class="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm">
+                    <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                        <div>
+                            <h2 class="text-xl font-semibold text-brand-navy">Legacy Scenario Generator</h2>
                             <p class="mt-1 text-sm text-slate-600">Predefined cards populate the app with realistic operational data in one click.</p>
                         </div>
 
@@ -278,7 +488,7 @@
                 <section class="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                         <div>
-                            <h2 class="text-xl font-semibold text-brand-navy">Quick Generators</h2>
+                            <h2 class="text-xl font-semibold text-brand-navy">Legacy Quick Generators</h2>
                             <p class="mt-1 text-sm text-slate-600">Generate a small, medium or large wave of orders using the currently selected provider.</p>
                         </div>
                         <div class="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-600">
@@ -302,7 +512,7 @@
 
                 <section class="grid gap-6 lg:grid-cols-2">
                     <div class="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm">
-                        <h2 class="text-xl font-semibold text-brand-navy">Customer Generator</h2>
+                        <h2 class="text-xl font-semibold text-brand-navy">Legacy Customer Generator</h2>
                         <p class="mt-1 text-sm text-slate-600">Generate customers only using random Costa Rican names and phone numbers.</p>
 
                         <form method="POST" action="{{ route('developer.webhook-simulator.generate') }}" class="mt-5">
@@ -320,7 +530,7 @@
                     </div>
 
                     <div class="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm">
-                        <h2 class="text-xl font-semibold text-brand-navy">Operational QA</h2>
+                        <h2 class="text-xl font-semibold text-brand-navy">Legacy Operational QA</h2>
                         <p class="mt-1 text-sm text-slate-600">Fast buttons for duplicate, VIP, parser failure, unknown product, busy day and empty inbox checks.</p>
 
                         <div class="mt-5 grid gap-3">
@@ -341,7 +551,7 @@
                 </section>
 
                 <section class="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm">
-                    <h2 class="text-xl font-semibold text-brand-navy">Reset</h2>
+                    <h2 class="text-xl font-semibold text-brand-navy">Legacy Demo Reset</h2>
                     <p class="mt-1 text-sm text-slate-600">Deletes demo orders or customers only. Admin users and organizations remain untouched.</p>
 
                     <div class="mt-5 grid gap-3 lg:grid-cols-3">
@@ -402,6 +612,60 @@
                         <div class="rounded-2xl bg-slate-50 px-4 py-3">
                             <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Duplicates</div>
                             <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $metrics['duplicates'] ?? 0 }}</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm">
+                    <h2 class="text-xl font-semibold text-brand-navy">Business Metrics</h2>
+                    <div class="mt-5 grid gap-4 sm:grid-cols-2">
+                        <div class="rounded-2xl bg-slate-50 px-4 py-3">
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Customers</div>
+                            <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $businessMetrics['customers'] ?? 0 }}</div>
+                        </div>
+                        <div class="rounded-2xl bg-slate-50 px-4 py-3">
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Orders</div>
+                            <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $businessMetrics['orders'] ?? 0 }}</div>
+                        </div>
+                        <div class="rounded-2xl bg-slate-50 px-4 py-3">
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Delivery</div>
+                            <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $businessMetrics['delivery'] ?? 0 }}</div>
+                        </div>
+                        <div class="rounded-2xl bg-slate-50 px-4 py-3">
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Pickup</div>
+                            <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $businessMetrics['pickup'] ?? 0 }}</div>
+                        </div>
+                        <div class="rounded-2xl bg-slate-50 px-4 py-3">
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Today</div>
+                            <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $businessMetrics['today'] ?? 0 }}</div>
+                        </div>
+                        <div class="rounded-2xl bg-slate-50 px-4 py-3">
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Tomorrow</div>
+                            <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $businessMetrics['tomorrow'] ?? 0 }}</div>
+                        </div>
+                        <div class="rounded-2xl bg-slate-50 px-4 py-3">
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Urgent</div>
+                            <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $businessMetrics['urgent'] ?? 0 }}</div>
+                        </div>
+                        <div class="rounded-2xl bg-slate-50 px-4 py-3">
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">VIP</div>
+                            <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $businessMetrics['vip'] ?? 0 }}</div>
+                        </div>
+                        <div class="rounded-2xl bg-slate-50 px-4 py-3">
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Duplicates</div>
+                            <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $businessMetrics['duplicates'] ?? 0 }}</div>
+                        </div>
+                        <div class="rounded-2xl bg-slate-50 px-4 py-3">
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Avg parser confidence</div>
+                            <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $businessMetrics['average_parser_confidence'] !== null ? number_format((float) $businessMetrics['average_parser_confidence'], 2) : '—' }}</div>
+                        </div>
+                        <div class="rounded-2xl bg-slate-50 px-4 py-3">
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Avg priority score</div>
+                            <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $businessMetrics['average_priority_score'] !== null ? number_format((float) $businessMetrics['average_priority_score'], 2) : '—' }}</div>
+                        </div>
+                        <div class="rounded-2xl bg-slate-50 px-4 py-3">
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Avg SLA</div>
+                            <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $businessMetrics['average_sla'] !== null ? number_format((float) $businessMetrics['average_sla'], 2) : '—' }}</div>
                         </div>
                     </div>
                 </section>

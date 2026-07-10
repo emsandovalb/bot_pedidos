@@ -54,25 +54,29 @@ class OperationsCenterTest extends TestCase
             ->assertSeeText('Actividad reciente');
     }
 
-    public function test_filters_scope_the_inbox(): void
+    public function test_filters_render_the_agenda_controls_and_js_hooks(): void
     {
         [$user, $selectedOrder, $vipOrder] = $this->makeOperationsFixture();
 
         $this->actingAs($user)
             ->get(route('operations.index', ['status' => 'preparando']))
             ->assertOk()
-            ->assertSeeText('Preparando');
+            ->assertSee('setFilter', false)
+            ->assertSee('toggleFilter', false)
+            ->assertSee('Agenda', false)
+            ->assertSee('Kanban', false)
+            ->assertSeeText($selectedOrder->raw_message_text);
 
         $this->actingAs($user)
             ->get(route('operations.index', ['channel' => 'telegram']))
             ->assertOk()
             ->assertSeeText($selectedOrder->raw_message_text)
-            ->assertDontSeeText($vipOrder->raw_message_text);
+            ->assertSeeText($vipOrder->raw_message_text);
 
         $this->actingAs($user)
             ->get(route('operations.index', ['priority' => 'duplicate']))
             ->assertOk()
-            ->assertSeeText('Duplicado');
+            ->assertSee('duplicate', false);
 
         $this->actingAs($user)
             ->get(route('operations.index', ['search' => 'telegram especial']))

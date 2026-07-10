@@ -185,6 +185,7 @@ export class LiveQueue {
             created_at_label: order.created_at_label ?? null,
             created_at_iso: order.created_at_iso ?? null,
             preview: order.preview ?? null,
+            summary: order.summary ?? null,
             items_count: Number(order.items_count ?? 0),
             recognized_items_count: Number(order.recognized_items_count ?? 0),
             unread: Boolean(order.unread),
@@ -193,6 +194,21 @@ export class LiveQueue {
             parser_confidence: order.parser_confidence === null || order.parser_confidence === undefined
                 ? null
                 : Number(order.parser_confidence),
+            delivery_method: order.delivery_method ?? null,
+            payment_method: order.payment_method ?? null,
+            commitment_date: order.commitment_date ?? null,
+            commitment_time: order.commitment_time ?? null,
+            remaining_sla_minutes: order.remaining_sla_minutes === null || order.remaining_sla_minutes === undefined
+                ? null
+                : Number(order.remaining_sla_minutes),
+            risk_level: order.risk_level ?? null,
+            priority_level: order.priority_level ?? null,
+            priority_score: order.priority_score === null || order.priority_score === undefined
+                ? null
+                : Number(order.priority_score),
+            priority_reason: order.priority_reason ?? null,
+            risk_reason: order.risk_reason ?? null,
+            requested_time_window: order.requested_time_window ?? null,
             update_url: order.update_url ?? null,
             show_url: order.show_url ?? null,
         };
@@ -215,6 +231,7 @@ export class LiveQueue {
             created_at_label: order?.created_at_label ?? 'Sin fecha',
             created_at_iso: order?.created_at_iso ?? null,
             preview: order?.preview ?? 'Sin mensaje original',
+            summary: order?.summary ?? order?.preview ?? 'Sin resumen',
             items_count: Number(order?.items_count ?? 0),
             recognized_items_count: Number(order?.recognized_items_count ?? 0),
             unread: Boolean(order?.unread),
@@ -223,6 +240,21 @@ export class LiveQueue {
             parser_confidence: order?.parser_confidence === null || order?.parser_confidence === undefined
                 ? null
                 : Number(order.parser_confidence),
+            delivery_method: order?.delivery_method ?? null,
+            payment_method: order?.payment_method ?? null,
+            commitment_date: order?.commitment_date ?? null,
+            commitment_time: order?.commitment_time ?? null,
+            remaining_sla_minutes: order?.remaining_sla_minutes === null || order?.remaining_sla_minutes === undefined
+                ? null
+                : Number(order.remaining_sla_minutes),
+            risk_level: order?.risk_level ?? null,
+            priority_level: order?.priority_level ?? null,
+            priority_score: order?.priority_score === null || order?.priority_score === undefined
+                ? null
+                : Number(order.priority_score),
+            priority_reason: order?.priority_reason ?? null,
+            risk_reason: order?.risk_reason ?? null,
+            requested_time_window: order?.requested_time_window ?? null,
             update_url: order?.update_url ?? this.buildOrderUrl(normalizedId),
             show_url: order?.show_url ?? this.buildOrderShowUrl(normalizedId),
             items: Array.isArray(order?.items) ? order.items.map((item) => ({ ...item })) : [],
@@ -240,6 +272,21 @@ export class LiveQueue {
                     parser_confidence: order?.parser_confidence === null || order?.parser_confidence === undefined
                         ? null
                         : Number(order.parser_confidence),
+                    delivery_method: order?.delivery_method ?? null,
+                    payment_method: order?.payment_method ?? null,
+                    commitment_date: order?.commitment_date ?? null,
+                    commitment_time: order?.commitment_time ?? null,
+                    remaining_sla_minutes: order?.remaining_sla_minutes === null || order?.remaining_sla_minutes === undefined
+                        ? null
+                        : Number(order.remaining_sla_minutes),
+                    risk_level: order?.risk_level ?? null,
+                    priority_level: order?.priority_level ?? null,
+                    priority_score: order?.priority_score === null || order?.priority_score === undefined
+                        ? null
+                        : Number(order.priority_score),
+                    priority_reason: order?.priority_reason ?? null,
+                    risk_reason: order?.risk_reason ?? null,
+                    requested_time_window: order?.requested_time_window ?? null,
                 },
                 order?.customer_context ?? this.defaultCustomerContext(order?.customer_name, order?.customer_phone),
             ),

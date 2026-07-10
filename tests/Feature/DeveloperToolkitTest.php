@@ -36,9 +36,9 @@ class DeveloperToolkitTest extends TestCase
         $this->actingAs($user)
             ->get(route('developer.webhook-simulator'))
             ->assertOk()
-            ->assertSee('Developer Toolkit')
-            ->assertSee('Webhook Playground')
-            ->assertSee('Scenario Generator');
+            ->assertSee('Business Scenario Simulator')
+            ->assertSee('Business Scenarios')
+            ->assertSee('Custom Ingestion Playground');
     }
 
     public function test_whatsapp_playground_creates_incoming_message_and_order(): void
