@@ -69,6 +69,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/incoming-messages', [IncomingMessageController::class, 'index'])->name('incoming-messages.index');
     Route::get('/operations', [OperationsController::class, 'index'])->name('operations.index');
     Route::get('/operations/feed', [OperationsController::class, 'feed'])->name('operations.feed');
+    Route::get('/operations/orders/{order}/snapshot', [OperationsController::class, 'snapshot'])->name('operations.orders.snapshot');
 
     Route::get('/developer/webhook-simulator', [WebhookSimulatorController::class, 'index'])->name('developer.webhook-simulator');
     Route::post('/developer/webhook-simulator/send', [WebhookSimulatorController::class, 'send'])->name('developer.webhook-simulator.send');

@@ -47,7 +47,6 @@ class OperationsController extends Controller
         $payload = $this->buildOperationsPayload($request);
 
         return view('operations.index', [
-            'orders' => $payload['orders'],
             'ordersData' => $payload['ordersData'],
             'feedData' => $payload['feedData'],
             'filters' => $payload['filters'],
@@ -64,9 +63,33 @@ class OperationsController extends Controller
         return response()->json($this->buildFeedPayload($request));
     }
 
+    public function snapshot(Order $order): JsonResponse
+    {
+        $order = $this->scopedQuery()
+            ->with([
+                'branch:id,name',
+                'customer:id,name,phone',
+                'incomingMessage:id,status,received_at',
+                'possibleDuplicateOf:id,customer_id,status,created_at',
+                'fulfillmentPlan',
+                'orderItems' => fn ($query) => $query->orderBy('sort_order')->orderBy('id'),
+                'orderItems.product:id,name',
+            ])
+            ->withCount([
+                'orderItems as recognized_order_items_count' => fn ($query) => $query->whereNotNull('product_id'),
+            ])
+            ->whereKey($order->getKey())
+            ->firstOrFail();
+
+        $customerContexts = $this->buildCustomerContexts(collect([$order]));
+        $serializedOrder = $this->serializeOrder($order, $customerContexts[(int) $order->customer_id] ?? null);
+
+        return response()->json($serializedOrder);
+    }
+
     /**
      * @return array{
-     *     orders: \Illuminate\Contracts\Pagination\LengthAwarePaginator,
+     *     orders: \Illuminate\Support\Collection<int, Order>,
      *     ordersData: array<int, array<string, mixed>>,
      *     feedData: array<string, mixed>,
      *     filters: array<string, mixed>,
@@ -79,8 +102,7 @@ class OperationsController extends Controller
         $filters = $this->validateFilters($request);
         $baseQuery = $this->buildInboxQuery($filters);
 
-        $orders = (clone $baseQuery)->paginate(25)->withQueryString();
-        $visibleOrders = $orders->getCollection();
+        $visibleOrders = (clone $baseQuery)->get();
         $customerContexts = $this->buildCustomerContexts($visibleOrders);
 
         $ordersData = $visibleOrders
@@ -94,7 +116,6 @@ class OperationsController extends Controller
         $selectedOrder = collect($ordersData)->firstWhere('id', $selectedOrderId) ?? ($ordersData[0] ?? null);
 
         return [
-            'orders' => $orders,
             'ordersData' => $ordersData,
             'feedData' => $this->buildFeedPayloadFromQuery($baseQuery, $visibleOrders, $customerContexts),
             'filters' => $filters,
@@ -110,8 +131,7 @@ class OperationsController extends Controller
     {
         $filters = $this->validateFilters($request);
         $baseQuery = $this->buildInboxQuery($filters);
-        $orders = (clone $baseQuery)->paginate(25)->withQueryString();
-        $visibleOrders = $orders->getCollection();
+        $visibleOrders = (clone $baseQuery)->get();
         $customerContexts = $this->buildCustomerContexts($visibleOrders);
 
         return $this->buildFeedPayloadFromQuery($baseQuery, $visibleOrders, $customerContexts);
@@ -128,6 +148,7 @@ class OperationsController extends Controller
                 'customer:id,name,phone',
                 'incomingMessage:id,status,received_at',
                 'possibleDuplicateOf:id,customer_id,status,created_at',
+                'fulfillmentPlan',
                 'orderItems' => fn ($query) => $query->orderBy('sort_order')->orderBy('id'),
                 'orderItems.product:id,name',
             ])
@@ -198,9 +219,12 @@ class OperationsController extends Controller
     {
         return $request->validate([
             'search' => ['nullable', 'string', 'max:255'],
+            'customer' => ['nullable', 'string', 'max:255'],
             'status' => ['nullable', 'string', 'max:32'],
             'channel' => ['nullable', 'string', 'max:32'],
             'priority' => ['nullable', 'string', 'max:32'],
+            'vip' => ['nullable', 'boolean'],
+            'duplicates' => ['nullable', 'boolean'],
             'order' => ['nullable', 'integer'],
         ]);
     }
@@ -352,6 +376,7 @@ class OperationsController extends Controller
                     ->orderBy('sort_order')
                     ->orderBy('id'),
                 'possibleDuplicateOf:id,customer_id,status,created_at',
+                'fulfillmentPlan',
             ])
             ->orderByDesc('created_at')
             ->orderByDesc('id')
@@ -593,20 +618,30 @@ class OperationsController extends Controller
             'status' => $order->status,
             'status_label' => $this->statusLabel($order->status),
             'status_tone' => $this->statusTone($order->status),
+            'source_channel' => $order->source_channel,
             'channel' => $this->channelLabel($order->source_channel),
             'channel_key' => $order->source_channel,
+            'created_at' => $order->created_at?->toIso8601String(),
+            'received_at' => $order->incomingMessage?->received_at?->toIso8601String(),
             'customer_name' => $order->customer?->name ?? 'Sin cliente',
+            'customer' => $order->customer?->name ?? 'Sin cliente',
             'customer_phone' => $order->customer?->phone ?? 'Sin telefono',
+            'phone' => $order->customer?->phone ?? 'Sin telefono',
             'branch_name' => $order->branch?->name ?? 'Sin sucursal',
+            'branch' => $order->branch?->name ?? 'Sin sucursal',
             'elapsed_label' => $this->elapsedLabel($order->created_at),
             'created_at_label' => $order->created_at?->format('d/m/Y H:i') ?? 'Sin fecha',
             'preview' => Str::limit($order->raw_message_text ?? 'Sin mensaje original', 120),
+            'original_message' => $order->raw_message_text ?? 'Sin mensaje original',
+            'created_at_iso' => $order->created_at?->toIso8601String(),
             'items_count' => $order->orderItems->count(),
             'recognized_items_count' => (int) ($order->recognized_order_items_count ?? 0),
             'unread' => $order->reviewed_at === null,
             'duplicate' => $order->possible_duplicate_of_order_id !== null,
+            'possible_duplicate' => $order->possible_duplicate_of_order_id !== null,
             'vip' => ($customerContext['segment'] ?? 'Inactive') === 'VIP',
             'parser_confidence' => $order->parser_confidence !== null ? (float) $order->parser_confidence : null,
+            'open_notifications' => (int) ($customerContext['open_notifications'] ?? 0),
             'allowed_actions' => $workflow['allowed_actions'],
             'primary_action' => $workflow['primary_action'],
             'secondary_actions' => $workflow['secondary_actions'],
@@ -619,6 +654,7 @@ class OperationsController extends Controller
                         'product_name' => $item->product?->name,
                         'quantity' => (float) $item->quantity,
                         'unit' => $item->unit,
+                        'name' => $this->resolveItemLabel($item->product_id, $item->raw_text, $item->product?->name),
                         'raw_text' => $item->raw_text,
                         'notes' => $item->notes,
                     ];
@@ -628,6 +664,7 @@ class OperationsController extends Controller
             'update_url' => route('orders.update', $order),
             'show_url' => route('orders.show', $order),
             'customer_context' => $enrichedCustomerContext,
+            'recent_activity' => $enrichedCustomerContext['recent_activity'] ?? [],
         ];
     }
 
@@ -661,6 +698,7 @@ class OperationsController extends Controller
             'elapsed_label' => $this->elapsedLabel($order->created_at),
             'created_at_label' => $order->created_at?->format('d/m/Y H:i') ?? 'Sin fecha',
             'preview' => Str::limit($order->raw_message_text ?? 'Sin mensaje original', 120),
+            'created_at_iso' => $order->created_at?->toIso8601String(),
             'items_count' => $order->orderItems->count(),
             'recognized_items_count' => (int) ($order->recognized_order_items_count ?? 0),
             'unread' => $order->reviewed_at === null,

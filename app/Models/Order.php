@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Services\Fulfillment\FulfillmentPlannerService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Order extends Model
 {
@@ -51,6 +53,13 @@ class Order extends Model
         'source_channel' => 'telegram',
         'status' => self::STATUS_PENDING_REVIEW,
     ];
+
+    protected static function booted(): void
+    {
+        static::created(function (Order $order): void {
+            app(FulfillmentPlannerService::class)->createDefaultPlan($order);
+        });
+    }
 
     protected function casts(): array
     {
@@ -107,6 +116,11 @@ class Order extends Model
     public function orderStatusHistories(): HasMany
     {
         return $this->hasMany(OrderStatusHistory::class);
+    }
+
+    public function fulfillmentPlan(): HasOne
+    {
+        return $this->hasOne(FulfillmentPlan::class);
     }
 
     public function manualReviews(): HasMany

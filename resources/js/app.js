@@ -2,6 +2,7 @@ import './bootstrap';
 
 import Alpine from 'alpinejs';
 import { LiveQueue } from './live-queue';
+import { createOperationsBoard, createOperationsCard, createOperationsColumn } from './operations-board';
 
 window.Alpine = Alpine;
 
@@ -388,5 +389,10 @@ window.operationsCenter = (config) => ({
         );
     },
 });
+
+window.operationsBoard = createOperationsBoard;
+window.operationsColumn = createOperationsColumn;
+window.operationsCard = createOperationsCard;
+window.operationsCenter = createOperationsBoard;
 
 Alpine.start();
