@@ -2,9 +2,9 @@
 
 namespace App\Services\Fulfillment;
 
-use App\Services\Fulfillment\DTO\FulfillmentIntent;
 use App\Models\FulfillmentPlan;
 use App\Models\Order;
+use App\Services\Fulfillment\DTO\FulfillmentIntent;
 use Illuminate\Support\Facades\Log;
 
 class FulfillmentPlannerService
@@ -16,9 +16,6 @@ class FulfillmentPlannerService
 
     public function createDefaultPlan(Order $order): FulfillmentPlan
     {
-        $priority = $this->calculatePriority($order);
-        $commitment = $this->calculateCommitment($order);
-
         return FulfillmentPlan::query()->firstOrCreate(
             ['order_id' => $order->id],
             [
@@ -30,12 +27,16 @@ class FulfillmentPlannerService
                 'pickup_branch_id' => $order->branch_id,
                 'delivery_address' => null,
                 'delivery_notes' => null,
-                'priority_score' => $priority['priority_score'],
-                'priority_level' => $priority['priority_level'],
-                'priority_reason' => $priority['priority_reason'],
-                'commitment_date' => $commitment['commitment_date'],
-                'commitment_time' => $commitment['commitment_time'],
-                'sla_minutes' => $commitment['sla_minutes'],
+                'priority_score' => (int) config('fulfillment.defaults.priority_score', 0),
+                'priority_level' => config('fulfillment.defaults.priority_level', 'normal'),
+                'priority_reason' => null,
+                'commitment_date' => null,
+                'commitment_time' => null,
+                'sla_minutes' => (int) config('fulfillment.defaults.sla_minutes', 0),
+                'remaining_sla_minutes' => null,
+                'risk_level' => null,
+                'risk_reason' => null,
+                'decision_version' => (string) config('fulfillment.decision_version', 'v1'),
                 'planner_confidence' => 0,
                 'planner_notes' => null,
                 'metadata_json' => [],
@@ -81,10 +82,6 @@ class FulfillmentPlannerService
             $updates['planner_confidence'] = $intent->confidence;
         }
 
-        if (! $this->isManuallyConfirmed($plan, 'priority_score')) {
-            $updates['priority_score'] = $this->resolvePriorityScore($intent->priority_level);
-        }
-
         if (! $this->isManuallyConfirmed($plan, 'planner_notes')) {
             $updates['planner_notes'] = $this->mergePlannerNotes(
                 $plan->planner_notes,
@@ -94,49 +91,41 @@ class FulfillmentPlannerService
 
         $plan->forceFill($updates)->save();
 
-        return $plan->refresh();
-    }
-
-    /**
-     * @return array{priority_score:int, priority_level:?string, priority_reason:?string}
-     */
-    public function calculatePriority(?Order $order = null): array
-    {
-        return [
-            'priority_score' => (int) config('fulfillment.defaults.priority_score', 0),
-            'priority_level' => config('fulfillment.defaults.priority_level', 'normal'),
-            'priority_reason' => null,
-        ];
-    }
-
-    /**
-     * @return array{commitment_date:?string, commitment_time:?string, sla_minutes:int}
-     */
-    public function calculateCommitment(?Order $order = null): array
-    {
-        return [
-            'commitment_date' => null,
-            'commitment_time' => null,
-            'sla_minutes' => (int) config('fulfillment.defaults.sla_minutes', 0),
-        ];
+        return $this->applyDecision($plan->refresh());
     }
 
     public function updatePlanner(FulfillmentPlan $plan): FulfillmentPlan
     {
-        $priority = $this->calculatePriority($plan->order);
-        $commitment = $this->calculateCommitment($plan->order);
+        return $this->applyDecision($plan->refresh());
+    }
 
-        $plan->forceFill([
-            'priority_score' => $priority['priority_score'],
-            'priority_level' => $priority['priority_level'],
-            'priority_reason' => $priority['priority_reason'],
-            'commitment_date' => $commitment['commitment_date'],
-            'commitment_time' => $commitment['commitment_time'],
-            'sla_minutes' => $commitment['sla_minutes'],
-            'planner_confidence' => 0,
-        ])->save();
+    private function applyDecision(FulfillmentPlan $plan): FulfillmentPlan
+    {
+        $decision = $this->decisionEngine()->evaluate($plan);
+        $updates = [];
+
+        $this->applyDecisionValue($plan, $updates, 'priority_score', $decision['priority_score']);
+        $this->applyDecisionValue($plan, $updates, 'priority_level', $decision['priority_level']);
+        $this->applyDecisionValue($plan, $updates, 'priority_reason', $decision['priority_reason']);
+        $this->applyDecisionValue($plan, $updates, 'commitment_date', $decision['commitment_date']);
+        $this->applyDecisionValue($plan, $updates, 'commitment_time', $decision['commitment_time']);
+        $this->applyDecisionValue($plan, $updates, 'remaining_sla_minutes', $decision['remaining_sla_minutes']);
+        $this->applyDecisionValue($plan, $updates, 'risk_level', $decision['risk_level']);
+        $this->applyDecisionValue($plan, $updates, 'risk_reason', $decision['risk_reason']);
+        $this->applyDecisionValue($plan, $updates, 'decision_version', $decision['decision_version']);
+
+        if ($updates === []) {
+            return $plan->refresh();
+        }
+
+        $plan->forceFill($updates)->save();
 
         return $plan->refresh();
+    }
+
+    private function decisionEngine(): FulfillmentDecisionEngine
+    {
+        return app(FulfillmentDecisionEngine::class);
     }
 
     private function getOrCreatePlan(Order $order): FulfillmentPlan
@@ -158,6 +147,10 @@ class FulfillmentPlannerService
                 'commitment_date' => null,
                 'commitment_time' => null,
                 'sla_minutes' => (int) config('fulfillment.defaults.sla_minutes', 0),
+                'remaining_sla_minutes' => null,
+                'risk_level' => null,
+                'risk_reason' => null,
+                'decision_version' => (string) config('fulfillment.decision_version', 'v1'),
                 'planner_confidence' => 0,
                 'planner_notes' => null,
                 'metadata_json' => [],
@@ -168,6 +161,15 @@ class FulfillmentPlannerService
     private function applyIntentValue(FulfillmentPlan $plan, array &$updates, string $field, mixed $value): void
     {
         if ($value === null || $this->isManuallyConfirmed($plan, $field)) {
+            return;
+        }
+
+        $updates[$field] = $value;
+    }
+
+    private function applyDecisionValue(FulfillmentPlan $plan, array &$updates, string $field, mixed $value): void
+    {
+        if ($this->isManuallyConfirmed($plan, $field)) {
             return;
         }
 
@@ -195,15 +197,6 @@ class FulfillmentPlannerService
         }
 
         return false;
-    }
-
-    private function resolvePriorityScore(?string $priorityLevel): int
-    {
-        return match ($priorityLevel) {
-            'urgent' => (int) config('fulfillment.priority_scores.urgent', 95),
-            'high' => (int) config('fulfillment.priority_scores.high', 70),
-            default => (int) config('fulfillment.priority_scores.normal', 40),
-        };
     }
 
     private function buildPlannerNotes(FulfillmentIntent $intent): ?string

@@ -21,6 +21,10 @@ class FulfillmentPlanTest extends TestCase
         $this->assertTrue(Schema::hasTable('fulfillment_plans'));
         $this->assertTrue(Schema::hasColumn('fulfillment_plans', 'organization_id'));
         $this->assertTrue(Schema::hasColumn('fulfillment_plans', 'order_id'));
+        $this->assertTrue(Schema::hasColumn('fulfillment_plans', 'risk_level'));
+        $this->assertTrue(Schema::hasColumn('fulfillment_plans', 'risk_reason'));
+        $this->assertTrue(Schema::hasColumn('fulfillment_plans', 'remaining_sla_minutes'));
+        $this->assertTrue(Schema::hasColumn('fulfillment_plans', 'decision_version'));
     }
 
     public function test_fulfillment_plan_is_created_with_order(): void
@@ -56,10 +60,14 @@ class FulfillmentPlanTest extends TestCase
         $this->assertSame((int) config('fulfillment.defaults.sla_minutes', 0), $plan->sla_minutes);
         $this->assertSame(config('fulfillment.defaults.delivery_method', 'unknown'), $plan->delivery_method);
         $this->assertSame(config('fulfillment.defaults.payment_method', 'unknown'), $plan->payment_method);
+        $this->assertSame(config('fulfillment.decision_version', 'v1'), $plan->decision_version);
         $this->assertNull($plan->requested_date);
         $this->assertNull($plan->requested_time_window);
         $this->assertNull($plan->commitment_date);
         $this->assertNull($plan->commitment_time);
+        $this->assertNull($plan->remaining_sla_minutes);
+        $this->assertNull($plan->risk_level);
+        $this->assertNull($plan->risk_reason);
         $this->assertSame(0, $plan->planner_confidence);
         $this->assertSame([], $plan->metadata_json);
     }

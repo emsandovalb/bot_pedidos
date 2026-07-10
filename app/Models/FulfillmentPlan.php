@@ -27,6 +27,10 @@ class FulfillmentPlan extends Model
         'commitment_date',
         'commitment_time',
         'sla_minutes',
+        'remaining_sla_minutes',
+        'risk_level',
+        'risk_reason',
+        'decision_version',
         'planner_confidence',
         'planner_notes',
         'metadata_json',
@@ -39,6 +43,7 @@ class FulfillmentPlan extends Model
             'priority_score' => 'integer',
             'commitment_date' => 'date',
             'sla_minutes' => 'integer',
+            'remaining_sla_minutes' => 'integer',
             'planner_confidence' => 'integer',
             'metadata_json' => 'array',
         ];
