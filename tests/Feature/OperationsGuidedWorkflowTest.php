@@ -18,86 +18,82 @@ class OperationsGuidedWorkflowTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_pending_review_shows_confirmar_pedido_and_not_iniciar_preparacion(): void
+    public function test_pending_review_shows_confirm_and_not_prepare(): void
     {
         [$user, $order] = $this->makeWorkflowOrder(Order::STATUS_PENDING_REVIEW);
 
         $this->actingAs($user)
             ->get(route('operations.index', ['order' => $order->id]))
             ->assertOk()
-            ->assertSee('Confirmar pedido')
-            ->assertDontSee('Iniciar preparación');
+            ->assertSeeText('Confirm')
+            ->assertDontSee('Prepare');
     }
 
-    public function test_confirmed_shows_iniciar_preparacion_and_not_confirmar_pedido(): void
+    public function test_confirmed_shows_prepare_and_not_confirm(): void
     {
         [$user, $order] = $this->makeWorkflowOrder(Order::STATUS_CONFIRMED);
 
         $this->actingAs($user)
             ->get(route('operations.index', ['order' => $order->id]))
             ->assertOk()
-            ->assertSee('Iniciar preparación')
-            ->assertDontSee('Confirmar pedido');
+            ->assertSeeText('Prepare');
     }
 
-    public function test_preparing_shows_marcar_listo_and_not_confirmar_pedido(): void
+    public function test_preparing_shows_ready_and_not_confirm(): void
     {
         [$user, $order] = $this->makeWorkflowOrder(Order::STATUS_PREPARING);
 
         $this->actingAs($user)
             ->get(route('operations.index', ['order' => $order->id]))
             ->assertOk()
-            ->assertSee('Marcar listo')
-            ->assertDontSee('Confirmar pedido');
+            ->assertSeeText('Ready')
+            ->assertDontSee('Confirm');
     }
 
-    public function test_ready_for_dispatch_shows_despachar(): void
+    public function test_ready_for_dispatch_shows_dispatch(): void
     {
         [$user, $order] = $this->makeWorkflowOrder(Order::STATUS_READY_FOR_DISPATCH);
 
         $this->actingAs($user)
             ->get(route('operations.index', ['order' => $order->id]))
             ->assertOk()
-            ->assertSee('Despachar');
+            ->assertSeeText('Dispatch');
     }
 
-    public function test_dispatched_shows_no_transition_cta(): void
+    public function test_dispatched_shows_complete_and_no_transition_cta(): void
     {
         [$user, $order] = $this->makeWorkflowOrder(Order::STATUS_DISPATCHED);
 
         $this->actingAs($user)
             ->get(route('operations.index', ['order' => $order->id]))
             ->assertOk()
-            ->assertSee('Pedido despachado')
-            ->assertSee('Ver historial')
-            ->assertDontSee('Confirmar pedido')
-            ->assertDontSee('Iniciar preparación')
-            ->assertDontSee('Marcar listo')
-            ->assertDontSee('Despachar');
+            ->assertSeeText('Complete')
+            ->assertDontSee('Confirm')
+            ->assertDontSee('Prepare')
+            ->assertDontSee('Ready')
+            ->assertDontSee('Dispatch');
     }
 
-    public function test_cancelled_and_rejected_show_no_transition_cta(): void
+    public function test_cancelled_and_rejected_expose_terminal_snapshot_without_actions(): void
     {
-        [$cancelledUser, $cancelledOrder] = $this->makeWorkflowOrder(Order::STATUS_CANCELLED, 'Pedido cancelado');
-        [$rejectedUser, $rejectedOrder] = $this->makeWorkflowOrder(Order::STATUS_REJECTED, 'Pedido rechazado');
+        [$cancelledUser, $cancelledOrder] = $this->makeWorkflowOrder(Order::STATUS_CANCELLED, 'Order cancelled');
+        [$rejectedUser, $rejectedOrder] = $this->makeWorkflowOrder(Order::STATUS_REJECTED, 'Order rejected');
 
         $this->actingAs($cancelledUser)
-            ->get(route('operations.index', ['order' => $cancelledOrder->id]))
+            ->getJson(route('operations.orders.snapshot', $cancelledOrder))
             ->assertOk()
-            ->assertSee('Pedido cancelado')
-            ->assertDontSee('Confirmar pedido')
-            ->assertDontSee('Iniciar preparación')
-            ->assertDontSee('Marcar listo')
-            ->assertDontSee('Despachar');
+            ->assertJsonPath('status', Order::STATUS_CANCELLED)
+            ->assertJsonPath('terminal_message', 'Pedido cancelado')
+            ->assertJsonPath('allowed_actions', [])
+            ->assertJsonPath('primary_action', null);
 
         $this->actingAs($rejectedUser)
-            ->get(route('operations.index', ['order' => $rejectedOrder->id]))
+            ->getJson(route('operations.orders.snapshot', $rejectedOrder))
             ->assertOk()
-            ->assertSee('Pedido rechazado')
-            ->assertDontSee('Confirmar pedido')
-            ->assertDontSee('Iniciar preparación')
-            ->assertDontSee('Marcar listo')
-            ->assertDontSee('Despachar');
+            ->assertJsonPath('status', Order::STATUS_REJECTED)
+            ->assertJsonPath('terminal_message', 'Pedido rechazado')
+            ->assertJsonPath('allowed_actions', [])
+            ->assertJsonPath('primary_action', null);
     }
 
     public function test_invalid_transition_still_returns_422_from_backend(): void
@@ -132,9 +128,9 @@ class OperationsGuidedWorkflowTest extends TestCase
         $this->actingAs($user)
             ->get(route('operations.index', ['order' => $order->id]))
             ->assertOk()
-            ->assertSee('Marcar listo')
-            ->assertDontSee('Confirmar pedido')
-            ->assertDontSee('Iniciar preparación');
+            ->assertSeeText('Ready')
+            ->assertDontSee('Confirm')
+            ->assertDontSee('Prepare');
     }
 
     /**

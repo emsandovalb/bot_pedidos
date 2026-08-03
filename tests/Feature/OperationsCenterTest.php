@@ -25,7 +25,9 @@ class OperationsCenterTest extends TestCase
             ->get(route('operations.index'))
             ->assertOk()
             ->assertSeeText('Benditio Operations Center')
-            ->assertSeeText('Bandeja inteligente');
+            ->assertSeeText('DO NOW')
+            ->assertSeeText('NEXT')
+            ->assertSeeText('COMPLETED');
     }
 
     public function test_inbox_renders_orders_and_selection_is_preselected_by_query(): void
@@ -37,7 +39,7 @@ class OperationsCenterTest extends TestCase
             ->assertOk()
             ->assertSeeText($selectedOrder->customer->name)
             ->assertSeeText($selectedOrder->raw_message_text)
-            ->assertSeeText('Contexto del cliente');
+            ->assertSeeText('Customer context');
     }
 
     public function test_customer_panel_shows_context_for_selected_order(): void
@@ -47,11 +49,11 @@ class OperationsCenterTest extends TestCase
         $this->actingAs($user)
             ->get(route('operations.index', ['order' => $selectedOrder->id]))
             ->assertOk()
-            ->assertSeeText('Contexto del cliente')
-            ->assertSeeText('Total de pedidos')
-            ->assertSeeText('Productos favoritos')
-            ->assertSeeText('Notificaciones abiertas')
-            ->assertSeeText('Actividad reciente');
+            ->assertSeeText('Customer context')
+            ->assertSeeText('Total orders')
+            ->assertSeeText('Favorite products')
+            ->assertSeeText('Open notifications')
+            ->assertSeeText('Recent activity');
     }
 
     public function test_filters_render_the_agenda_controls_and_js_hooks(): void
@@ -61,10 +63,10 @@ class OperationsCenterTest extends TestCase
         $this->actingAs($user)
             ->get(route('operations.index', ['status' => 'preparando']))
             ->assertOk()
-            ->assertSee('setFilter', false)
+            ->assertSee('applyFilter', false)
             ->assertSee('toggleFilter', false)
-            ->assertSee('Agenda', false)
-            ->assertSee('Kanban', false)
+            ->assertSeeText('Secondary toolbar')
+            ->assertSeeText('Filters')
             ->assertSeeText($selectedOrder->raw_message_text);
 
         $this->actingAs($user)
@@ -76,7 +78,7 @@ class OperationsCenterTest extends TestCase
         $this->actingAs($user)
             ->get(route('operations.index', ['priority' => 'duplicate']))
             ->assertOk()
-            ->assertSee('duplicate', false);
+            ->assertSee('duplicates', false);
 
         $this->actingAs($user)
             ->get(route('operations.index', ['search' => 'telegram especial']))

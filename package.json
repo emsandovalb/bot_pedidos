@@ -4,9 +4,20 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "pilot:clean": "node scripts/pilot-runner.mjs clean",
+        "pilot:prepare": "php artisan pilot:prepare",
+        "pilot:backend": "php artisan test --filter=HardwareStorePilotTest",
+        "pilot:build": "npm run build",
+        "pilot:e2e": "npx playwright test tests/e2e/operations-pilot.spec.js",
+        "pilot:report": "node scripts/pilot-runner.mjs report",
+        "pilot": "node scripts/pilot-runner.mjs full",
+        "test:pilot:backend": "php artisan test --filter=HardwareStorePilotTest",
+        "test:pilot:e2e": "playwright test tests/e2e/operations-pilot.spec.js",
+        "test:pilot": "npm run test:pilot:backend && npm run build && npm run test:pilot:e2e"
     },
     "devDependencies": {
+        "@playwright/test": "^1.62.1",
         "@tailwindcss/forms": "^0.5.2",
         "alpinejs": "^3.4.2",
         "autoprefixer": "^10.4.2",

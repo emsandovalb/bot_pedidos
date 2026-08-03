@@ -65,7 +65,17 @@ class AgendaCard
 
     public function isCompletedToday(): bool
     {
-        return $this->isDispatched() && $this->hasDateFor($this->todayString());
+        if (! $this->isDispatched()) {
+            return false;
+        }
+
+        $dispatchedAt = $this->stringValue($this->order['dispatched_at'] ?? null);
+
+        if ($dispatchedAt !== null) {
+            return substr($dispatchedAt, 0, 10) === $this->todayString();
+        }
+
+        return $this->hasDateFor($this->todayString());
     }
 
     public function isToday(): bool
@@ -346,7 +356,7 @@ class AgendaCard
 
     private function tomorrowString(): string
     {
-        return $this->referenceTime->addDay()->toDateString();
+        return $this->referenceTime->copy()->addDay()->toDateString();
     }
 
     private function formatDateLabel(string $date): string

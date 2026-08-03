@@ -17,7 +17,7 @@ class OperationsKanbanTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_board_renders_four_production_columns_and_the_drawer_entry_path(): void
+    public function test_board_renders_the_next_action_sections_and_drawer_entry_path(): void
     {
         [$user, $fixture] = $this->makeOperationsFixture();
 
@@ -25,13 +25,10 @@ class OperationsKanbanTest extends TestCase
             ->get(route('operations.index', ['order' => $fixture['preparingOrder']->id]))
             ->assertOk()
             ->assertSeeText('Benditio Operations Center')
-            ->assertSeeText('Bandeja inteligente')
-            ->assertSeeText('Nuevos')
-            ->assertSeeText('Preparando')
-            ->assertSeeText('Listos')
-            ->assertSeeText('Despachados')
-            ->assertSeeText('Promedio')
-            ->assertSeeText('Contexto del cliente')
+            ->assertSeeText('DO NOW')
+            ->assertSeeText('NEXT')
+            ->assertSeeText('COMPLETED')
+            ->assertSeeText('Detail drawer')
             ->assertSeeText($fixture['preparingOrder']->customer->name);
     }
 
@@ -46,7 +43,7 @@ class OperationsKanbanTest extends TestCase
             ->assertDontSee('$root.select');
     }
 
-    public function test_cards_map_into_the_expected_kanban_columns(): void
+    public function test_cards_map_into_the_expected_feed_ordering(): void
     {
         [$user, $fixture] = $this->makeOperationsFixture();
 
@@ -55,22 +52,12 @@ class OperationsKanbanTest extends TestCase
             ->assertOk()
             ->json();
 
-        $cardsByColumn = [
-            'new' => [],
-            'preparing' => [],
-            'ready' => [],
-            'dispatched' => [],
-        ];
+        $queueSections = collect($payload['next_action_queue']['sections'] ?? [])->keyBy('key');
+        $doNowCards = collect(data_get($queueSections->get('do_now', []), 'cards', []));
 
-        foreach ($payload['inbox'] ?? [] as $card) {
-            $cardsByColumn[$this->columnKeyForStatus($card['status'] ?? '')][] = (int) $card['id'];
-        }
-
-        $this->assertContains($fixture['pendingReviewOrder']->id, $cardsByColumn['new']);
-        $this->assertContains($fixture['confirmedOrder']->id, $cardsByColumn['new']);
-        $this->assertContains($fixture['preparingOrder']->id, $cardsByColumn['preparing']);
-        $this->assertContains($fixture['readyOrder']->id, $cardsByColumn['ready']);
-        $this->assertContains($fixture['dispatchedOrder']->id, $cardsByColumn['dispatched']);
+        $this->assertNotEmpty($doNowCards);
+        $this->assertCount(5, $doNowCards);
+        $this->assertContains($fixture['pendingReviewOrder']->id, $doNowCards->pluck('id')->map(fn ($id) => (int) $id)->all());
     }
 
     public function test_status_transitions_move_cards_and_update_counters(): void

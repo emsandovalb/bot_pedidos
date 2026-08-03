@@ -17,6 +17,13 @@ class OperationsAgendaTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function tearDown(): void
+    {
+        Carbon::setTestNow();
+
+        parent::tearDown();
+    }
+
     public function test_agenda_renders_as_the_default_landing_view(): void
     {
         [$user] = $this->makeAgendaFixture();
@@ -24,11 +31,11 @@ class OperationsAgendaTest extends TestCase
         $this->actingAs($user)
             ->get(route('operations.index'))
             ->assertOk()
-            ->assertSee('Agenda', false)
-            ->assertSee('Kanban', false)
-            ->assertSee('Production schedule', false)
-            ->assertSee('Orders Today', false)
-            ->assertSee('Average SLA Remaining', false);
+            ->assertSeeText('Benditio Operations Center')
+            ->assertSeeText('DO NOW')
+            ->assertSeeText('NEXT')
+            ->assertSeeText('COMPLETED')
+            ->assertSeeText('Today');
     }
 
     public function test_feed_groups_orders_into_the_expected_agenda_sections(): void
@@ -95,7 +102,8 @@ class OperationsAgendaTest extends TestCase
             ->assertOk()
             ->assertSee('snapshotUrlBase', false)
             ->assertSee('operations-select-order')
-            ->assertSee('drawerLoading', false);
+            ->assertSee('drawerLoading', false)
+            ->assertSeeText('Loading order details...');
     }
 
     /**
@@ -105,8 +113,7 @@ class OperationsAgendaTest extends TestCase
     {
         Carbon::setTestNow(Carbon::parse('2026-07-10 08:00:00'));
 
-        try {
-            $organization = Organization::create([
+        $organization = Organization::create([
                 'name' => 'Agenda Org',
                 'status' => Organization::STATUS_ACTIVE,
             ]);
@@ -297,23 +304,20 @@ class OperationsAgendaTest extends TestCase
                 'rejected_at' => null,
             ]);
 
-            return [
-                $user->fresh(),
-                [
-                    'criticalFirst' => $criticalFirst->fresh(['customer']),
-                    'criticalSecond' => $criticalSecond->fresh(['customer']),
-                    'dueSoonOrder' => $dueSoonOrder->fresh(['customer']),
-                    'todayMorningOrder' => $todayMorningOrder->fresh(['customer']),
-                    'todayAfternoonOrder' => $todayAfternoonOrder->fresh(['customer']),
-                    'tomorrowOrder' => $tomorrowOrder->fresh(['customer']),
-                    'noCommitmentOrder' => $noCommitmentOrder->fresh(['customer']),
-                    'completedOrder' => $completedOrder->fresh(['customer']),
-                    'foreignOrder' => Order::query()->where('organization_id', $foreignOrganization->id)->firstOrFail()->load('customer'),
-                ],
-            ];
-        } finally {
-            Carbon::setTestNow();
-        }
+        return [
+            $user->fresh(),
+            [
+                'criticalFirst' => $criticalFirst->fresh(['customer']),
+                'criticalSecond' => $criticalSecond->fresh(['customer']),
+                'dueSoonOrder' => $dueSoonOrder->fresh(['customer']),
+                'todayMorningOrder' => $todayMorningOrder->fresh(['customer']),
+                'todayAfternoonOrder' => $todayAfternoonOrder->fresh(['customer']),
+                'tomorrowOrder' => $tomorrowOrder->fresh(['customer']),
+                'noCommitmentOrder' => $noCommitmentOrder->fresh(['customer']),
+                'completedOrder' => $completedOrder->fresh(['customer']),
+                'foreignOrder' => Order::query()->where('organization_id', $foreignOrganization->id)->firstOrFail()->load('customer'),
+            ],
+        ];
     }
 
     private function createAgendaOrder(Customer $customer, Branch $branch, Product $product, array $attributes): Order

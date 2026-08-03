@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderNotificationLog;
 use App\Services\OrderWorkflowActionPresenter;
+use App\Services\Operations\NextActionQueue;
 use App\Services\Operations\OperationsAgenda;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\View\View;
@@ -21,6 +22,7 @@ class OperationsController extends Controller
     public function __construct(
         private readonly OrderWorkflowActionPresenter $orderWorkflowActionPresenter,
         private readonly OperationsAgenda $operationsAgenda,
+        private readonly NextActionQueue $nextActionQueue,
     ) {
     }
 
@@ -52,6 +54,7 @@ class OperationsController extends Controller
             'ordersData' => $payload['ordersData'],
             'feedData' => $payload['feedData'],
             'agendaData' => $payload['agendaData'],
+            'queueData' => $payload['queueData'],
             'filters' => $payload['filters'],
             'selectedOrderId' => $payload['selectedOrderId'],
             'selectedOrder' => $payload['selectedOrder'],
@@ -75,6 +78,8 @@ class OperationsController extends Controller
                 'incomingMessage:id,status,received_at',
                 'possibleDuplicateOf:id,customer_id,status,created_at',
                 'fulfillmentPlan',
+                'orderStatusHistories' => fn ($query) => $query->orderBy('created_at'),
+                'notificationLogs' => fn ($query) => $query->orderByDesc('created_at'),
                 'orderItems' => fn ($query) => $query->orderBy('sort_order')->orderBy('id'),
                 'orderItems.product:id,name',
             ])
@@ -116,6 +121,7 @@ class OperationsController extends Controller
             ->all();
 
         $agendaData = $this->operationsAgenda->build(collect($ordersData), now());
+        $queueData = $this->nextActionQueue->build(collect($ordersData), now());
 
         $selectedOrderId = $this->resolveSelectedOrderId($request, $ordersData);
         $selectedOrder = collect($ordersData)->firstWhere('id', $selectedOrderId) ?? ($ordersData[0] ?? null);
@@ -123,7 +129,8 @@ class OperationsController extends Controller
         return [
             'ordersData' => $ordersData,
             'agendaData' => $agendaData,
-            'feedData' => $this->buildFeedPayloadFromOrders(collect($ordersData), $agendaData),
+            'queueData' => $queueData,
+            'feedData' => $this->buildFeedPayloadFromOrders(collect($ordersData), $agendaData, $queueData),
             'filters' => $filters,
             'selectedOrderId' => $selectedOrderId,
             'selectedOrder' => $selectedOrder,
@@ -145,8 +152,9 @@ class OperationsController extends Controller
             })
             ->values();
         $agendaData = $this->operationsAgenda->build($ordersData, now());
+        $queueData = $this->nextActionQueue->build($ordersData, now());
 
-        return $this->buildFeedPayloadFromOrders($ordersData, $agendaData);
+        return $this->buildFeedPayloadFromOrders($ordersData, $agendaData, $queueData);
     }
 
     /**
@@ -161,6 +169,8 @@ class OperationsController extends Controller
                 'incomingMessage:id,status,received_at',
                 'possibleDuplicateOf:id,customer_id,status,created_at',
                 'fulfillmentPlan:id,order_id,requested_date,requested_time_window,delivery_method,payment_method,pickup_branch_id,delivery_address,delivery_notes,priority_score,priority_level,priority_reason,commitment_date,commitment_time,sla_minutes,remaining_sla_minutes,risk_level,risk_reason,decision_version,planner_confidence,planner_notes,metadata_json',
+                'orderStatusHistories' => fn ($query) => $query->orderBy('created_at'),
+                'notificationLogs' => fn ($query) => $query->orderByDesc('created_at'),
                 'orderItems' => fn ($query) => $query->orderBy('sort_order')->orderBy('id'),
                 'orderItems.product:id,name',
             ])
@@ -186,9 +196,10 @@ class OperationsController extends Controller
     /**
      * @param  Collection<int, array<string, mixed>>  $orders
      * @param  array{sections:array<int, array<string, mixed>>, metrics:array<string, mixed>}  $agendaData
+     * @param  array{sections:array<int, array<string, mixed>>, metrics:array<string, mixed>}  $queueData
      * @return array<string, mixed>
      */
-    private function buildFeedPayloadFromOrders(Collection $orders, array $agendaData): array
+    private function buildFeedPayloadFromOrders(Collection $orders, array $agendaData, array $queueData): array
     {
         $latestOrderId = (int) ($orders->max('id') ?? 0);
         $pendingReviewCount = $orders->where('status', Order::STATUS_PENDING_REVIEW)->count();
@@ -201,6 +212,7 @@ class OperationsController extends Controller
             'latest_order_id' => $latestOrderId,
             'server_time' => now()->toIso8601String(),
             'agenda' => $agendaData,
+            'next_action_queue' => $queueData,
             'counts' => [
                 'pending_review' => $pendingReviewCount,
                 'confirmed' => $confirmedCount,
@@ -634,7 +646,9 @@ class OperationsController extends Controller
             'preview' => Str::limit($order->raw_message_text ?? 'Sin mensaje original', 120),
             'original_message' => $order->raw_message_text ?? 'Sin mensaje original',
             'summary' => $this->productSummary($order),
+            'notes' => $order->notes,
             'created_at_iso' => $order->created_at?->toIso8601String(),
+            'dispatched_at' => $order->dispatched_at?->toIso8601String(),
             'items_count' => $order->orderItems->count(),
             'recognized_items_count' => (int) ($order->recognized_order_items_count ?? 0),
             'unread' => $order->reviewed_at === null,
@@ -653,6 +667,58 @@ class OperationsController extends Controller
             'priority_reason' => $order->fulfillmentPlan?->priority_reason,
             'risk_reason' => $order->fulfillmentPlan?->risk_reason,
             'requested_time_window' => $order->fulfillmentPlan?->requested_time_window,
+            'decision_version' => $order->fulfillmentPlan?->decision_version,
+            'planner_confidence' => $order->fulfillmentPlan?->planner_confidence,
+            'planner_notes' => $order->fulfillmentPlan?->planner_notes,
+            'sla_minutes' => $order->fulfillmentPlan?->sla_minutes,
+            'metadata_json' => $order->fulfillmentPlan?->metadata_json,
+            'fulfillment_plan' => [
+                'requested_date' => $order->fulfillmentPlan?->requested_date?->toDateString(),
+                'requested_time_window' => $order->fulfillmentPlan?->requested_time_window,
+                'delivery_method' => $order->fulfillmentPlan?->delivery_method,
+                'payment_method' => $order->fulfillmentPlan?->payment_method,
+                'pickup_branch' => $order->fulfillmentPlan?->pickupBranch?->name,
+                'delivery_address' => $order->fulfillmentPlan?->delivery_address,
+                'delivery_notes' => $order->fulfillmentPlan?->delivery_notes,
+            ],
+            'parser_details' => [
+                'parser_confidence' => $order->parser_confidence !== null ? (float) $order->parser_confidence : null,
+                'decision_version' => $order->fulfillmentPlan?->decision_version,
+                'planner_confidence' => $order->fulfillmentPlan?->planner_confidence,
+                'planner_notes' => $order->fulfillmentPlan?->planner_notes,
+            ],
+            'duplicate_analysis' => [
+                'possible_duplicate_of' => $order->possible_duplicate_of_order_id,
+                'duplicate_score' => $order->duplicate_score !== null ? (float) $order->duplicate_score : null,
+                'duplicate_reason' => $order->duplicate_reason,
+                'duplicate_checked_at' => $order->duplicate_checked_at?->toIso8601String(),
+            ],
+            'timeline' => $order->orderStatusHistories
+                ->map(function ($history): array {
+                    return [
+                        'from_status' => $history->from_status,
+                        'to_status' => $history->to_status,
+                        'changed_via' => $history->changed_via,
+                        'reason' => $history->reason,
+                        'created_at' => $history->created_at?->toIso8601String(),
+                    ];
+                })
+                ->values()
+                ->all(),
+            'notification_history' => $order->notificationLogs
+                ->map(function ($log): array {
+                    return [
+                        'channel' => $log->channel,
+                        'event' => $log->event,
+                        'status' => $log->status,
+                        'reason' => $log->reason,
+                        'message_body' => $log->message_body,
+                        'evaluated_at' => $log->evaluated_at?->toIso8601String(),
+                        'sent_at' => $log->sent_at?->toIso8601String(),
+                    ];
+                })
+                ->values()
+                ->all(),
             'open_notifications' => (int) ($customerContext['open_notifications'] ?? 0),
             'allowed_actions' => $workflow['allowed_actions'],
             'primary_action' => $workflow['primary_action'],
@@ -711,6 +777,7 @@ class OperationsController extends Controller
             'created_at_label' => $order->created_at?->format('d/m/Y H:i') ?? 'Sin fecha',
             'preview' => Str::limit($order->raw_message_text ?? 'Sin mensaje original', 120),
             'created_at_iso' => $order->created_at?->toIso8601String(),
+            'dispatched_at' => $order->dispatched_at?->toIso8601String(),
             'items_count' => $order->orderItems->count(),
             'recognized_items_count' => (int) ($order->recognized_order_items_count ?? 0),
             'unread' => $order->reviewed_at === null,
@@ -729,6 +796,11 @@ class OperationsController extends Controller
             'priority_reason' => $order->fulfillmentPlan?->priority_reason,
             'risk_reason' => $order->fulfillmentPlan?->risk_reason,
             'requested_time_window' => $order->fulfillmentPlan?->requested_time_window,
+            'decision_version' => $order->fulfillmentPlan?->decision_version,
+            'planner_confidence' => $order->fulfillmentPlan?->planner_confidence,
+            'planner_notes' => $order->fulfillmentPlan?->planner_notes,
+            'sla_minutes' => $order->fulfillmentPlan?->sla_minutes,
+            'metadata_json' => $order->fulfillmentPlan?->metadata_json,
             'update_url' => route('orders.update', $order),
             'show_url' => route('orders.show', $order),
         ];

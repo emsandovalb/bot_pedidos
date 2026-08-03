@@ -1,0 +1,40 @@
+{
+  "browser": "chromium",
+  "console_errors": [],
+  "page_errors": [],
+  "http_500_responses": [],
+  "failed_snapshot_requests": [],
+  "failed_requests": [],
+  "alpine_expression_errors": [],
+  "unhandled_javascript_errors": [],
+  "warnings": [],
+  "failures": [],
+  "screenshots": {
+    "toolkit_generated": "screenshots/01-toolkit-generated.png",
+    "operations_home": "screenshots/02-operations-home.png",
+    "order_drawer": "screenshots/03-order-drawer.png",
+    "after_action": "screenshots/04-after-action.png",
+    "final_state": "screenshots/05-final-state.png"
+  },
+  "backend_status_dispatched": true,
+  "completed_ui_visible": true,
+  "workflow_completed": true,
+  "metrics": {
+    "whatsapp_tested": true,
+    "telegram_tested": true,
+    "incoming_messages_created": 210,
+    "customers_created": 15,
+    "identities_created": 15,
+    "orders_created": 210,
+    "fulfillment_plans_created": 210,
+    "dispatched_orders_verified": true,
+    "operations_do_now_visible": true,
+    "operations_next_visible": true,
+    "operations_drawer_opened": true,
+    "operations_items_visible": true,
+    "operations_valid_action_visible": true,
+    "operations_transition_succeeded": true,
+    "operations_live_visible": true,
+    "operations_search_stable": true
+  }
+}

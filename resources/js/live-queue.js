@@ -92,8 +92,15 @@ export class LiveQueue {
         const existingOrders = Array.isArray(this.component.orders) ? this.component.orders : [];
         const activeId = this.component.activeId ?? null;
         const diff = this.diffOrders(existingOrders, incomingOrders);
+        const nextActionQueue = payload?.next_action_queue;
 
         this.component.orders = diff.orders;
+        if (nextActionQueue) {
+            this.component.queueData = {
+                sections: Array.isArray(nextActionQueue.sections) ? nextActionQueue.sections : [],
+                metrics: nextActionQueue.metrics ?? {},
+            };
+        }
         this.component.counts = {
             ...this.component.counts,
             ...(payload?.counts ?? {}),
@@ -184,6 +191,7 @@ export class LiveQueue {
             elapsed_label: order.elapsed_label ?? null,
             created_at_label: order.created_at_label ?? null,
             created_at_iso: order.created_at_iso ?? null,
+            dispatched_at: order.dispatched_at ?? null,
             preview: order.preview ?? null,
             summary: order.summary ?? null,
             items_count: Number(order.items_count ?? 0),

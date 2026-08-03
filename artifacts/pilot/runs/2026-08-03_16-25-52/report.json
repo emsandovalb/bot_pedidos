@@ -1,0 +1,313 @@
+{
+    "status": "not_ready",
+    "started_at": "2026-08-03T16:25:52.557Z",
+    "finished_at": "2026-08-03T16:25:56.513Z",
+    "duration_seconds": 3.956,
+    "phases": [
+        {
+            "name": "prepare",
+            "status": "passed",
+            "duration_seconds": 0.61,
+            "command": "php artisan pilot:prepare",
+            "exit_code": 0,
+            "stdout": "Pilot database ready at C:\\Users\\Ema\\Desktop\\Code\\bot_pedidos\\database\\pilot.sqlite on port 8010.\r\n",
+            "stderr": "",
+            "warnings": [],
+            "failures": [],
+            "artifacts": []
+        },
+        {
+            "name": "backend",
+            "status": "passed",
+            "duration_seconds": 2.963,
+            "command": "php artisan test --filter=HardwareStorePilotTest",
+            "exit_code": 0,
+            "stdout": "{\"tool\":\"phpunit\",\"result\":\"passed\",\"tests\":7,\"passed\":7,\"assertions\":92,\"duration_ms\":2055}\r\n",
+            "stderr": "",
+            "warnings": [],
+            "failures": [],
+            "artifacts": []
+        },
+        {
+            "name": "build",
+            "status": "failed",
+            "duration_seconds": 0,
+            "command": "npm run build",
+            "exit_code": null,
+            "stdout": "",
+            "stderr": "",
+            "warnings": [],
+            "failures": [
+                "build failed with exit code 1."
+            ],
+            "artifacts": []
+        },
+        {
+            "name": "e2e",
+            "status": "failed",
+            "duration_seconds": 0,
+            "command": "playwright test tests/e2e/operations-pilot.spec.js",
+            "exit_code": null,
+            "stdout": "",
+            "stderr": "",
+            "warnings": [],
+            "failures": [
+                "e2e failed with exit code 1."
+            ],
+            "artifacts": []
+        }
+    ],
+    "metrics": {
+        "backend_tests_passed": null,
+        "backend_assertions": null,
+        "backend_failures": null,
+        "build_warnings": [],
+        "vite_manifest_exists": true,
+        "browser": "chromium",
+        "console_error_count": 0,
+        "http_500_count": 0,
+        "failed_request_count": 0,
+        "backend_status_dispatched": false,
+        "workflow_completed": false,
+        "completed_ui_inconsistent": false
+    },
+    "warnings": [
+        "Node version differs from the preferred pilot runtime."
+    ],
+    "failures": [
+        "Vite build failed.",
+        "Browser E2E failed.",
+        "build failed with exit code 1.",
+        "e2e failed with exit code 1."
+    ],
+    "artifacts": {
+        "screenshots": [],
+        "run_dir": "C:\\Users\\Ema\\Desktop\\Code\\bot_pedidos\\artifacts\\pilot\\runs\\2026-08-03_16-25-52",
+        "playwright_report": "C:\\Users\\Ema\\Desktop\\Code\\bot_pedidos\\playwright-report\\index.html"
+    },
+    "environment": {
+        "php_version": "8.3.9",
+        "laravel_version": "Laravel Framework 13.8.0",
+        "node_version": "v24.18.0",
+        "database_driver": "sqlite",
+        "pilot_database_path": "C:\\Users\\Ema\\Desktop\\Code\\bot_pedidos\\database\\pilot.sqlite",
+        "application_url": "http://127.0.0.1:8010",
+        "timestamp": "2026-08-03T16:25:52.930Z"
+    },
+    "recommendation": "Blocked",
+    "sections": [
+        {
+            "title": "Environment",
+            "status": "Context and runtime",
+            "items": [
+                {
+                    "label": "PHP version",
+                    "value": "8.3.9"
+                },
+                {
+                    "label": "Laravel version",
+                    "value": "Laravel Framework 13.8.0"
+                },
+                {
+                    "label": "Node version",
+                    "value": "v24.18.0"
+                },
+                {
+                    "label": "Database driver",
+                    "value": "sqlite"
+                },
+                {
+                    "label": "Pilot database path",
+                    "value": "C:\\Users\\Ema\\Desktop\\Code\\bot_pedidos\\database\\pilot.sqlite"
+                },
+                {
+                    "label": "Application URL",
+                    "value": "http://127.0.0.1:8010"
+                },
+                {
+                    "label": "Timestamp",
+                    "value": "2026-08-03T16:25:52.930Z"
+                }
+            ]
+        },
+        {
+            "title": "Backend",
+            "status": "passed",
+            "items": [
+                {
+                    "label": "Tests passed",
+                    "value": "PASS"
+                },
+                {
+                    "label": "Assertions",
+                    "value": "n/a"
+                },
+                {
+                    "label": "Duration",
+                    "value": "2.96 s"
+                },
+                {
+                    "label": "Failures",
+                    "value": 0
+                }
+            ]
+        },
+        {
+            "title": "Build",
+            "status": "failed",
+            "items": [
+                {
+                    "label": "Vite build status",
+                    "value": "FAIL"
+                },
+                {
+                    "label": "Duration",
+                    "value": "0.00 s"
+                },
+                {
+                    "label": "Warnings",
+                    "value": []
+                },
+                {
+                    "label": "Asset manifest exists",
+                    "value": "Yes"
+                }
+            ]
+        },
+        {
+            "title": "Browser E2E",
+            "status": "failed",
+            "items": [
+                {
+                    "label": "Tests passed",
+                    "value": "FAIL"
+                },
+                {
+                    "label": "Browser used",
+                    "value": "chromium"
+                },
+                {
+                    "label": "Duration",
+                    "value": "0.00 s"
+                },
+                {
+                    "label": "Console errors",
+                    "value": 0
+                },
+                {
+                    "label": "HTTP 500 responses",
+                    "value": 0
+                },
+                {
+                    "label": "Failed requests",
+                    "value": 0
+                },
+                {
+                    "label": "Screenshots",
+                    "value": []
+                }
+            ]
+        },
+        {
+            "title": "Business Flow",
+            "status": "Review",
+            "items": [
+                {
+                    "label": "WhatsApp tested",
+                    "value": "No"
+                },
+                {
+                    "label": "Telegram tested",
+                    "value": "No"
+                },
+                {
+                    "label": "Incoming messages created",
+                    "value": 0
+                },
+                {
+                    "label": "Customers created",
+                    "value": 0
+                },
+                {
+                    "label": "Identities created",
+                    "value": 0
+                },
+                {
+                    "label": "Orders created",
+                    "value": 0
+                },
+                {
+                    "label": "Fulfillment plans created",
+                    "value": 0
+                },
+                {
+                    "label": "Workflow completed",
+                    "value": "No"
+                },
+                {
+                    "label": "Dispatched orders verified",
+                    "value": "No"
+                }
+            ]
+        },
+        {
+            "title": "Operations UX",
+            "status": "Blocked",
+            "items": [
+                {
+                    "label": "Do Now visible",
+                    "value": "No"
+                },
+                {
+                    "label": "Next visible",
+                    "value": "No"
+                },
+                {
+                    "label": "Drawer opens",
+                    "value": "No"
+                },
+                {
+                    "label": "Items visible",
+                    "value": "No"
+                },
+                {
+                    "label": "Valid action shown",
+                    "value": "No"
+                },
+                {
+                    "label": "Status transition succeeds",
+                    "value": "No"
+                },
+                {
+                    "label": "Live indicator visible",
+                    "value": "No"
+                },
+                {
+                    "label": "Search/filter stable",
+                    "value": "No"
+                }
+            ]
+        },
+        {
+            "title": "Known Warnings",
+            "status": "Review",
+            "list": [
+                "Node version differs from the preferred pilot runtime."
+            ]
+        },
+        {
+            "title": "Final Recommendation",
+            "status": "NOT READY",
+            "items": [
+                {
+                    "label": "Recommendation",
+                    "value": "Blocked"
+                },
+                {
+                    "label": "Failures",
+                    "value": "Vite build failed.; Browser E2E failed.; build failed with exit code 1.; e2e failed with exit code 1."
+                }
+            ]
+        }
+    ]
+}

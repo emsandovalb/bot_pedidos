@@ -503,6 +503,7 @@ class OrderController extends Controller
                     'status' => $order->status,
                     'status_label' => $this->statusLabel($order->status),
                     'status_tone' => $this->statusTone($order->status),
+                    'dispatched_at' => $order->dispatched_at?->toIso8601String(),
                     'updated_at' => $order->updated_at?->toIso8601String(),
                     'allowed_actions' => $workflow['allowed_actions'],
                     'primary_action' => $workflow['primary_action'],

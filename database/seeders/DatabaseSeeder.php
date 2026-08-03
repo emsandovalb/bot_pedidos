@@ -11,6 +11,7 @@ use App\Models\Organization;
 use App\Models\Product;
 use App\Models\ProductAlias;
 use App\Models\User;
+use App\Services\ProductTextNormalizer;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -176,6 +177,7 @@ class DatabaseSeeder extends Seeder
                 'organization_id' => $organization->id,
                 'branch_id' => $productData['branch_id'],
                 'name' => $productData['name'],
+                'normalized_name' => app(ProductTextNormalizer::class)->normalize($productData['name']),
                 'sku' => $productData['sku'],
                 'unit_label' => $productData['unit_label'],
                 'is_active' => true,
@@ -187,6 +189,7 @@ class DatabaseSeeder extends Seeder
                     'organization_id' => $organization->id,
                     'product_id' => $product->id,
                     'alias' => $alias,
+                    'normalized_alias' => app(ProductTextNormalizer::class)->normalize($alias),
                     'match_weight' => 100,
                     'is_active' => true,
                 ]);

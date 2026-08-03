@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BENDITIO PILOT READINESS</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #f6f7fb;
+            --card: #ffffff;
+            --text: #122033;
+            --muted: #5a6b82;
+            --border: #d9e1ec;
+            --green: #0f7a4c;
+            --amber: #9a6700;
+            --red: #b42318;
+        }
+        body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%); color: var(--text); }
+        .wrap { max-width: 1180px; margin: 0 auto; padding: 32px 20px 56px; }
+        .hero { background: rgba(255,255,255,0.9); border: 1px solid var(--border); border-radius: 24px; padding: 28px; box-shadow: 0 18px 50px rgba(18,32,51,.08); }
+        .kicker { letter-spacing: .18em; text-transform: uppercase; font-size: 12px; font-weight: 700; color: var(--muted); }
+        h1 { margin: 10px 0 6px; font-size: 36px; }
+        .status { display: inline-flex; align-items: center; gap: 10px; margin-top: 12px; padding: 8px 14px; border-radius: 999px; font-weight: 700; }
+        .ready { background: #ecfdf3; color: var(--green); }
+        .warning { background: #fff7e6; color: var(--amber); }
+        .not-ready { background: #fff1f0; color: var(--red); }
+        .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-top: 20px; }
+        .meta div { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 14px; }
+        .meta span { display: block; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+        .meta strong { display: block; margin-top: 6px; font-size: 15px; }
+        .grid { display: grid; gap: 16px; margin-top: 18px; }
+        .card { background: rgba(255,255,255,0.95); border: 1px solid var(--border); border-radius: 20px; padding: 20px; box-shadow: 0 14px 30px rgba(18,32,51,.05); }
+        .card h2 { margin: 0 0 6px; font-size: 22px; }
+        .section-status { margin: 0 0 14px; color: var(--muted); font-size: 14px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border-top: 1px solid #edf1f6; padding: 10px 0; text-align: left; vertical-align: top; }
+        th { width: 36%; font-size: 14px; }
+        td { color: var(--muted); }
+        ul { margin: 0; padding-left: 20px; color: var(--muted); }
+        .footer { margin-top: 18px; color: var(--muted); font-size: 13px; }
+        a { color: #0f62fe; text-decoration: none; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <header class="hero">
+        <div class="kicker">Benditio Pilot Readiness</div>
+        <h1>BENDITIO PILOT READINESS</h1>
+        <div class="status ready">Overall status: <strong>READY</strong></div>
+        <div class="meta">
+            <div><span>Started</span><strong>2026-08-03T17:22:44.087Z</strong></div>
+            <div><span>Finished</span><strong>2026-08-03T17:23:36.908Z</strong></div>
+            <div><span>Duration</span><strong>52.82 s</strong></div>
+            <div><span>Warnings</span><strong>0</strong></div>
+        </div>
+        <div class="footer">Generated at 2026-08-03T17:23:37+00:00</div>
+    </header>
+
+    <div class="grid">
+        <section class="card"><h2>Environment</h2><p class="section-status">Context and runtime</p><table><tr><th>PHP version</th><td>8.3.9</td></tr><tr><th>Laravel version</th><td>Laravel Framework 13.8.0</td></tr><tr><th>Node version</th><td>v24.18.0</td></tr><tr><th>Database driver</th><td>sqlite</td></tr><tr><th>Pilot database path</th><td>C:\Users\Ema\Desktop\Code\bot_pedidos\database\pilot.sqlite</td></tr><tr><th>Application URL</th><td>http://127.0.0.1:8010</td></tr><tr><th>Timestamp</th><td>2026-08-03T17:22:44.510Z</td></tr></table></section><section class="card"><h2>Backend</h2><p class="section-status">passed</p><table><tr><th>Tests passed</th><td>PASS</td></tr><tr><th>Assertions</th><td>n/a</td></tr><tr><th>Duration</th><td>2.91 s</td></tr><tr><th>Failures</th><td>0</td></tr></table></section><section class="card"><h2>Build</h2><p class="section-status">passed</p><table><tr><th>Vite build status</th><td>PASS</td></tr><tr><th>Duration</th><td>2.28 s</td></tr><tr><th>Warnings</th><td></td></tr><tr><th>Asset manifest exists</th><td>Yes</td></tr></table></section><section class="card"><h2>Browser E2E</h2><p class="section-status">passed</p><table><tr><th>Tests passed</th><td>PASS</td></tr><tr><th>Browser used</th><td>chromium</td></tr><tr><th>Duration</th><td>46.53 s</td></tr><tr><th>Console errors</th><td>0</td></tr><tr><th>HTTP 500 responses</th><td>0</td></tr><tr><th>Failed requests</th><td>0</td></tr><tr><th>Screenshots</th><td>screenshots/01-toolkit-generated.png, screenshots/02-operations-home.png, screenshots/03-order-drawer.png, screenshots/04-after-action.png, screenshots/05-final-state.png</td></tr></table></section><section class="card"><h2>Business Flow</h2><p class="section-status">Healthy</p><table><tr><th>WhatsApp tested</th><td>Yes</td></tr><tr><th>Telegram tested</th><td>Yes</td></tr><tr><th>Incoming messages created</th><td>240</td></tr><tr><th>Customers created</th><td>15</td></tr><tr><th>Identities created</th><td>15</td></tr><tr><th>Orders created</th><td>240</td></tr><tr><th>Fulfillment plans created</th><td>240</td></tr><tr><th>Workflow completed</th><td>Yes</td></tr><tr><th>Dispatched orders verified</th><td>Yes</td></tr></table></section><section class="card"><h2>Operations UX</h2><p class="section-status">Healthy</p><table><tr><th>Do Now visible</th><td>Yes</td></tr><tr><th>Next visible</th><td>Yes</td></tr><tr><th>Drawer opens</th><td>Yes</td></tr><tr><th>Items visible</th><td>Yes</td></tr><tr><th>Valid action shown</th><td>Yes</td></tr><tr><th>Status transition succeeds</th><td>Yes</td></tr><tr><th>Live indicator visible</th><td>Yes</td></tr><tr><th>Search/filter stable</th><td>Yes</td></tr></table></section><section class="card"><h2>Known Warnings</h2><p class="section-status">None</p><ul><li>No known warnings.</li></ul></section><section class="card"><h2>Final Recommendation</h2><p class="section-status">READY</p><table><tr><th>Recommendation</th><td>Ready for pilot</td></tr><tr><th>Failures</th><td>None</td></tr></table></section>
+        <section class="card">
+            <h2>Artifacts</h2>
+            <ul><li><a href="screenshots/01-toolkit-generated.png">screenshots</a></li><li><a href="screenshots/02-operations-home.png">screenshots</a></li><li><a href="screenshots/03-order-drawer.png">screenshots</a></li><li><a href="screenshots/04-after-action.png">screenshots</a></li><li><a href="screenshots/05-final-state.png">screenshots</a></li><li><a href="C:\Users\Ema\Desktop\Code\bot_pedidos\artifacts\pilot\runs\2026-08-03_17-22-44">run_dir</a></li><li><a href="C:\Users\Ema\Desktop\Code\bot_pedidos\playwright-report\index.html">playwright_report</a></li></ul>
+        </section>
+    </div>
+</div>
+</body>
+</html>

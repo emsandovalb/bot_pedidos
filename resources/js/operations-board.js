@@ -1,45 +1,10 @@
-const BOARD_COLUMNS = [
-    {
-        key: 'new',
-        label: 'Nuevos',
-        statuses: ['pending_review', 'confirmed'],
-        tone: 'border-blue-200 bg-blue-50/70 text-blue-800',
-        accent: 'border-l-blue-500',
-        dot: 'bg-blue-500',
-        emptyLabel: 'No hay pedidos nuevos.',
-    },
-    {
-        key: 'preparing',
-        label: 'Preparando',
-        statuses: ['preparing'],
-        tone: 'border-amber-200 bg-amber-50/70 text-amber-800',
-        accent: 'border-l-amber-500',
-        dot: 'bg-amber-500',
-        emptyLabel: 'No hay pedidos preparando.',
-    },
-    {
-        key: 'ready',
-        label: 'Listos',
-        statuses: ['ready_for_dispatch'],
-        tone: 'border-emerald-200 bg-emerald-50/70 text-emerald-800',
-        accent: 'border-l-emerald-500',
-        dot: 'bg-emerald-500',
-        emptyLabel: 'No hay pedidos listos.',
-    },
-    {
-        key: 'dispatched',
-        label: 'Despachados',
-        statuses: ['dispatched'],
-        tone: 'border-slate-200 bg-slate-50 text-slate-700',
-        accent: 'border-l-slate-400',
-        dot: 'bg-slate-400',
-        emptyLabel: 'No hay pedidos despachados.',
-    },
-];
+import { LiveQueue } from './live-queue';
 
-const STATUS_TO_COLUMN = new Map(
-    BOARD_COLUMNS.flatMap((column) => column.statuses.map((status) => [status, column.key])),
-);
+const CHANNEL_LABELS = {
+    whatsapp: 'WhatsApp',
+    telegram: 'Telegram',
+    instagram: 'Instagram',
+};
 
 const DEFAULT_FILTERS = {
     search: '',
@@ -55,11 +20,6 @@ const DEFAULT_FILTERS = {
     status: 'all',
 };
 
-const CHANNEL_LABELS = {
-    whatsapp: 'WhatsApp',
-    telegram: 'Telegram',
-};
-
 function toNumber(value, fallback = 0) {
     const parsed = Number(value);
     return Number.isFinite(parsed) ? parsed : fallback;
@@ -73,7 +33,7 @@ function normalizeText(value) {
 }
 
 function parseTimestamp(value) {
-    if (! value) {
+    if (!value) {
         return null;
     }
 
@@ -81,78 +41,26 @@ function parseTimestamp(value) {
     return Number.isFinite(parsed) ? parsed : null;
 }
 
-function formatWaitLabel(minutes) {
+function formatMinutes(minutes) {
     const rounded = Math.max(1, Math.round(minutes));
 
     if (rounded < 60) {
         return `${rounded} min`;
     }
 
-    const hours = Math.round(rounded / 60);
-    return `${hours} h`;
-}
-
-function isUrgentOrder(order, referenceTimeMs) {
-    const createdAtMs = parseTimestamp(order.created_at_iso);
-    if (createdAtMs === null) {
-        return false;
-    }
-
-    const ageMinutes = (referenceTimeMs - createdAtMs) / 60000;
-
-    return (
-        (order.status === 'pending_review' && ageMinutes >= 20)
-        || order.parser_confidence === null
-        || Number(order.parser_confidence) < 0.5
-    );
-}
-
-function isAgendaUrgent(order) {
-    if (String(order.risk_level ?? '') === 'critical' || String(order.risk_level ?? '') === 'high') {
-        return true;
-    }
-
-    if (order.remaining_sla_minutes !== null && order.remaining_sla_minutes !== undefined) {
-        return Number(order.remaining_sla_minutes) < 60;
-    }
-
-    return false;
-}
-
-function agendaPriorityWeight(order) {
-    const risk = String(order.risk_level ?? '');
-
-    if (risk === 'critical') {
-        return 0;
-    }
-
-    if (risk === 'high') {
-        return 1;
-    }
-
-    if (String(order.priority_level ?? '') === 'urgent') {
-        return 2;
-    }
-
-    if (String(order.priority_level ?? '') === 'low') {
-        return 4;
-    }
-
-    return 3;
+    return `${Math.round(rounded / 60)} h`;
 }
 
 function commitmentDateKey(order) {
     return String(order.commitment_date ?? '');
 }
 
-function hasCommitment(order) {
-    return commitmentDateKey(order) !== '';
+function dispatchedDateKey(order) {
+    return String(order.dispatched_at ?? '').slice(0, 10);
 }
 
 function commitmentMinutes(order) {
-    const value = String(order.commitment_time ?? '');
-    const match = value.match(/^(\d{2}):(\d{2})/);
-
+    const match = String(order.commitment_time ?? '').match(/^(\d{2}):(\d{2})/);
     if (!match) {
         return Number.POSITIVE_INFINITY;
     }
@@ -161,141 +69,281 @@ function commitmentMinutes(order) {
 }
 
 function timeWindowLabel(order) {
-    const explicit = String(order.requested_time_window ?? '').trim().toLowerCase();
+    const explicit = String(order.time_window_label ?? order.requested_time_window ?? '').trim();
     if (explicit !== '') {
         return explicit.replaceAll('_', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
     }
 
-    const time = String(order.commitment_time ?? '');
-    const match = time.match(/^(\d{2}):/);
+    const match = String(order.commitment_time ?? '').match(/^(\d{2}):/);
     if (!match) {
-        return 'Anytime';
+        return 'Tomorrow';
     }
 
     const hour = Number(match[1]);
     if (hour < 10) return 'Morning';
-    if (hour < 12) return 'Before Noon';
-    if (hour < 17) return 'Afternoon';
-    if (hour < 20) return 'Evening';
-    return 'Anytime';
+    if (hour < 13) return 'Afternoon';
+    if (hour < 18) return 'Evening';
+    return 'Tomorrow';
 }
 
-function agendaSectionKeyForOrder(order, referenceDate) {
-    const commitmentDate = commitmentDateKey(order);
-    const today = referenceDate.toISOString().slice(0, 10);
-    const tomorrow = new Date(referenceDate.getTime() + (24 * 60 * 60 * 1000)).toISOString().slice(0, 10);
+function isUrgentOrder(order) {
+    const risk = String(order.risk_level ?? '');
+    const priority = String(order.priority_level ?? '');
+    const remaining = order.remaining_sla_minutes;
 
-    if (String(order.risk_level ?? '') === 'critical') {
-        return 'critical';
-    }
-
-    if (String(order.risk_level ?? '') === 'high') {
-        return 'due_soon';
-    }
-
-    if (String(order.status ?? '') === 'dispatched' && commitmentDate === today) {
-        return 'completed';
-    }
-
-    if (commitmentDate === today) {
-        return 'today';
-    }
-
-    if (commitmentDate === tomorrow) {
-        return 'tomorrow';
-    }
-
-    if (commitmentDate === '') {
-        return 'no_commitment';
-    }
-
-    return 'today';
+    return risk === 'critical'
+        || risk === 'high'
+        || priority === 'urgent'
+        || (remaining !== null && remaining !== undefined && Number(remaining) < 0);
 }
 
-function sectionLabel(key) {
-    return ({
-        critical: 'Critical',
-        due_soon: 'Due Soon',
-        today: 'Today',
-        tomorrow: 'Tomorrow',
-        no_commitment: 'No Commitment',
-        completed: 'Completed Today',
-    })[key] ?? 'Agenda';
-}
+function sortOrder(left, right) {
+    const leftRemaining = left.remaining_sla_minutes === null || left.remaining_sla_minutes === undefined
+        ? Number.POSITIVE_INFINITY
+        : Number(left.remaining_sla_minutes);
+    const rightRemaining = right.remaining_sla_minutes === null || right.remaining_sla_minutes === undefined
+        ? Number.POSITIVE_INFINITY
+        : Number(right.remaining_sla_minutes);
 
-function sectionTone(key) {
-    return ({
-        critical: 'border-rose-200 bg-rose-50/80 text-rose-800',
-        due_soon: 'border-orange-200 bg-orange-50/80 text-orange-800',
-        today: 'border-blue-200 bg-blue-50/80 text-blue-800',
-        tomorrow: 'border-sky-200 bg-sky-50/80 text-sky-800',
-        no_commitment: 'border-slate-200 bg-slate-50 text-slate-700',
-        completed: 'border-emerald-200 bg-emerald-50/80 text-emerald-800',
-    })[key] ?? 'border-slate-200 bg-white text-slate-700';
-}
+    if (leftRemaining !== rightRemaining) {
+        return leftRemaining - rightRemaining;
+    }
 
-function columnForStatus(status) {
-    return STATUS_TO_COLUMN.get(status) ?? 'new';
-}
+    const leftCommitment = commitmentMinutes(left);
+    const rightCommitment = commitmentMinutes(right);
+    if (leftCommitment !== rightCommitment) {
+        return leftCommitment - rightCommitment;
+    }
 
-function sortOldestFirst(left, right) {
     const leftTime = parseTimestamp(left.created_at_iso);
     const rightTime = parseTimestamp(right.created_at_iso);
-
     if (leftTime !== null && rightTime !== null && leftTime !== rightTime) {
         return leftTime - rightTime;
     }
 
-    if (left.id !== right.id) {
-        return toNumber(left.id) - toNumber(right.id);
-    }
+    return toNumber(left.id) - toNumber(right.id);
+}
 
-    return 0;
+function sectionSortLabel(card) {
+    return `${String(card.customer_name ?? '')} ${String(card.preview ?? '')}`.trim();
 }
 
 function buildChannelPill(order) {
     const key = String(order.channel_key ?? '').toLowerCase();
 
     return {
-        label: order.channel ?? CHANNEL_LABELS[key] ?? 'Sin canal',
+        label: CHANNEL_LABELS[key] ?? (order.channel ?? 'Sin canal'),
+        glyph: key === 'telegram' ? 'TG' : (key === 'whatsapp' ? 'WA' : 'CH'),
         tone: key === 'telegram'
             ? 'bg-sky-50 text-sky-800 ring-1 ring-sky-100'
             : 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100',
-        glyph: key === 'telegram' ? 'TG' : 'WA',
     };
 }
 
-function buildPriorityPill(order, referenceTimeMs) {
-    return isUrgentOrder(order, referenceTimeMs)
-        ? {
-            label: 'Urgente',
-            tone: 'bg-amber-50 text-amber-800 ring-1 ring-amber-100',
-        }
-        : {
-            label: 'Normal',
-            tone: 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
-        };
+function buildWorkflow(orderId, status, ordersBaseUrl) {
+    const base = `${ordersBaseUrl}/${orderId}`;
+
+    switch (status) {
+        case 'pending_review':
+            return {
+                label: 'Prepare',
+                key: 'confirm',
+                method: 'POST',
+                url: `${base}/confirm`,
+                style: 'primary',
+                requires_confirmation: false,
+            };
+        case 'confirmed':
+            return {
+                label: 'Prepare',
+                key: 'prepare',
+                method: 'POST',
+                url: `${base}/prepare`,
+                style: 'primary',
+                requires_confirmation: false,
+            };
+        case 'preparing':
+            return {
+                label: 'Ready',
+                key: 'ready',
+                method: 'POST',
+                url: `${base}/ready-for-dispatch`,
+                style: 'primary',
+                requires_confirmation: false,
+            };
+        case 'ready_for_dispatch':
+            return {
+                label: 'Dispatch',
+                key: 'dispatch',
+                method: 'POST',
+                url: `${base}/dispatch`,
+                style: 'primary',
+                requires_confirmation: false,
+            };
+        case 'dispatched':
+            return {
+                label: 'Complete',
+                key: 'view_history',
+                method: 'GET',
+                url: base,
+                style: 'secondary',
+                requires_confirmation: false,
+            };
+        default:
+            return {
+                label: 'Cancel',
+                key: 'cancel',
+                method: 'POST',
+                url: `${base}/cancel`,
+                style: 'danger',
+                requires_confirmation: true,
+            };
+    }
 }
 
-function buildConfidencePill(order) {
-    if (order.parser_confidence === null || order.parser_confidence === undefined) {
-        return {
-            label: 'Sin parser',
-            tone: 'bg-slate-100 text-slate-600 ring-1 ring-slate-200',
-        };
+function normalizeQueueData(queueData) {
+    return {
+        sections: Array.isArray(queueData?.sections) ? queueData.sections : [],
+        metrics: queueData?.metrics ?? {},
+    };
+}
+
+function normalizeOrderDetails(orderDetails) {
+    const normalized = {};
+
+    for (const [key, value] of Object.entries(orderDetails ?? {})) {
+        normalized[key] = value;
     }
 
-    const value = Number(order.parser_confidence);
-    const tone = value >= 0.8
-        ? 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100'
-        : value >= 0.5
-            ? 'bg-amber-50 text-amber-800 ring-1 ring-amber-100'
-            : 'bg-rose-50 text-rose-800 ring-1 ring-rose-100';
+    return normalized;
+}
 
-    return {
-        label: `${value.toFixed(2)}`,
-        tone,
+function normalizeOrder(order, ordersBaseUrl) {
+    const normalizedId = Number(order?.id ?? 0);
+    const workflow = buildWorkflow(normalizedId, order?.status ?? 'pending_review', ordersBaseUrl);
+
+        return {
+            id: normalizedId,
+            status: order?.status ?? 'pending_review',
+        status_label: order?.status_label ?? String(order?.status ?? 'pending review').replaceAll('_', ' '),
+        status_tone: order?.status_tone ?? 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
+        channel: order?.channel ?? 'Sin canal',
+        channel_key: order?.channel_key ?? '',
+        customer_name: order?.customer_name ?? 'Sin cliente',
+        customer_phone: order?.customer_phone ?? 'Sin telefono',
+        branch_name: order?.branch_name ?? 'Sin sucursal',
+        elapsed_label: order?.elapsed_label ?? 'Sin fecha',
+        created_at_label: order?.created_at_label ?? 'Sin fecha',
+        created_at_iso: order?.created_at_iso ?? null,
+        dispatched_at: order?.dispatched_at ?? null,
+        preview: order?.preview ?? 'Sin mensaje original',
+        summary: order?.summary ?? order?.preview ?? 'Sin resumen',
+        items_count: Number(order?.items_count ?? 0),
+        recognized_items_count: Number(order?.recognized_items_count ?? 0),
+        unread: Boolean(order?.unread),
+        duplicate: Boolean(order?.duplicate),
+        vip: Boolean(order?.vip),
+        parser_confidence: order?.parser_confidence === null || order?.parser_confidence === undefined
+            ? null
+            : Number(order.parser_confidence),
+        delivery_method: order?.delivery_method ?? null,
+        payment_method: order?.payment_method ?? null,
+        commitment_date: order?.commitment_date ?? null,
+        commitment_time: order?.commitment_time ?? null,
+        remaining_sla_minutes: order?.remaining_sla_minutes === null || order?.remaining_sla_minutes === undefined
+            ? null
+            : Number(order.remaining_sla_minutes),
+        risk_level: order?.risk_level ?? null,
+        priority_level: order?.priority_level ?? null,
+        priority_score: order?.priority_score === null || order?.priority_score === undefined
+            ? null
+            : Number(order.priority_score),
+        priority_reason: order?.priority_reason ?? null,
+        risk_reason: order?.risk_reason ?? null,
+        requested_time_window: order?.requested_time_window ?? null,
+        notes: order?.notes ?? null,
+        decision_version: order?.decision_version ?? null,
+        planner_confidence: order?.planner_confidence ?? null,
+        planner_notes: order?.planner_notes ?? null,
+        sla_minutes: order?.sla_minutes ?? null,
+        metadata_json: order?.metadata_json ?? null,
+        update_url: order?.update_url ?? `${ordersBaseUrl}/${normalizedId}`,
+        show_url: order?.show_url ?? `${ordersBaseUrl}/${normalizedId}`,
+        items: Array.isArray(order?.items) ? order.items.map((item) => ({ ...item })) : [],
+        fulfillment_plan: order?.fulfillment_plan ?? {
+            requested_date: order?.commitment_date ?? null,
+            requested_time_window: order?.requested_time_window ?? null,
+            delivery_method: order?.delivery_method ?? null,
+            payment_method: order?.payment_method ?? null,
+            pickup_branch: null,
+            delivery_address: null,
+            delivery_notes: null,
+        },
+        parser_details: order?.parser_details ?? {
+            parser_confidence: order?.parser_confidence ?? null,
+            decision_version: order?.decision_version ?? null,
+            planner_confidence: order?.planner_confidence ?? null,
+            planner_notes: order?.planner_notes ?? null,
+        },
+        duplicate_analysis: order?.duplicate_analysis ?? {
+            possible_duplicate_of: null,
+            duplicate_score: null,
+            duplicate_reason: null,
+            duplicate_checked_at: null,
+        },
+        timeline: Array.isArray(order?.timeline) ? order.timeline.map((item) => ({ ...item })) : [],
+        notification_history: Array.isArray(order?.notification_history)
+            ? order.notification_history.map((item) => ({ ...item }))
+            : [],
+        customer_context: order?.customer_context ?? {
+            name: order?.customer_name ?? 'Sin cliente',
+            phone: order?.customer_phone ?? 'Sin telefono',
+            total_orders: 0,
+            favorite_products: [],
+            favorite_channel: { name: 'Unknown', percentage: 0 },
+            last_order: null,
+            segment: 'Inactive',
+            open_notifications: 0,
+            recent_activity: [],
+            current_order: null,
+            current_alerts: [],
+        },
+        primary_action: order?.primary_action ?? workflow,
+        secondary_actions: Array.isArray(order?.secondary_actions) ? order.secondary_actions : [],
+        terminal_message: order?.terminal_message ?? (statusTerminalMessage(order?.status ?? '')),
     };
+}
+
+function statusTerminalMessage(status) {
+    return ({
+        dispatched: 'Pedido despachado',
+        cancelled: 'Pedido cancelado',
+        rejected: 'Pedido rechazado',
+    })[status] ?? null;
+}
+
+function statusLabel(status) {
+    return ({
+        pending_review: 'New',
+        confirmed: 'Confirmed',
+        preparing: 'Preparing',
+        ready_for_dispatch: 'Ready',
+        dispatched: 'Completed',
+        cancelled: 'Cancelled',
+        rejected: 'Rejected',
+    })[status] ?? String(status ?? '').replaceAll('_', ' ');
+}
+
+function statusTone(status) {
+    return ({
+        pending_review: 'bg-amber-50 text-amber-800 ring-1 ring-amber-100',
+        confirmed: 'bg-blue-50 text-blue-800 ring-1 ring-blue-100',
+        preparing: 'bg-violet-50 text-violet-800 ring-1 ring-violet-100',
+        ready_for_dispatch: 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100',
+        dispatched: 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
+        cancelled: 'bg-red-50 text-red-800 ring-1 ring-red-100',
+        rejected: 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
+    })[status] ?? 'bg-slate-100 text-slate-700 ring-1 ring-slate-200';
 }
 
 export function createOperationsColumn(column) {
@@ -304,25 +352,19 @@ export function createOperationsColumn(column) {
         get orders() {
             return Array.isArray(column.orders) ? column.orders : [];
         },
-        get count() {
-            return toNumber(column.count);
-        },
     };
 }
 
 export function createOperationsCard(order) {
     return {
         order,
-        get columnKey() {
-            return columnForStatus(this.order.status);
-        },
     };
 }
 
 export function createOperationsBoard(config = {}) {
     return {
-        orders: Array.isArray(config.orders) ? config.orders.map((order) => ({ ...order })) : [],
-        selectedOrder: config.selectedOrder ?? null,
+        orders: Array.isArray(config.orders) ? config.orders.map((order) => normalizeOrder(order, config.ordersBaseUrl ?? '/orders')) : [],
+        selectedOrder: config.selectedOrder ? normalizeOrder(config.selectedOrder, config.ordersBaseUrl ?? '/orders') : null,
         activeId: config.selectedOrderId ?? null,
         counts: config.counts ?? {
             pending_review: 0,
@@ -336,20 +378,9 @@ export function createOperationsBoard(config = {}) {
         ordersBaseUrl: config.ordersBaseUrl ?? '/orders',
         pollIntervalMs: Number(config.pollIntervalMs ?? 8000),
         snapshotUrlBase: config.snapshotUrlBase ?? '/operations/orders',
-        orderDetails: config.orderDetails ?? {},
-        agendaData: config.agendaData ?? {
-            sections: [],
-            metrics: {
-                orders_today: 0,
-                deliveries: 0,
-                pickups: 0,
-                urgent: 0,
-                completed: 0,
-                average_sla_remaining: null,
-            },
-        },
+        orderDetails: normalizeOrderDetails(config.orderDetails ?? {}),
+        queueData: normalizeQueueData(config.queueData ?? { sections: [], metrics: {} }),
         filters: { ...DEFAULT_FILTERS },
-        activeView: 'agenda',
         drawerOpen: false,
         drawerLoading: false,
         drawerError: '',
@@ -360,7 +391,7 @@ export function createOperationsBoard(config = {}) {
             state: 'live',
             label: 'Live',
             tone: 'green',
-            description: 'Conectado',
+            description: 'Connected',
         },
         liveToast: {
             visible: false,
@@ -377,35 +408,34 @@ export function createOperationsBoard(config = {}) {
             message: '',
         },
         toastTimer: null,
+        operatorName: config.operatorName ?? 'Carlos',
         csrfToken: document.querySelector('meta[name="csrf-token"]')?.content ?? '',
         submittingActionKey: null,
+        soundMuted: localStorage.getItem('benditio.operations.live-queue.muted') === '1',
 
         init() {
-            this.orderDetails = this.normalizeOrderDetails(this.orderDetails);
-            this.agendaData = this.normalizeAgendaData(this.agendaData);
-            this.selectedOrder = this.selectedOrder ? this.decorateSelectedOrder(this.selectedOrder) : null;
+            this.queueData = normalizeQueueData(this.queueData);
+            this.orderDetails = normalizeOrderDetails(this.orderDetails);
+            this.orders = this.orders.map((order) => normalizeOrder(order, this.ordersBaseUrl));
+            this.selectedOrder = this.selectedOrder ? normalizeOrder(this.selectedOrder, this.ordersBaseUrl) : null;
             this.activeId = this.activeId ?? this.selectedOrder?.id ?? this.orders[0]?.id ?? null;
-            const url = new URL(window.location.href);
-            this.drawerOpen = url.searchParams.has('order');
-            this.activeView = url.searchParams.get('view') === 'kanban' ? 'kanban' : 'agenda';
-            this.applyInitialFilters(config.filters ?? {});
+            this.drawerOpen = new URL(window.location.href).searchParams.has('order');
+            this.applyInitialFilters();
 
-            if (! this.selectedOrder && this.activeId !== null) {
-                this.selectedOrder = this.decorateSelectedOrder(
-                    this.orderDetails[this.activeId] ?? this.orders.find((order) => Number(order.id) === Number(this.activeId)) ?? null,
-                );
+            if (!this.selectedOrder && this.activeId !== null) {
+                const existing = this.orderDetails[this.activeId] ?? this.orders.find((order) => Number(order.id) === Number(this.activeId)) ?? null;
+                this.selectedOrder = existing ? normalizeOrder(existing, this.ordersBaseUrl) : null;
             }
 
             if (this.selectedOrder) {
-                this.selectedOrder = this.decorateSelectedOrder(this.selectedOrder);
+                this.syncDraftItems();
             }
-
-            this.syncDraftItems();
-            this.syncUrlFromState({ preserveDrawer: true });
 
             if (this.drawerOpen && this.activeId !== null) {
                 void this.refreshSelectedOrderSnapshot();
             }
+
+            this.syncUrlFromState({ preserveDrawer: true });
 
             this.liveQueue = new LiveQueue(this, {
                 feedUrl: this.feedUrl,
@@ -429,139 +459,81 @@ export function createOperationsBoard(config = {}) {
             return this.orders.filter((order) => this.matchesFilters(order));
         },
 
-        get agendaVisibleOrders() {
-            return this.visibleOrders.filter((order) => this.matchesFilters(order));
+        get queueMetrics() {
+            return this.buildMetrics(this.visibleOrders);
         },
 
-        get agendaMetrics() {
-            const orders = this.agendaVisibleOrders;
-            const completed = orders.filter((order) => String(order.status ?? '') === 'dispatched' && commitmentDateKey(order) === this.todayKey()).length;
-            const averageSla = this.averageSlaRemaining(orders);
+        get queueSections() {
+            const sections = this.queueData.sections ?? [];
 
-            return {
-                orders_today: orders.filter((order) => commitmentDateKey(order) === this.todayKey()).length,
-                deliveries: orders.filter((order) => String(order.delivery_method ?? '') === 'delivery').length,
-                pickups: orders.filter((order) => String(order.delivery_method ?? '') === 'pickup').length,
-                urgent: orders.filter((order) => isAgendaUrgent(order)).length,
-                completed,
-                average_sla_remaining: averageSla,
-            };
-        },
+            return sections.map((section) => {
+                if (section.key === 'do_now') {
+                    const cards = (section.cards ?? []).filter((card) => this.matchesFilters(card)).slice(0, section.limit ?? 5);
 
-        get agendaSections() {
-            const orders = this.agendaVisibleOrders.slice();
-            const referenceDate = this.referenceDate();
-            const sectionKeys = ['critical', 'due_soon', 'today', 'tomorrow', 'no_commitment', 'completed'];
+                    return {
+                        ...section,
+                        cards,
+                    };
+                }
 
-            return sectionKeys.map((key) => {
-                const cards = orders.filter((order) => agendaSectionKeyForOrder(order, referenceDate) === key);
-                const sorted = key === 'critical' || key === 'due_soon'
-                    ? cards.sort((left, right) => {
-                        const leftRemaining = Number(left.remaining_sla_minutes ?? Number.POSITIVE_INFINITY);
-                        const rightRemaining = Number(right.remaining_sla_minutes ?? Number.POSITIVE_INFINITY);
+                if (section.key === 'next') {
+                    return {
+                        ...section,
+                        groups: (section.groups ?? [])
+                            .map((group) => ({
+                                ...group,
+                                cards: (group.cards ?? []).filter((card) => this.matchesFilters(card)),
+                            }))
+                            .filter((group) => group.cards.length > 0),
+                    };
+                }
 
-                        if (leftRemaining !== rightRemaining) {
-                            return leftRemaining - rightRemaining;
-                        }
+                if (section.key === 'completed') {
+                    return {
+                        ...section,
+                        cards: (section.cards ?? []).filter((card) => this.matchesFilters(card)),
+                    };
+                }
 
-                        return sortOldestFirst(left, right);
-                    })
-                    : cards.sort((left, right) => {
-                        const leftRank = this.timeWindowRank(left);
-                        const rightRank = this.timeWindowRank(right);
-
-                        if (leftRank !== rightRank) {
-                            return leftRank - rightRank;
-                        }
-
-                        const leftPriority = agendaPriorityWeight(left);
-                        const rightPriority = agendaPriorityWeight(right);
-
-                        if (leftPriority !== rightPriority) {
-                            return leftPriority - rightPriority;
-                        }
-
-                        const leftCommitment = commitmentMinutes(left);
-                        const rightCommitment = commitmentMinutes(right);
-
-                        if (leftCommitment !== rightCommitment) {
-                            return leftCommitment - rightCommitment;
-                        }
-
-                        return (left.customer_name ?? '').localeCompare(right.customer_name ?? '');
-                    });
-
-                const groups = key === 'critical' || key === 'due_soon' || key === 'no_commitment' || key === 'completed'
-                    ? [{
-                        label: sectionLabel(key),
-                        cards: sorted,
-                    }]
-                    : this.groupAgendaCards(sorted);
-
-                return {
-                    key,
-                    label: sectionLabel(key),
-                    tone: sectionTone(key),
-                    emptyMessage: ({
-                        critical: 'No hay pedidos críticos.',
-                        due_soon: 'No hay pedidos en riesgo alto.',
-                        today: 'No hay pedidos para hoy.',
-                        tomorrow: 'No hay pedidos para mañana.',
-                        no_commitment: 'No hay pedidos sin compromiso.',
-                        completed: 'No hay pedidos completados hoy.',
-                    })[key] ?? 'No hay pedidos.',
-                    groups,
-                };
+                return section;
             });
         },
 
-        get boardColumns() {
-            const referenceTimeMs = parseTimestamp(this.serverTime) ?? Date.now();
-
-            return BOARD_COLUMNS.map((definition) => {
-                const orders = this.visibleOrders
-                    .filter((order) => definition.statuses.includes(order.status))
-                    .slice()
-                    .sort(sortOldestFirst);
-
-                const averageWaitingMinutes = orders.length === 0
-                    ? 0
-                    : orders.reduce((total, order) => {
-                        const createdAtMs = parseTimestamp(order.created_at_iso);
-                        if (createdAtMs === null) {
-                            return total;
-                        }
-
-                        return total + Math.max(0, (referenceTimeMs - createdAtMs) / 60000);
-                    }, 0) / orders.length;
-
-                return {
-                    ...definition,
-                    orders,
-                    count: orders.length,
-                    average_wait_label: orders.length > 0 ? formatWaitLabel(averageWaitingMinutes) : '0 min',
-                };
-            });
+        get doNowCards() {
+            return this.queueSections.find((section) => section.key === 'do_now')?.cards ?? [];
         },
 
-        get boardTotals() {
-            return this.boardColumns.map((column) => ({
-                key: column.key,
-                label: column.label,
-                count: column.count,
-                average_wait_label: column.average_wait_label,
-                tone: column.tone,
-            }));
+        get upcomingGroups() {
+            return this.queueSections.find((section) => section.key === 'next')?.groups ?? [];
         },
 
-        get visibleOrdersCount() {
-            return this.visibleOrders.length;
+        get completedCards() {
+            return this.queueSections.find((section) => section.key === 'completed')?.cards ?? [];
         },
 
-        normalizeAgendaData(agendaData) {
+        get hasQueueWork() {
+            return this.doNowCards.length > 0 || this.upcomingGroups.length > 0 || this.completedCards.length > 0;
+        },
+
+        get headerDateLabel() {
+            return this.formatHeaderDate(this.referenceDate());
+        },
+
+        get greetingLabel() {
+            const hour = this.referenceDate().getHours();
+            if (hour < 12) return 'Good Morning';
+            if (hour < 18) return 'Good Afternoon';
+            return 'Good Evening';
+        },
+
+        get todaySummary() {
+            const metrics = this.queueMetrics;
             return {
-                sections: Array.isArray(agendaData?.sections) ? agendaData.sections : [],
-                metrics: agendaData?.metrics ?? {},
+                urgent: metrics.urgent_orders ?? 0,
+                today: metrics.orders_today ?? 0,
+                deliveries: metrics.deliveries ?? 0,
+                pickups: metrics.pickups ?? 0,
+                overdue: metrics.overdue ?? 0,
             };
         },
 
@@ -570,463 +542,112 @@ export function createOperationsBoard(config = {}) {
             return new Date(parsed ?? Date.now());
         },
 
-        todayKey() {
-            return this.referenceDate().toISOString().slice(0, 10);
+        formatHeaderDate(date) {
+            const label = new Intl.DateTimeFormat('en-US', {
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric',
+            }).format(date);
+
+            return label.replace(',', '');
         },
 
-        tomorrowKey() {
-            return new Date(this.referenceDate().getTime() + (24 * 60 * 60 * 1000)).toISOString().slice(0, 10);
-        },
-
-        timeWindowRank(order) {
-            return ({
-                Morning: 0,
-                'Before Noon': 1,
-                Afternoon: 2,
-                Evening: 3,
-                Anytime: 4,
-            })[timeWindowLabel(order)] ?? 4;
-        },
-
-        groupAgendaCards(cards) {
-            const groups = [];
-            const labels = ['Morning', 'Before Noon', 'Afternoon', 'Evening', 'Anytime'];
-
-            for (const label of labels) {
-                const bucket = cards.filter((order) => timeWindowLabel(order) === label);
-                if (bucket.length > 0) {
-                    groups.push({
-                        label,
-                        cards: bucket,
-                    });
-                }
+        formatCommitment(order) {
+            if (order.commitment_date && order.commitment_time) {
+                return `${order.commitment_date} ${String(order.commitment_time).slice(0, 5)}`;
             }
 
-            return groups;
-        },
-
-        averageSlaRemaining(orders) {
-            const values = orders
-                .map((order) => Number(order.remaining_sla_minutes))
-                .filter((value) => Number.isFinite(value));
-
-            if (values.length === 0) {
-                return null;
+            if (order.commitment_date) {
+                return order.commitment_date;
             }
 
-            return Math.round(values.reduce((total, value) => total + value, 0) / values.length);
+            return 'No commitment';
         },
 
-        applyInitialFilters(filters = {}) {
-            this.filters = {
-                ...DEFAULT_FILTERS,
-                search: String(filters.search ?? '').trim(),
-                customer: String(filters.customer ?? '').trim(),
-                channel: String(filters.channel ?? 'all'),
-                priority: String(filters.priority ?? 'all'),
-                time: String(filters.time ?? 'all'),
-                delivery: String(filters.delivery ?? 'all'),
-                payment: String(filters.payment ?? 'all'),
-                status: String(filters.status ?? 'all'),
-                vip: this.parseBooleanFilter(filters.vip),
-                duplicates: this.parseBooleanFilter(filters.duplicates),
-                urgent: this.parseBooleanFilter(filters.urgent),
+        workflowLabel(order) {
+            return buildWorkflow(order.id, order.status, this.ordersBaseUrl).label;
+        },
+
+        workflowAction(order) {
+            const action = buildWorkflow(order.id, order.status, this.ordersBaseUrl);
+            return {
+                key: action.key,
+                label: action.label,
+                method: action.method,
+                url: action.url,
+                style: action.style,
+                requires_confirmation: action.requires_confirmation,
             };
         },
 
-        parseBooleanFilter(value) {
-            return value === true || value === 1 || value === '1' || value === 'true' || value === 'on';
+        openDrawer(order) {
+            this.select(order.id, order);
+            this.drawerOpen = true;
+            void this.refreshSelectedOrderSnapshot();
+            this.syncUrlFromState({ preserveDrawer: true });
         },
 
-        normalizeOrderDetails(orderDetails) {
-            return Object.fromEntries(
-                Object.entries(orderDetails ?? {}).map(([key, order]) => [key, this.decorateSelectedOrder(order)]),
-            );
+        closeDrawer() {
+            this.drawerOpen = false;
+            this.drawerError = '';
+            const url = new URL(window.location.href);
+            url.searchParams.delete('order');
+            window.history.replaceState({}, '', url);
         },
 
-        normalizeOrder(order) {
-            if (! order) {
-                return null;
-            }
+        select(orderId, order = null) {
+            this.activeId = Number(orderId);
 
-            const normalized = { ...order };
-            normalized.id = Number(normalized.id ?? 0);
-            normalized.status = normalized.status ?? 'pending_review';
-            normalized.status_label = normalized.status_label ?? this.statusLabel(normalized.status);
-            normalized.status_tone = normalized.status_tone ?? this.statusTone(normalized.status);
-            normalized.source_channel = normalized.source_channel ?? normalized.channel_key ?? '';
-            normalized.channel = normalized.channel ?? 'Sin canal';
-            normalized.channel_key = normalized.channel_key ?? normalized.source_channel ?? '';
-            normalized.customer_name = normalized.customer_name ?? normalized.customer ?? 'Sin cliente';
-            normalized.customer = normalized.customer ?? normalized.customer_name;
-            normalized.customer_phone = normalized.customer_phone ?? normalized.phone ?? 'Sin telefono';
-            normalized.phone = normalized.phone ?? normalized.customer_phone;
-            normalized.branch_name = normalized.branch_name ?? normalized.branch ?? 'Sin sucursal';
-            normalized.branch = normalized.branch ?? normalized.branch_name;
-            normalized.elapsed_label = normalized.elapsed_label ?? 'Sin fecha';
-            normalized.created_at_label = normalized.created_at_label ?? 'Sin fecha';
-            normalized.created_at_iso = normalized.created_at_iso ?? normalized.created_at ?? null;
-            normalized.created_at = normalized.created_at ?? normalized.created_at_iso;
-            normalized.received_at = normalized.received_at ?? null;
-            normalized.received_at_iso = normalized.received_at_iso ?? normalized.received_at;
-            normalized.preview = normalized.preview ?? 'Sin mensaje original';
-            normalized.original_message = normalized.original_message ?? normalized.preview;
-            normalized.items_count = toNumber(normalized.items_count);
-            normalized.recognized_items_count = toNumber(normalized.recognized_items_count);
-            normalized.unread = Boolean(normalized.unread);
-            normalized.duplicate = Boolean(normalized.duplicate);
-            normalized.possible_duplicate = Boolean(normalized.possible_duplicate ?? normalized.duplicate);
-            normalized.vip = Boolean(normalized.vip);
-            normalized.parser_confidence = normalized.parser_confidence === null || normalized.parser_confidence === undefined
-                ? null
-                : Number(normalized.parser_confidence);
-            normalized.delivery_method = normalized.delivery_method ?? null;
-            normalized.payment_method = normalized.payment_method ?? null;
-            normalized.commitment_date = normalized.commitment_date ?? null;
-            normalized.commitment_time = normalized.commitment_time ?? null;
-            normalized.remaining_sla_minutes = normalized.remaining_sla_minutes === null || normalized.remaining_sla_minutes === undefined
-                ? null
-                : Number(normalized.remaining_sla_minutes);
-            normalized.risk_level = normalized.risk_level ?? null;
-            normalized.priority_level = normalized.priority_level ?? null;
-            normalized.priority_score = normalized.priority_score === null || normalized.priority_score === undefined
-                ? null
-                : Number(normalized.priority_score);
-            normalized.priority_reason = normalized.priority_reason ?? null;
-            normalized.risk_reason = normalized.risk_reason ?? null;
-            normalized.requested_time_window = normalized.requested_time_window ?? null;
-            normalized.summary = normalized.summary ?? normalized.preview;
-            normalized.open_notifications = toNumber(normalized.open_notifications);
-            normalized.recent_activity = Array.isArray(normalized.recent_activity) ? normalized.recent_activity : [];
-            normalized.update_url = normalized.update_url ?? this.buildOrderUrl(normalized.id);
-            normalized.show_url = normalized.show_url ?? this.buildOrderShowUrl(normalized.id);
+            const nextOrder = order
+                ?? this.orderDetails[this.activeId]
+                ?? this.orders.find((item) => Number(item.id) === Number(this.activeId))
+                ?? null;
 
-            return normalized;
+            this.selectedOrder = nextOrder ? normalizeOrder(nextOrder, this.ordersBaseUrl) : null;
+            this.syncDraftItems();
+
+            const nextUrl = new URL(window.location.href);
+            nextUrl.searchParams.set('order', String(orderId));
+            window.history.replaceState({}, '', nextUrl);
+        },
+
+        syncDraftItems() {
+            this.draftItems = Array.isArray(this.activeOrder?.items)
+                ? this.activeOrder.items.map((item) => ({ ...item }))
+                : [];
         },
 
         decorateSelectedOrder(order) {
-            if (! order) {
-                return null;
-            }
-
-            const normalized = this.normalizeOrder(order);
-            normalized.items = Array.isArray(normalized.items) ? normalized.items : [];
-            normalized.customer_context = this.normalizeCustomerContext(
-                normalized,
-                normalized.customer_context ?? this.defaultCustomerContext(normalized.customer_name, normalized.customer_phone),
-            );
-
-            if (! normalized.primary_action && ! normalized.secondary_actions && ! normalized.terminal_message) {
-                const workflow = this.buildWorkflow(normalized.id, normalized.status);
-                normalized.primary_action = workflow.primary_action;
-                normalized.secondary_actions = workflow.secondary_actions;
-                normalized.terminal_message = workflow.terminal_message;
-            }
-
-            return normalized;
-        },
-
-        normalizeCustomerContext(order, customerContext) {
-            const context = {
-                name: customerContext?.name ?? order.customer_name ?? 'Sin cliente',
-                phone: customerContext?.phone ?? order.customer_phone ?? 'Sin telefono',
-                total_orders: toNumber(customerContext?.total_orders),
-                favorite_products: Array.isArray(customerContext?.favorite_products) ? customerContext.favorite_products : [],
-                favorite_channel: customerContext?.favorite_channel ?? { name: 'Unknown', percentage: 0 },
-                last_order: customerContext?.last_order ?? null,
-                segment: customerContext?.segment ?? 'Inactive',
-                open_notifications: toNumber(customerContext?.open_notifications),
-                recent_activity: Array.isArray(customerContext?.recent_activity) ? customerContext.recent_activity : [],
-                current_order: customerContext?.current_order ?? null,
-                current_alerts: Array.isArray(customerContext?.current_alerts) ? customerContext.current_alerts : [],
-            };
-
-            context.current_order = {
-                id: order.id,
-                status: order.status_label,
-                channel: order.channel,
-                elapsed: order.elapsed_label,
-                preview: order.preview,
-                possible_duplicate: order.duplicate,
-            };
-            context.current_alerts = this.buildAlerts(order, context);
-
-            return context;
-        },
-
-        defaultCustomerContext(name, phone) {
-            return {
-                name: name ?? 'Sin cliente',
-                phone: phone ?? 'Sin telefono',
-                total_orders: 0,
-                favorite_products: [],
-                favorite_channel: { name: 'Unknown', percentage: 0 },
-                last_order: null,
-                segment: 'Inactive',
-                open_notifications: 0,
-                recent_activity: [],
-                current_order: null,
-                current_alerts: [],
-            };
-        },
-
-        buildAlerts(order, customerContext) {
-            const alerts = [];
-
-            if ((customerContext?.segment ?? 'Inactive') === 'VIP') {
-                alerts.push('Cliente VIP');
-            }
-
-            if ((customerContext?.open_notifications ?? 0) > 0) {
-                alerts.push(`${customerContext.open_notifications} notificacion(es) abiertas`);
-            }
-
-            if (order.duplicate) {
-                alerts.push('Posible duplicado');
-            }
-
-            if (order.parser_confidence !== null && Number(order.parser_confidence) < 0.5) {
-                alerts.push('Confianza baja');
-            }
-
-            if (order.status === 'pending_review' && order.created_at_iso) {
-                const ageMinutes = (Date.now() - parseTimestamp(order.created_at_iso)) / 60000;
-                if (ageMinutes >= 20) {
-                    alerts.push('Pedido envejecido');
-                }
-            }
-
-            return alerts;
-        },
-
-        currentAlerts(customerContext, order) {
-            return this.buildAlerts(order, customerContext);
-        },
-
-        buildBaseCustomerContext(customer, history, openNotifications) {
-            const lastOrder = history[0] ?? null;
-            const favoriteProducts = this.favoriteProducts(history);
-            const favoriteChannel = this.favoriteChannel(history);
-            const segment = this.customerSegment(toNumber(customer.orders_count), lastOrder?.created_at ?? null);
-            const recentActivity = history.slice(0, 5).map((order) => ({
-                label: `Pedido #${order.id}`,
-                status: this.statusLabel(order.status),
-                channel: this.channelLabel(order.source_channel),
-                elapsed: this.elapsedLabel(order.created_at ?? null),
-                duplicate: order.possible_duplicate_of_order_id !== null,
-            }));
-
-            return {
-                name: customer.name,
-                phone: customer.phone,
-                total_orders: toNumber(customer.orders_count),
-                favorite_products: favoriteProducts,
-                favorite_channel: favoriteChannel,
-                last_order: lastOrder !== null ? {
-                    id: lastOrder.id,
-                    label: `Pedido #${lastOrder.id}`,
-                    elapsed: this.elapsedLabel(lastOrder.created_at ?? null),
-                    status: this.statusLabel(lastOrder.status),
-                } : null,
-                segment,
-                open_notifications: openNotifications,
-                recent_activity: recentActivity,
-            };
-        },
-
-        buildWorkflow(orderId, status) {
-            const base = `${this.ordersBaseUrl}/${orderId}`;
-
-            switch (status) {
-                case 'pending_review':
-                    return {
-                        primary_action: this.buildAction('confirm', 'Confirmar pedido', 'POST', `${base}/confirm`, 'primary'),
-                        secondary_actions: [
-                            this.buildAction('reject', 'Rechazar', 'POST', `${base}/reject`, 'danger', true),
-                            this.buildAction('cancel', 'Cancelar', 'POST', `${base}/cancel`, 'danger', true),
-                        ],
-                        terminal_message: null,
-                    };
-                case 'confirmed':
-                    return {
-                        primary_action: this.buildAction('prepare', 'Iniciar preparacion', 'POST', `${base}/prepare`, 'primary'),
-                        secondary_actions: [
-                            this.buildAction('cancel', 'Cancelar', 'POST', `${base}/cancel`, 'danger', true),
-                        ],
-                        terminal_message: null,
-                    };
-                case 'preparing':
-                    return {
-                        primary_action: this.buildAction('ready', 'Marcar listo', 'POST', `${base}/ready-for-dispatch`, 'primary'),
-                        secondary_actions: [
-                            this.buildAction('cancel', 'Cancelar', 'POST', `${base}/cancel`, 'danger', true),
-                        ],
-                        terminal_message: null,
-                    };
-                case 'ready_for_dispatch':
-                    return {
-                        primary_action: this.buildAction('dispatch', 'Despachar', 'POST', `${base}/dispatch`, 'primary'),
-                        secondary_actions: [
-                            this.buildAction('cancel', 'Cancelar', 'POST', `${base}/cancel`, 'danger', true),
-                        ],
-                        terminal_message: null,
-                    };
-                case 'dispatched':
-                    return {
-                        primary_action: null,
-                        secondary_actions: [this.buildAction('view_history', 'Ver historial', 'GET', `${base}`, 'secondary')],
-                        terminal_message: 'Pedido despachado',
-                    };
-                case 'cancelled':
-                    return {
-                        primary_action: null,
-                        secondary_actions: [],
-                        terminal_message: 'Pedido cancelado',
-                    };
-                case 'rejected':
-                    return {
-                        primary_action: null,
-                        secondary_actions: [],
-                        terminal_message: 'Pedido rechazado',
-                    };
-                default:
-                    return {
-                        primary_action: null,
-                        secondary_actions: [],
-                        terminal_message: null,
-                    };
-            }
-        },
-
-        buildAction(key, label, method, url, style, requiresConfirmation = false) {
-            return {
-                key,
-                label,
-                method,
-                url,
-                style,
-                requires_confirmation: requiresConfirmation,
-            };
+            return normalizeOrder(order, this.ordersBaseUrl);
         },
 
         updateSelectedOrderFromResponse(order) {
-            if (! order) {
+            if (!order) {
                 return;
             }
 
-            const sourceOrder = this.activeOrder ?? this.orderDetails[this.activeId] ?? this.orders.find((item) => Number(item.id) === Number(order.id)) ?? null;
-            const mergedOrder = sourceOrder ? {
-                ...sourceOrder,
+            const normalized = normalizeOrder({
                 ...order,
-                items: sourceOrder.items ?? order.items ?? [],
-                customer_context: sourceOrder.customer_context ?? order.customer_context ?? null,
-            } : order;
+                items: this.activeOrder?.items ?? order.items ?? [],
+                customer_context: this.activeOrder?.customer_context ?? null,
+            }, this.ordersBaseUrl);
 
-            const normalized = this.decorateSelectedOrder(mergedOrder);
             this.selectedOrder = normalized;
             this.orderDetails[normalized.id] = normalized;
             this.syncDraftItems();
         },
 
-        async refreshSelectedOrderSnapshot(orderId = this.activeId) {
-            if (orderId === null || orderId === undefined) {
-                return;
-            }
-
-            const requestId = ++this.snapshotRequestId;
-            this.drawerLoading = true;
-            this.drawerError = '';
-
-            try {
-                const response = await fetch(`${this.snapshotUrlBase}/${orderId}/snapshot`, {
-                    headers: {
-                        Accept: 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
-                    credentials: 'same-origin',
-                });
-
-                if (requestId !== this.snapshotRequestId) {
-                    return;
-                }
-
-                if (! response.ok) {
-                    throw new Error(`Snapshot request failed with status ${response.status}`);
-                }
-
-                const payload = await response.json();
-
-                if (requestId !== this.snapshotRequestId) {
-                    return;
-                }
-
-                const normalized = this.decorateSelectedOrder(payload);
-                this.selectedOrder = normalized;
-                this.activeId = normalized.id;
-                this.orderDetails[normalized.id] = normalized;
-                this.drawerLoading = false;
-                this.drawerError = '';
-                this.syncDraftItems();
-                this.syncUrlFromState({ preserveDrawer: true });
-            } catch (error) {
-                if (requestId !== this.snapshotRequestId) {
-                    return;
-                }
-
-                this.drawerLoading = false;
-                this.drawerError = 'No se pudo cargar el detalle del pedido.';
-            }
-        },
-
         applyOrderUpdate(updatedOrder) {
-            if (! updatedOrder) {
+            if (!updatedOrder) {
                 return;
             }
 
-            const existingOrder = this.orders.find((order) => Number(order.id) === Number(updatedOrder.id));
-            const normalized = this.decorateSelectedOrder(
-                existingOrder ? {
-                    ...existingOrder,
-                    ...updatedOrder,
-                } : updatedOrder,
-            );
+            const normalized = normalizeOrder(updatedOrder, this.ordersBaseUrl);
             this.orderDetails[normalized.id] = normalized;
 
-            if (existingOrder) {
-                Object.assign(existingOrder, {
-                    status: normalized.status,
-                    status_label: normalized.status_label,
-                    status_tone: normalized.status_tone,
-                    channel: normalized.channel,
-                    channel_key: normalized.channel_key,
-                    customer_name: normalized.customer_name,
-                    customer_phone: normalized.customer_phone,
-                    branch_name: normalized.branch_name,
-                    elapsed_label: normalized.elapsed_label,
-                    created_at_label: normalized.created_at_label,
-                    created_at_iso: normalized.created_at_iso,
-                    preview: normalized.preview,
-                    items_count: normalized.items_count,
-                    recognized_items_count: normalized.recognized_items_count,
-                    unread: normalized.unread,
-                    duplicate: normalized.duplicate,
-                    vip: normalized.vip,
-                    parser_confidence: normalized.parser_confidence,
-                    summary: normalized.summary,
-                    delivery_method: normalized.delivery_method,
-                    payment_method: normalized.payment_method,
-                    commitment_date: normalized.commitment_date,
-                    commitment_time: normalized.commitment_time,
-                    remaining_sla_minutes: normalized.remaining_sla_minutes,
-                    risk_level: normalized.risk_level,
-                    priority_level: normalized.priority_level,
-                    priority_score: normalized.priority_score,
-                    priority_reason: normalized.priority_reason,
-                    risk_reason: normalized.risk_reason,
-                    requested_time_window: normalized.requested_time_window,
-                    update_url: normalized.update_url,
-                    show_url: normalized.show_url,
-                });
+            const inboxOrder = this.orders.find((order) => Number(order.id) === Number(normalized.id));
+            if (inboxOrder) {
+                Object.assign(inboxOrder, normalized);
             }
 
             if (this.activeId === normalized.id) {
@@ -1035,16 +656,99 @@ export function createOperationsBoard(config = {}) {
             }
         },
 
+        syncSelectedOrder(updatedOrder) {
+            if (!this.selectedOrder) {
+                this.selectedOrder = normalizeOrder(updatedOrder, this.ordersBaseUrl);
+                this.syncDraftItems();
+                return;
+            }
+
+            const preservedItems = Array.isArray(this.selectedOrder.items)
+                ? this.selectedOrder.items.map((item) => ({ ...item }))
+                : [];
+            const preservedContext = this.selectedOrder.customer_context ?? null;
+            const preservedWorkflow = {
+                primary_action: this.selectedOrder.primary_action,
+                secondary_actions: this.selectedOrder.secondary_actions,
+                terminal_message: this.selectedOrder.terminal_message,
+            };
+            const normalized = normalizeOrder(updatedOrder, this.ordersBaseUrl);
+
+            Object.assign(this.selectedOrder, normalized);
+            this.selectedOrder.items = preservedItems;
+            this.selectedOrder.customer_context = preservedContext ?? this.selectedOrder.customer_context;
+            this.selectedOrder.primary_action = preservedWorkflow.primary_action ?? this.selectedOrder.primary_action;
+            this.selectedOrder.secondary_actions = preservedWorkflow.secondary_actions ?? this.selectedOrder.secondary_actions;
+            this.selectedOrder.terminal_message = preservedWorkflow.terminal_message ?? this.selectedOrder.terminal_message;
+            this.syncDraftItems();
+        },
+
+        selectNextOrder({ incomingOrders = [], removedIndex = -1, preferFirst = false, selectedNewOrderId = null } = {}) {
+            if (incomingOrders.length === 0) {
+                this.activeId = null;
+                this.selectedOrder = null;
+                this.draftItems = [];
+                return null;
+            }
+
+            let nextOrder = null;
+
+            if (preferFirst) {
+                nextOrder = selectedNewOrderId !== null
+                    ? incomingOrders.find((order) => Number(order.id) === Number(selectedNewOrderId)) ?? incomingOrders[0]
+                    : incomingOrders[0];
+            } else {
+                const nextIndex = removedIndex >= 0 ? Math.min(removedIndex, incomingOrders.length - 1) : 0;
+                nextOrder = incomingOrders[nextIndex] ?? incomingOrders[0];
+            }
+
+            if (nextOrder) {
+                this.select(nextOrder.id, nextOrder);
+            }
+
+            return nextOrder;
+        },
+
+        showNotification(order) {
+            if (!order) {
+                return;
+            }
+
+            this.liveToast = {
+                visible: true,
+                title: 'New order received',
+                customer: order.customer_name ?? 'Sin cliente',
+                elapsed: 'A few seconds ago',
+            };
+
+            if (this.liveToastTimer !== null) {
+                window.clearTimeout(this.liveToastTimer);
+            }
+
+            this.liveToastTimer = window.setTimeout(() => {
+                this.liveToast.visible = false;
+            }, 4000);
+        },
+
+        playSound() {
+            if (this.isLiveMuted() || !this.liveQueue?.audioUnlocked) {
+                return;
+            }
+
+            this.liveQueue.playSound();
+        },
+
         setLiveMuted(isMuted) {
             this.liveQueue?.setMuted(isMuted);
+            this.soundMuted = Boolean(isMuted);
         },
 
         isLiveMuted() {
-            return this.liveQueue?.soundMuted ?? false;
+            return this.soundMuted || this.liveQueue?.soundMuted || false;
         },
 
         toggleLiveSound() {
-            this.setLiveMuted(! this.isLiveMuted());
+            this.setLiveMuted(!this.isLiveMuted());
         },
 
         showToast(message, type = 'success') {
@@ -1061,8 +765,57 @@ export function createOperationsBoard(config = {}) {
             }, 4000);
         },
 
+        async refreshSelectedOrderSnapshot() {
+            if (this.activeId === null) {
+                return;
+            }
+
+            this.drawerLoading = true;
+            this.drawerError = '';
+            const requestId = ++this.snapshotRequestId;
+
+            try {
+                const response = await fetch(`${this.snapshotUrlBase}/${this.activeId}/snapshot`, {
+                    headers: {
+                        Accept: 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    credentials: 'same-origin',
+                });
+
+                if (!response.ok) {
+                    throw new Error('Snapshot unavailable');
+                }
+
+                const payload = await response.json();
+
+                if (requestId !== this.snapshotRequestId) {
+                    return;
+                }
+
+                const normalized = normalizeOrder(payload, this.ordersBaseUrl);
+                this.selectedOrder = normalized;
+                this.orderDetails[normalized.id] = normalized;
+                this.updateSelectedOrderInOrders(normalized);
+                this.syncDraftItems();
+            } catch (error) {
+                this.drawerError = 'Unable to load order details.';
+            } finally {
+                if (requestId === this.snapshotRequestId) {
+                    this.drawerLoading = false;
+                }
+            }
+        },
+
+        updateSelectedOrderInOrders(order) {
+            const inboxOrder = this.orders.find((item) => Number(item.id) === Number(order.id));
+            if (inboxOrder) {
+                Object.assign(inboxOrder, order);
+            }
+        },
+
         async submitWorkflowAction(action) {
-            if (! action || ! action.url) {
+            if (!action || !action.url) {
                 return;
             }
 
@@ -1071,7 +824,7 @@ export function createOperationsBoard(config = {}) {
                 return;
             }
 
-            if (action.requires_confirmation && ! window.confirm('Esta accion modificara el estado del pedido. Deseas continuar?')) {
+            if (action.requires_confirmation && !window.confirm('This action will change the order status. Continue?')) {
                 return;
             }
 
@@ -1080,11 +833,6 @@ export function createOperationsBoard(config = {}) {
             try {
                 const formData = new FormData();
                 formData.append('_token', this.csrfToken);
-
-                const method = (action.method ?? 'POST').toUpperCase();
-                if (method !== 'POST') {
-                    formData.append('_method', method);
-                }
 
                 const response = await fetch(action.url, {
                     method: 'POST',
@@ -1099,10 +847,10 @@ export function createOperationsBoard(config = {}) {
                 const contentType = response.headers.get('content-type') ?? '';
                 const payload = contentType.includes('application/json') ? await response.json() : null;
 
-                if (! response.ok) {
+                if (!response.ok) {
                     const message = response.status === 422
-                        ? 'Esta accion ya no esta disponible para este pedido.'
-                        : payload?.message ?? 'No se pudo completar la accion.';
+                        ? 'This action is no longer available.'
+                        : payload?.message ?? 'Unable to complete the action.';
 
                     this.showToast(message, 'error');
                     return;
@@ -1111,167 +859,124 @@ export function createOperationsBoard(config = {}) {
                 if (payload?.order) {
                     this.applyOrderUpdate(payload.order);
                     this.updateSelectedOrderFromResponse(payload.order);
-                    void this.refreshSelectedOrderSnapshot(this.activeId);
                 }
 
-                this.showToast(payload?.message ?? 'Pedido actualizado.', 'success');
+                this.showToast(payload?.message ?? 'Order updated.', 'success');
                 void this.liveQueue?.refresh();
             } catch (error) {
-                this.showToast('No se pudo completar la accion.', 'error');
+                this.showToast('Unable to complete the action.', 'error');
             } finally {
                 this.submittingActionKey = null;
             }
         },
 
-        removeItem(index) {
-            this.draftItems.splice(index, 1);
+        buildMetrics(orders) {
+            const todayKey = this.referenceDate().toISOString().slice(0, 10);
+
+            return {
+                urgent_orders: orders.filter((order) => isUrgentOrder(order)).length,
+                orders_today: orders.filter((order) => commitmentDateKey(order) === todayKey).length,
+                deliveries: orders.filter((order) => String(order.delivery_method ?? '') === 'delivery').length,
+                pickups: orders.filter((order) => String(order.delivery_method ?? '') === 'pickup').length,
+                overdue: orders.filter((order) => commitmentDateKey(order) === todayKey && Number(order.remaining_sla_minutes ?? 0) < 0).length,
+                completed_today: orders.filter((order) => String(order.status ?? '') === 'dispatched' && dispatchedDateKey(order) === todayKey).length,
+            };
         },
 
-        addItem() {
-            this.draftItems.push({
-                id: null,
-                quantity: 1,
-                unit: '',
-                raw_text: '',
-                notes: '',
-            });
-        },
+        applyInitialFilters() {
+            const url = new URL(window.location.href);
+            const filters = this.filters;
 
-        serializedItems() {
-            return JSON.stringify(
-                this.draftItems.map((item) => ({
-                    id: item.id ?? null,
-                    quantity: item.quantity ?? 1,
-                    unit: item.unit ?? '',
-                    raw_text: item.raw_text ?? '',
-                    notes: item.notes ?? '',
-                })),
-            );
-        },
-
-        syncDraftItems() {
-            this.draftItems = (this.activeOrder?.items ?? []).map((item) => ({ ...item }));
-        },
-
-        select(orderId, order = null) {
-            this.activeId = Number(orderId);
-            this.drawerOpen = true;
-            this.drawerLoading = true;
-            this.drawerError = '';
-
-            const nextOrder = order ?? this.orderDetails[this.activeId] ?? this.orders.find((item) => Number(item.id) === Number(orderId)) ?? null;
-            this.selectedOrder = nextOrder ? this.decorateSelectedOrder(nextOrder) : null;
-            this.syncDraftItems();
-            this.syncUrlFromState({ preserveDrawer: true });
-            void this.refreshSelectedOrderSnapshot(this.activeId);
-        },
-
-        closeDrawer() {
-            this.drawerOpen = false;
-            this.drawerLoading = false;
-            this.drawerError = '';
-            this.snapshotRequestId += 1;
-            this.syncUrlFromState({ preserveDrawer: false });
+            filters.search = url.searchParams.get('search') ?? '';
+            filters.customer = url.searchParams.get('customer') ?? '';
+            filters.channel = url.searchParams.get('channel') ?? 'all';
+            filters.priority = url.searchParams.get('priority') ?? 'all';
+            filters.time = url.searchParams.get('time') ?? 'all';
+            filters.delivery = url.searchParams.get('delivery') ?? 'all';
+            filters.payment = url.searchParams.get('payment') ?? 'all';
+            filters.vip = url.searchParams.get('vip') === '1';
+            filters.duplicates = url.searchParams.get('duplicates') === '1';
+            filters.urgent = url.searchParams.get('urgent') === '1';
         },
 
         applyFilter(key, value) {
-            if (key === 'vip' || key === 'duplicates' || key === 'urgent') {
-                this.filters[key] = this.parseBooleanFilter(value);
-            } else if (key === 'time' || key === 'delivery' || key === 'payment' || key === 'channel' || key === 'priority' || key === 'status') {
-                this.filters[key] = String(value ?? 'all');
-            } else {
-                this.filters[key] = String(value ?? '');
-            }
-
-            this.syncUrlFromState({ preserveDrawer: true });
-            void this.liveQueue?.refresh();
-        },
-
-        toggleFilter(key) {
-            this.filters[key] = ! this.filters[key];
-            this.syncUrlFromState({ preserveDrawer: true });
-            void this.liveQueue?.refresh();
+            this.filters[key] = value;
+            this.syncUrlFromState();
         },
 
         setFilter(key, value) {
-            if (this.filters[key] === value) {
-                this.filters[key] = 'all';
-            } else {
-                this.filters[key] = value;
-            }
+            this.filters[key] = value;
+            this.syncUrlFromState();
+        },
 
-            this.syncUrlFromState({ preserveDrawer: true });
-            void this.liveQueue?.refresh();
+        toggleFilter(key) {
+            this.filters[key] = !this.filters[key];
+            this.syncUrlFromState();
         },
 
         clearFilters() {
-            const currentStatus = this.filters.status;
-            this.filters = {
-                ...DEFAULT_FILTERS,
-                status: currentStatus,
-            };
-            this.syncUrlFromState({ preserveDrawer: true });
-            void this.liveQueue?.refresh();
+            this.filters = { ...DEFAULT_FILTERS };
+            this.syncUrlFromState();
         },
 
-        setView(view) {
-            this.activeView = view === 'kanban' ? 'kanban' : 'agenda';
-            this.syncUrlFromState({ preserveDrawer: true });
-        },
-
-        syncUrlFromState({ preserveDrawer = true } = {}) {
+        syncUrlFromState({ preserveDrawer = false } = {}) {
             const url = new URL(window.location.href);
-            const managedKeys = ['search', 'customer', 'channel', 'priority', 'time', 'delivery', 'payment', 'vip', 'duplicates', 'urgent', 'page', 'view'];
+            const filters = this.filters;
 
-            for (const key of managedKeys) {
-                url.searchParams.delete(key);
+            url.searchParams.delete('search');
+            url.searchParams.delete('customer');
+            url.searchParams.delete('channel');
+            url.searchParams.delete('priority');
+            url.searchParams.delete('time');
+            url.searchParams.delete('delivery');
+            url.searchParams.delete('payment');
+            url.searchParams.delete('vip');
+            url.searchParams.delete('duplicates');
+            url.searchParams.delete('urgent');
+
+            if (filters.search.trim() !== '') {
+                url.searchParams.set('search', filters.search.trim());
             }
 
-            if (this.filters.search.trim() !== '') {
-                url.searchParams.set('search', this.filters.search.trim());
+            if (filters.customer.trim() !== '') {
+                url.searchParams.set('customer', filters.customer.trim());
             }
 
-            if (this.filters.customer.trim() !== '') {
-                url.searchParams.set('customer', this.filters.customer.trim());
+            if (filters.channel !== 'all') {
+                url.searchParams.set('channel', filters.channel);
             }
 
-            if (this.filters.channel !== 'all') {
-                url.searchParams.set('channel', this.filters.channel);
+            if (filters.priority !== 'all') {
+                url.searchParams.set('priority', filters.priority);
             }
 
-            if (this.filters.priority !== 'all') {
-                url.searchParams.set('priority', this.filters.priority);
+            if (filters.time !== 'all') {
+                url.searchParams.set('time', filters.time);
             }
 
-            if (this.filters.time !== 'all') {
-                url.searchParams.set('time', this.filters.time);
+            if (filters.delivery !== 'all') {
+                url.searchParams.set('delivery', filters.delivery);
             }
 
-            if (this.filters.delivery !== 'all') {
-                url.searchParams.set('delivery', this.filters.delivery);
+            if (filters.payment !== 'all') {
+                url.searchParams.set('payment', filters.payment);
             }
 
-            if (this.filters.payment !== 'all') {
-                url.searchParams.set('payment', this.filters.payment);
-            }
-
-            if (this.filters.vip) {
+            if (filters.vip) {
                 url.searchParams.set('vip', '1');
             }
 
-            if (this.filters.duplicates) {
+            if (filters.duplicates) {
                 url.searchParams.set('duplicates', '1');
             }
 
-            if (this.filters.urgent) {
+            if (filters.urgent) {
                 url.searchParams.set('urgent', '1');
             }
 
-            url.searchParams.set('view', this.activeView);
-
             if (preserveDrawer && this.drawerOpen && this.activeId !== null) {
                 url.searchParams.set('order', String(this.activeId));
-            } else {
+            } else if (!this.drawerOpen) {
                 url.searchParams.delete('order');
             }
 
@@ -1279,18 +984,23 @@ export function createOperationsBoard(config = {}) {
         },
 
         matchesFilters(order) {
-            if (! order) {
+            if (!order) {
                 return false;
             }
 
             if (this.filters.time !== 'all') {
+                const today = this.referenceDate().toISOString().slice(0, 10);
+                const tomorrow = new Date(this.referenceDate().getTime() + (24 * 60 * 60 * 1000)).toISOString().slice(0, 10);
                 const commitmentDate = commitmentDateKey(order);
-                if (this.filters.time === 'today' && commitmentDate !== this.todayKey()) {
+
+                if (this.filters.time === 'today' && commitmentDate !== today) {
                     return false;
                 }
-                if (this.filters.time === 'tomorrow' && commitmentDate !== this.tomorrowKey()) {
+
+                if (this.filters.time === 'tomorrow' && commitmentDate !== tomorrow) {
                     return false;
                 }
+
                 if (this.filters.time === 'no_commitment' && commitmentDate !== '') {
                     return false;
                 }
@@ -1308,37 +1018,37 @@ export function createOperationsBoard(config = {}) {
                 return false;
             }
 
-            if (this.filters.priority === 'urgent' && ! isUrgentOrder(order, parseTimestamp(this.serverTime) ?? Date.now())) {
+            if (this.filters.priority === 'urgent' && !isUrgentOrder(order)) {
                 return false;
             }
 
-            if (this.filters.priority === 'normal' && isUrgentOrder(order, parseTimestamp(this.serverTime) ?? Date.now())) {
+            if (this.filters.priority === 'normal' && isUrgentOrder(order)) {
                 return false;
             }
 
-            if (this.filters.vip && ! order.vip) {
+            if (this.filters.vip && !order.vip) {
                 return false;
             }
 
-            if (this.filters.duplicates && ! order.duplicate) {
+            if (this.filters.duplicates && !order.duplicate) {
                 return false;
             }
 
-            if (this.filters.urgent && ! isAgendaUrgent(order)) {
+            if (this.filters.urgent && !isUrgentOrder(order)) {
                 return false;
             }
 
             const customerTerm = normalizeText(this.filters.customer.trim());
             if (customerTerm !== '') {
                 const customerHaystack = normalizeText([order.customer_name, order.customer_phone].join(' '));
-                if (! customerHaystack.includes(customerTerm)) {
+                if (!customerHaystack.includes(customerTerm)) {
                     return false;
                 }
             }
 
             const searchTerm = normalizeText(this.filters.search.trim());
             if (searchTerm !== '') {
-                const searchHaystack = normalizeText([
+                const haystack = normalizeText([
                     order.customer_name,
                     order.customer_phone,
                     order.branch_name,
@@ -1348,7 +1058,7 @@ export function createOperationsBoard(config = {}) {
                     `#${order.id}`,
                 ].join(' '));
 
-                if (! searchHaystack.includes(searchTerm)) {
+                if (!haystack.includes(searchTerm)) {
                     return false;
                 }
             }
@@ -1356,74 +1066,51 @@ export function createOperationsBoard(config = {}) {
             return true;
         },
 
-        columnKeyForOrder(order) {
-            return columnForStatus(order.status);
-        },
-
-        columnOrders(columnKey) {
-            return this.visibleOrders.filter((order) => this.columnKeyForOrder(order) === columnKey).sort(sortOldestFirst);
-        },
-
-        columnCount(columnKey) {
-            return this.columnOrders(columnKey).length;
-        },
-
-        averageWaitLabel(columnKey) {
-            const orders = this.columnOrders(columnKey);
-            if (orders.length === 0) {
-                return '0 min';
-            }
-
-            const referenceTimeMs = parseTimestamp(this.serverTime) ?? Date.now();
-            const averageMinutes = orders.reduce((total, order) => {
-                const createdAtMs = parseTimestamp(order.created_at_iso);
-                if (createdAtMs === null) {
-                    return total;
-                }
-
-                return total + Math.max(0, (referenceTimeMs - createdAtMs) / 60000);
-            }, 0) / orders.length;
-
-            return formatWaitLabel(averageMinutes);
-        },
-
-        badgeForChannel(order) {
+        channelPill(order) {
             return buildChannelPill(order);
         },
 
-        badgeForPriority(order) {
-            return buildPriorityPill(order, parseTimestamp(this.serverTime) ?? Date.now());
+        workflowActionLabel(order) {
+            return this.workflowLabel(order);
         },
 
-        badgeForConfidence(order) {
-            return buildConfidencePill(order);
-        },
-
-        cardAccentClass(order) {
+        agendaDeliveryLabel(order) {
             return ({
-                new: 'border-l-blue-500',
-                preparing: 'border-l-amber-500',
-                ready: 'border-l-emerald-500',
-                dispatched: 'border-l-slate-400',
-            })[this.columnKeyForOrder(order)] ?? 'border-l-slate-300';
+                pickup: 'Pickup',
+                delivery: 'Delivery',
+                express: 'Express',
+                third_party: 'Third party',
+            })[String(order.delivery_method ?? '')] ?? 'No delivery';
         },
 
-        agendaCardAccentClass(order) {
+        agendaPaymentLabel(order) {
+            return ({
+                sinpe: 'SINPE',
+                cash: 'Cash',
+                card: 'Card',
+                transfer: 'Transfer',
+            })[String(order.payment_method ?? '')] ?? 'No payment';
+        },
+
+        agendaTimeWindowLabel(order) {
+            return timeWindowLabel(order);
+        },
+
+        agendaSummary(order) {
+            return order.summary ?? order.preview ?? 'Sin resumen';
+        },
+
+        agendaRiskLabel(order) {
             const risk = String(order.risk_level ?? '');
 
-            if (risk === 'critical') {
-                return 'border-l-rose-500';
-            }
-
-            if (risk === 'high' || isAgendaUrgent(order)) {
-                return 'border-l-orange-400';
-            }
-
-            if (String(order.priority_level ?? '') === 'low') {
-                return 'border-l-slate-300';
-            }
-
-            return 'border-l-blue-500';
+            return ({
+                critical: 'SLA expired',
+                high: order.remaining_sla_minutes !== null && order.remaining_sla_minutes !== undefined
+                    ? `Due in ${Number(order.remaining_sla_minutes)} min`
+                    : 'High risk',
+                medium: 'Medium',
+                low: 'Normal',
+            })[risk] ?? 'Normal';
         },
 
         agendaRiskTone(order) {
@@ -1435,26 +1122,6 @@ export function createOperationsBoard(config = {}) {
                 medium: 'bg-amber-50 text-amber-800 ring-1 ring-amber-100',
                 low: 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
             })[risk] ?? 'bg-slate-100 text-slate-700 ring-1 ring-slate-200';
-        },
-
-        agendaRiskLabel(order) {
-            const risk = String(order.risk_level ?? '');
-
-            if (risk === 'critical') {
-                return 'SLA Expired';
-            }
-
-            if (risk === 'high') {
-                return order.remaining_sla_minutes !== null && order.remaining_sla_minutes !== undefined
-                    ? `Due in ${Number(order.remaining_sla_minutes)} min`
-                    : 'High risk';
-            }
-
-            if (risk === 'medium') {
-                return 'Medium';
-            }
-
-            return 'Normal';
         },
 
         agendaPriorityTone(order) {
@@ -1485,50 +1152,8 @@ export function createOperationsBoard(config = {}) {
             return 'Normal';
         },
 
-        agendaDeliveryLabel(order) {
-            return ({
-                pickup: 'Pickup',
-                delivery: 'Delivery',
-                express: 'Express',
-                third_party: 'Terceros',
-            })[String(order.delivery_method ?? '')] ?? 'Sin entrega';
-        },
-
-        agendaPaymentLabel(order) {
-            return ({
-                sinpe: 'SINPE',
-                cash: 'Cash',
-                card: 'Card',
-                transfer: 'Transferencia',
-            })[String(order.payment_method ?? '')] ?? 'Sin pago';
-        },
-
         agendaChannelGlyph(order) {
-            return ({
-                whatsapp: 'WA',
-                telegram: 'TG',
-            })[String(order.channel_key ?? '').toLowerCase()] ?? 'CH';
-        },
-
-        agendaTimeWindowLabel(order) {
-            return timeWindowLabel(order);
-        },
-
-        agendaSlaLabel(order) {
-            if (order.remaining_sla_minutes === null || order.remaining_sla_minutes === undefined) {
-                return 'Sin SLA';
-            }
-
-            const remaining = Number(order.remaining_sla_minutes);
-            if (remaining < 0) {
-                return 'SLA Expired';
-            }
-
-            if (remaining < 60) {
-                return `Due in ${remaining} min`;
-            }
-
-            return `Due in ${Math.round(remaining / 60)} h`;
+            return buildChannelPill(order).glyph;
         },
 
         agendaSmartLabels(order) {
@@ -1536,76 +1161,57 @@ export function createOperationsBoard(config = {}) {
                 this.agendaDeliveryLabel(order),
                 this.agendaPaymentLabel(order),
                 this.agendaTimeWindowLabel(order),
-                this.agendaSlaLabel(order),
+                order.vip ? 'VIP' : null,
+                order.duplicate ? 'Duplicate' : null,
             ];
 
-            if (order.vip) {
-                labels.push('VIP');
+            return labels.filter((label) => label && label !== 'No delivery' && label !== 'No payment' && label !== 'No commitment');
+        },
+
+        cardAccentClass(order) {
+            const risk = String(order.risk_level ?? '');
+
+            if (risk === 'critical') {
+                return 'border-l-rose-500';
             }
 
-            if (order.duplicate) {
-                labels.push('Duplicated');
+            if (risk === 'high' || isUrgentOrder(order)) {
+                return 'border-l-orange-400';
             }
 
-            return labels.filter((label) => label !== 'Sin entrega' && label !== 'Sin pago' && label !== 'Sin SLA');
+            return 'border-l-blue-500';
         },
 
-        agendaCustomerSummary(order) {
-            return order.summary ?? order.preview ?? 'Sin resumen';
-        },
-
-        columnToneClass(columnKey) {
-            return BOARD_COLUMNS.find((column) => column.key === columnKey)?.tone ?? 'border-slate-200 bg-white text-slate-700';
-        },
-
-        columnDotClass(columnKey) {
-            return BOARD_COLUMNS.find((column) => column.key === columnKey)?.dot ?? 'bg-slate-400';
-        },
-
-        columnEmptyLabel(columnKey) {
-            return BOARD_COLUMNS.find((column) => column.key === columnKey)?.emptyLabel ?? 'No hay pedidos.';
-        },
-
-        statusLabel(status) {
-            return ({
-                pending_review: 'Nuevos',
-                confirmed: 'Confirmado',
-                preparing: 'Preparando',
-                ready_for_dispatch: 'Listo',
-                dispatched: 'Despachado',
-                cancelled: 'Cancelado',
-                rejected: 'Rechazado',
-            })[status] ?? String(status ?? '').replaceAll('_', ' ');
-        },
-
-        statusTone(status) {
-            return ({
-                pending_review: 'bg-blue-50 text-blue-800 ring-1 ring-blue-100',
-                confirmed: 'bg-sky-50 text-sky-800 ring-1 ring-sky-100',
-                preparing: 'bg-amber-50 text-amber-800 ring-1 ring-amber-100',
-                ready_for_dispatch: 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100',
-                dispatched: 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
-                cancelled: 'bg-red-50 text-red-800 ring-1 ring-red-100',
-                rejected: 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
-            })[status] ?? 'bg-slate-100 text-slate-700 ring-1 ring-slate-200';
-        },
-
-        channelLabel(channel) {
-            const key = String(channel ?? '').toLowerCase();
-            return CHANNEL_LABELS[key] ?? (channel ? String(channel) : 'Sin canal');
-        },
-
-        elapsedLabel(date) {
-            if (! date) {
-                return 'Sin fecha';
+        formatLongDate(date) {
+            if (!date) {
+                return 'No date';
             }
 
             const parsed = date instanceof Date ? date : new Date(date);
             if (Number.isNaN(parsed.getTime())) {
-                return 'Sin fecha';
+                return 'No date';
+            }
+
+            return new Intl.DateTimeFormat('en-US', {
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric',
+            }).format(parsed).replace(',', '');
+        },
+
+        elapsedLabel(date) {
+            if (!date) {
+                return 'No date';
+            }
+
+            const parsed = date instanceof Date ? date : new Date(date);
+            if (Number.isNaN(parsed.getTime())) {
+                return 'No date';
             }
 
             const minutes = (Date.now() - parsed.getTime()) / 60000;
+
             if (minutes < 60) {
                 return `Hace ${Math.max(1, Math.floor(minutes))} min`;
             }
@@ -1628,42 +1234,29 @@ export function createOperationsBoard(config = {}) {
                 return 'Inactive';
             }
 
-            const inactiveDays = 90;
-            const vipMinOrders = 20;
-            const frequentMinOrders = 3;
-            const newMaxOrders = 2;
-
-            if (lastSeen.getTime() <= Date.now() - (inactiveDays * 86400000)) {
-                return 'Inactive';
-            }
-
-            if (totalOrders >= vipMinOrders) {
+            if (totalOrders >= 20) {
                 return 'VIP';
             }
 
-            if (totalOrders >= frequentMinOrders) {
+            if (totalOrders >= 3) {
                 return 'Frequent';
             }
 
-            if (totalOrders <= newMaxOrders) {
-                return 'New';
-            }
-
-            return 'Frequent';
+            return 'New';
         },
 
         favoriteProducts(history) {
             const groups = new Map();
 
             for (const order of history) {
-                for (const item of order.orderItems ?? []) {
+                for (const item of order.items ?? []) {
                     const key = item.product_id !== null && item.product_id !== undefined
                         ? `product:${item.product_id}`
                         : `raw:${normalizeText(item.raw_text ?? '') || 'sin-texto'}`;
 
-                    if (! groups.has(key)) {
+                    if (!groups.has(key)) {
                         groups.set(key, {
-                            label: this.resolveItemLabel(item.product_id, item.raw_text, item.product?.name ?? null),
+                            label: this.resolveItemLabel(item.product_id, item.raw_text, item.product_name ?? null),
                             count: 0,
                         });
                     }
@@ -1682,35 +1275,6 @@ export function createOperationsBoard(config = {}) {
                 })
                 .slice(0, 3)
                 .map((entry) => `${entry.label} x${entry.count}`);
-        },
-
-        favoriteChannel(history) {
-            if (history.length === 0) {
-                return {
-                    name: 'Unknown',
-                    percentage: 0.0,
-                };
-            }
-
-            const counts = new Map();
-            for (const order of history) {
-                const label = this.channelLabel(order.source_channel);
-                counts.set(label, (counts.get(label) ?? 0) + 1);
-            }
-
-            let favoriteChannel = 'Unknown';
-            let favoriteCount = 0;
-            for (const [label, count] of counts.entries()) {
-                if (count > favoriteCount) {
-                    favoriteCount = count;
-                    favoriteChannel = label;
-                }
-            }
-
-            return {
-                name: favoriteChannel,
-                percentage: Math.round((favoriteCount / history.length) * 10000) / 100,
-            };
         },
 
         resolveItemLabel(productId, rawText, productName) {
@@ -1734,66 +1298,6 @@ export function createOperationsBoard(config = {}) {
             return `${this.ordersBaseUrl}/${orderId}`;
         },
 
-        showNotification(order) {
-            if (! order) {
-                return;
-            }
-
-            this.liveToast = {
-                visible: true,
-                title: 'Nuevo pedido recibido',
-                customer: order.customer_name ?? 'Sin cliente',
-                elapsed: 'Hace unos segundos',
-            };
-
-            if (this.liveToastTimer !== null) {
-                window.clearTimeout(this.liveToastTimer);
-            }
-
-            this.liveToastTimer = window.setTimeout(() => {
-                this.liveToast.visible = false;
-            }, 4000);
-        },
-
-        playSound() {
-            if (this.isLiveMuted() || ! this.liveQueue?.audioUnlocked) {
-                return;
-            }
-
-            this.liveQueue.playSound();
-        },
-
-        formatColumnTitle(column) {
-            return `${column.label}`;
-        },
-
-        syncSelectedOrder(updatedOrder) {
-            if (! this.selectedOrder) {
-                this.selectedOrder = this.decorateSelectedOrder(updatedOrder);
-                this.syncDraftItems();
-                return;
-            }
-
-            const preservedItems = Array.isArray(this.selectedOrder.items)
-                ? this.selectedOrder.items.map((item) => ({ ...item }))
-                : [];
-            const preservedContext = this.selectedOrder.customer_context
-                ?? this.defaultCustomerContext(this.selectedOrder.customer_name, this.selectedOrder.customer_phone);
-            const { customer_context: _customerContext, items: _items, ...rest } = updatedOrder;
-
-            Object.assign(this.selectedOrder, rest);
-            this.selectedOrder.items = preservedItems;
-            const workflow = this.buildWorkflow(this.selectedOrder.id, this.selectedOrder.status);
-            this.selectedOrder.primary_action = workflow.primary_action;
-            this.selectedOrder.secondary_actions = workflow.secondary_actions;
-            this.selectedOrder.terminal_message = workflow.terminal_message;
-            this.selectedOrder.customer_context = this.normalizeCustomerContext(
-                this.selectedOrder,
-                preservedContext,
-            );
-            this.syncDraftItems();
-        },
-
         flashOrders(orderIds) {
             this.flashOrderIds = Array.isArray(orderIds) ? orderIds : [];
 
@@ -1805,6 +1309,14 @@ export function createOperationsBoard(config = {}) {
                 this.flashOrderIds = [];
                 this.flashTimer = null;
             }, 4000);
+        },
+
+        playSound() {
+            if (this.isLiveMuted() || !this.liveQueue?.audioUnlocked) {
+                return;
+            }
+
+            this.liveQueue.playSound();
         },
     };
 }
