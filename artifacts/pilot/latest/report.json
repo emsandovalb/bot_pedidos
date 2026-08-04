@@ -1,13 +1,13 @@
 {
     "status": "ready",
-    "started_at": "2026-08-03T17:33:06.202Z",
-    "finished_at": "2026-08-03T17:34:50.241Z",
-    "duration_seconds": 104.039,
+    "started_at": "2026-08-03T20:11:25.408Z",
+    "finished_at": "2026-08-03T20:12:40.554Z",
+    "duration_seconds": 75.146,
     "phases": [
         {
             "name": "prepare",
             "status": "passed",
-            "duration_seconds": 0.777,
+            "duration_seconds": 0.603,
             "command": "php artisan pilot:prepare",
             "exit_code": 0,
             "stdout": "Pilot database ready at C:\\Users\\Ema\\Desktop\\Code\\bot_pedidos\\database\\pilot.sqlite on port 8010.\r\n",
@@ -19,10 +19,10 @@
         {
             "name": "backend",
             "status": "passed",
-            "duration_seconds": 4.095,
+            "duration_seconds": 2.588,
             "command": "php artisan test --filter=HardwareStorePilotTest",
             "exit_code": 0,
-            "stdout": "{\"tool\":\"phpunit\",\"result\":\"passed\",\"tests\":7,\"passed\":7,\"assertions\":92,\"duration_ms\":2806}\r\n",
+            "stdout": "{\"tool\":\"phpunit\",\"result\":\"passed\",\"tests\":7,\"passed\":7,\"assertions\":92,\"duration_ms\":1645}\r\n",
             "stderr": "",
             "warnings": [],
             "failures": [],
@@ -31,10 +31,10 @@
         {
             "name": "build",
             "status": "passed",
-            "duration_seconds": 2.752,
+            "duration_seconds": 2.021,
             "command": "npm run build",
             "exit_code": 0,
-            "stdout": "\n> build\n> vite build\n\n\u001b[36mvite v7.3.3 \u001b[32mbuilding client environment for production...\u001b[36m\u001b[39m\ntransforming...\n\u001b[32m✓\u001b[39m 6 modules transformed.\nrendering chunks...\ncomputing gzip size...\n\u001b[2mpublic/build/\u001b[22m\u001b[32mmanifest.json            \u001b[39m\u001b[1m\u001b[2m 0.33 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  0.17 kB\u001b[22m\n\u001b[2mpublic/build/\u001b[22m\u001b[35massets/app-B9UukG4s.css  \u001b[39m\u001b[1m\u001b[2m76.99 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip: 12.50 kB\u001b[22m\n\u001b[2mpublic/build/\u001b[22m\u001b[36massets/app-B3ZVWeLq.js   \u001b[39m\u001b[1m\u001b[2m90.85 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip: 26.58 kB\u001b[22m\n\u001b[32m✓ built in 1.82s\u001b[39m\n",
+            "stdout": "\n> build\n> vite build\n\n\u001b[36mvite v7.3.3 \u001b[32mbuilding client environment for production...\u001b[36m\u001b[39m\ntransforming...\n\u001b[32m✓\u001b[39m 6 modules transformed.\nrendering chunks...\ncomputing gzip size...\n\u001b[2mpublic/build/\u001b[22m\u001b[32mmanifest.json            \u001b[39m\u001b[1m\u001b[2m 0.33 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  0.17 kB\u001b[22m\n\u001b[2mpublic/build/\u001b[22m\u001b[35massets/app-B9UukG4s.css  \u001b[39m\u001b[1m\u001b[2m76.99 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip: 12.50 kB\u001b[22m\n\u001b[2mpublic/build/\u001b[22m\u001b[36massets/app-B3ZVWeLq.js   \u001b[39m\u001b[1m\u001b[2m90.85 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip: 26.58 kB\u001b[22m\n\u001b[32m✓ built in 1.27s\u001b[39m\n",
             "stderr": "",
             "warnings": [],
             "failures": [],
@@ -43,10 +43,10 @@
         {
             "name": "e2e",
             "status": "passed",
-            "duration_seconds": 95.879,
-            "command": "npx playwright test tests/e2e/operations-pilot.spec.js",
+            "duration_seconds": 69.551,
+            "command": "npx playwright test tests/e2e/pilot-documentation.spec.js",
             "exit_code": 0,
-            "stdout": "\nRunning 1 test using 1 worker\n\n  ok 1 tests\\e2e\\operations-pilot.spec.js:13:1 › operations pilot flow remains stable end to end (1.5m)\n\n  1 passed (1.6m)\n",
+            "stdout": "\nRunning 1 test using 1 worker\n\n  ok 1 tests\\e2e\\pilot-documentation.spec.js:15:1 › pilot documentation package captures the Benditio flow end to end (1.1m)\n\n  1 passed (1.1m)\n",
             "stderr": "",
             "warnings": [],
             "failures": [],
@@ -61,39 +61,37 @@
         "vite_manifest_exists": true,
         "whatsapp_tested": true,
         "telegram_tested": true,
-        "incoming_messages_created": 480,
-        "customers_created": 15,
-        "identities_created": 15,
-        "orders_created": 480,
-        "fulfillment_plans_created": 480,
-        "dispatched_orders_verified": true,
-        "operations_do_now_visible": true,
-        "operations_next_visible": true,
-        "operations_drawer_opened": true,
-        "operations_items_visible": true,
-        "operations_valid_action_visible": true,
-        "operations_transition_succeeded": true,
-        "operations_live_visible": true,
-        "operations_search_stable": true,
+        "login_visible": true,
+        "developer_toolkit_visible": true,
+        "operations_home_visible": true,
+        "operations_drawer_visible": true,
+        "operations_transitions_completed": true,
+        "completed_after_refresh_visible": true,
+        "customer_detail_visible": true,
+        "completed_ui_inconsistent": false,
         "browser": "chromium",
         "console_error_count": 0,
         "http_500_count": 0,
         "failed_request_count": 0,
         "backend_status_dispatched": true,
-        "workflow_completed": true,
-        "completed_ui_inconsistent": false
+        "workflow_completed": true
     },
     "warnings": [],
     "failures": [],
     "artifacts": {
         "screenshots": {
-            "toolkit_generated": "screenshots/01-toolkit-generated.png",
-            "operations_home": "screenshots/02-operations-home.png",
-            "order_drawer": "screenshots/03-order-drawer.png",
-            "after_action": "screenshots/04-after-action.png",
-            "final_state": "screenshots/05-final-state.png"
+            "login": "screenshots/01-login.png",
+            "developerToolkit": "screenshots/02-developer-toolkit.png",
+            "operationsHome": "screenshots/03-operations-home.png",
+            "doNowOrder": "screenshots/04-do-now-order.png",
+            "orderDrawer": "screenshots/05-order-drawer.png",
+            "orderPreparing": "screenshots/06-order-preparing.png",
+            "orderReady": "screenshots/07-order-ready.png",
+            "orderDispatched": "screenshots/08-order-dispatched.png",
+            "completedAfterRefresh": "screenshots/09-completed-after-refresh.png",
+            "customerDetail": "screenshots/10-customer-detail.png"
         },
-        "run_dir": "C:\\Users\\Ema\\Desktop\\Code\\bot_pedidos\\artifacts\\pilot\\runs\\2026-08-03_17-33-06",
+        "run_dir": "C:\\Users\\Ema\\Desktop\\Code\\bot_pedidos\\artifacts\\pilot\\runs\\2026-08-03_20-11-25",
         "playwright_report": "C:\\Users\\Ema\\Desktop\\Code\\bot_pedidos\\playwright-report\\index.html"
     },
     "environment": {
@@ -103,7 +101,7 @@
         "database_driver": "sqlite",
         "pilot_database_path": "C:\\Users\\Ema\\Desktop\\Code\\bot_pedidos\\database\\pilot.sqlite",
         "application_url": "http://127.0.0.1:8010",
-        "timestamp": "2026-08-03T17:33:06.723Z"
+        "timestamp": "2026-08-03T20:11:25.777Z"
     },
     "recommendation": "Ready for pilot",
     "sections": [
@@ -137,7 +135,7 @@
                 },
                 {
                     "label": "Timestamp",
-                    "value": "2026-08-03T17:33:06.723Z"
+                    "value": "2026-08-03T20:11:25.777Z"
                 }
             ]
         },
@@ -155,7 +153,7 @@
                 },
                 {
                     "label": "Duration",
-                    "value": "4.10 s"
+                    "value": "2.59 s"
                 },
                 {
                     "label": "Failures",
@@ -173,7 +171,7 @@
                 },
                 {
                     "label": "Duration",
-                    "value": "2.75 s"
+                    "value": "2.02 s"
                 },
                 {
                     "label": "Warnings",
@@ -199,7 +197,7 @@
                 },
                 {
                     "label": "Duration",
-                    "value": "95.88 s"
+                    "value": "69.55 s"
                 },
                 {
                     "label": "Console errors",
@@ -216,18 +214,23 @@
                 {
                     "label": "Screenshots",
                     "value": [
-                        "screenshots/01-toolkit-generated.png",
-                        "screenshots/02-operations-home.png",
-                        "screenshots/03-order-drawer.png",
-                        "screenshots/04-after-action.png",
-                        "screenshots/05-final-state.png"
+                        "screenshots/01-login.png",
+                        "screenshots/02-developer-toolkit.png",
+                        "screenshots/03-operations-home.png",
+                        "screenshots/04-do-now-order.png",
+                        "screenshots/05-order-drawer.png",
+                        "screenshots/06-order-preparing.png",
+                        "screenshots/07-order-ready.png",
+                        "screenshots/08-order-dispatched.png",
+                        "screenshots/09-completed-after-refresh.png",
+                        "screenshots/10-customer-detail.png"
                     ]
                 }
             ]
         },
         {
             "title": "Business Flow",
-            "status": "Healthy",
+            "status": "Review",
             "items": [
                 {
                     "label": "WhatsApp tested",
@@ -239,23 +242,23 @@
                 },
                 {
                     "label": "Incoming messages created",
-                    "value": 480
+                    "value": 0
                 },
                 {
                     "label": "Customers created",
-                    "value": 15
+                    "value": 0
                 },
                 {
                     "label": "Identities created",
-                    "value": 15
+                    "value": 0
                 },
                 {
                     "label": "Orders created",
-                    "value": 480
+                    "value": 0
                 },
                 {
                     "label": "Fulfillment plans created",
-                    "value": 480
+                    "value": 0
                 },
                 {
                     "label": "Workflow completed",
@@ -263,7 +266,7 @@
                 },
                 {
                     "label": "Dispatched orders verified",
-                    "value": "Yes"
+                    "value": "No"
                 }
             ]
         },
@@ -273,35 +276,35 @@
             "items": [
                 {
                     "label": "Do Now visible",
-                    "value": "Yes"
+                    "value": "No"
                 },
                 {
                     "label": "Next visible",
-                    "value": "Yes"
+                    "value": "No"
                 },
                 {
                     "label": "Drawer opens",
-                    "value": "Yes"
+                    "value": "No"
                 },
                 {
                     "label": "Items visible",
-                    "value": "Yes"
+                    "value": "No"
                 },
                 {
                     "label": "Valid action shown",
-                    "value": "Yes"
+                    "value": "No"
                 },
                 {
                     "label": "Status transition succeeds",
-                    "value": "Yes"
+                    "value": "No"
                 },
                 {
                     "label": "Live indicator visible",
-                    "value": "Yes"
+                    "value": "No"
                 },
                 {
                     "label": "Search/filter stable",
-                    "value": "Yes"
+                    "value": "No"
                 }
             ]
         },

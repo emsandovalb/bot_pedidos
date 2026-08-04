@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Benditio Pilot Journey</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #122033;
+      --muted: #5c6b7f;
+      --border: #dbe3ee;
+      --blue: #146edb;
+      --green: #0f7a4c;
+      --amber: #a56400;
+      --purple: #6b5bd2;
+      --red: #b42318;
+      --shadow: 0 18px 50px rgba(18, 32, 51, .08);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(20,110,219,.12), transparent 24%),
+        radial-gradient(circle at top right, rgba(15,122,76,.10), transparent 22%),
+        linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+    }
+
+    .wrap {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 28px 18px 44px;
+    }
+
+    .hero {
+      background: rgba(255,255,255,.92);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .kicker {
+      text-transform: uppercase;
+      letter-spacing: .18em;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    h1 {
+      margin: 10px 0 8px;
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      line-height: 1.05;
+    }
+
+    .lead {
+      margin: 0;
+      max-width: 75ch;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .legend span,
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      border: 1px solid var(--border);
+      background: #fff;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .stage {
+      position: relative;
+      background: rgba(255,255,255,.94);
+      border: 1px solid var(--border);
+      border-radius: 26px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+      min-height: 330px;
+      overflow: hidden;
+    }
+
+    .stage::after {
+      content: "";
+      position: absolute;
+      inset: auto 20px 18px 20px;
+      height: 2px;
+      background: linear-gradient(90deg, rgba(20,110,219,.1), rgba(20,110,219,.6), rgba(15,122,76,.6));
+      border-radius: 999px;
+    }
+
+    .stage-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .num {
+      width: 38px;
+      height: 38px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, rgba(20,110,219,.14), rgba(15,122,76,.12));
+      color: var(--blue);
+      font-weight: 800;
+    }
+
+    .stage h2 {
+      margin: 0;
+      font-size: 1.02rem;
+      line-height: 1.2;
+    }
+
+    .icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      background: #f7f9fc;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--border);
+    }
+
+    .section {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 18px;
+      background: #f8fbff;
+      border: 1px solid #e4ebf5;
+    }
+
+    .section h3 {
+      margin: 0 0 8px;
+      font-size: .78rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .section p {
+      margin: 0;
+      line-height: 1.55;
+      color: #223146;
+      font-size: .95rem;
+    }
+
+    .callout {
+      border-left: 4px solid var(--blue);
+      background: linear-gradient(90deg, rgba(20,110,219,.08), rgba(20,110,219,.03));
+    }
+
+    .warning {
+      border-left-color: var(--amber);
+      background: linear-gradient(90deg, rgba(165,100,0,.09), rgba(165,100,0,.03));
+    }
+
+    .manual {
+      border-left-color: var(--purple);
+      background: linear-gradient(90deg, rgba(107,91,210,.09), rgba(107,91,210,.03));
+    }
+
+    .done {
+      border-left-color: var(--green);
+      background: linear-gradient(90deg, rgba(15,122,76,.09), rgba(15,122,76,.03));
+    }
+
+    .footer-note {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 1200px) {
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .stage { min-height: auto; }
+    }
+
+    @media (max-width: 720px) {
+      .wrap { padding: 16px 12px 28px; }
+      .hero, .stage { border-radius: 22px; }
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    @media print {
+      body { background: #fff; }
+      .wrap { max-width: none; padding: 0; }
+      .hero, .stage { box-shadow: none; }
+      .stage { break-inside: avoid; page-break-inside: avoid; }
+      .footer-note { break-before: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div class="kicker">Benditio Pilot Journey</div>
+      <h1>Flujo visual del piloto</h1>
+      <p class="lead">
+        Este recorrido resume cómo un mensaje entra, se entiende, se prioriza, pasa por la mesa operativa y termina despachado y completado. Cada etapa muestra la entrada del cliente, el comportamiento automático, la salida visible para el operador y una posible excepción.
+      </p>
+
+      <div class="legend" aria-label="Leyenda">
+        <span><i class="dot" style="background: var(--blue)"></i> Automatizado</span>
+        <span><i class="dot" style="background: var(--green)"></i> Acción del operador</span>
+        <span><i class="dot" style="background: var(--amber)"></i> Revisión requerida</span>
+        <span><i class="dot" style="background: var(--purple)"></i> Finalizado</span>
+      </div>
+    </section>
+
+    <div class="grid" role="list">
+      <article class="stage" role="listitem">
+        <div class="stage-head">
+          <div class="num">1</div>
+          <div class="icon" aria-hidden="true">✉</div>
+        </div>
+        <h2>Cliente escribe</h2>
+        <div class="section callout">
+          <h3>Entrada del cliente</h3>
+          <p>El cliente envía un mensaje por WhatsApp, Telegram o Instagram.</p>
+        </div>
+        <div class="section">
+          <h3>Comportamiento automático</h3>
+          <p>El mensaje entra al canal o al simulador y queda listo para procesarse.</p>
+        </div>
+        <div class="section">
+          <h3>Resultado visible</h3>
+          <p>Aún no hay acción operativa; el pedido recién empieza su recorrido.</p>
+        </div>
+        <div class="section warning">
+          <h3>Excepción posible</h3>
+          <p>El mensaje puede llegar vacío, duplicado o con un canal que todavía es placeholder.</p>
+        </div>
+      </article>
+
+      <article class="stage" role="listitem">
+        <div class="stage-head">
+          <div class="num">2</div>
+          <div class="icon" aria-hidden="true">◔</div>
+        </div>
+        <h2>Benditio entiende</h2>
+        <div class="section callout">
+          <h3>Entrada del cliente</h3>
+          <p>Texto con productos, cantidad, fecha, hora o condiciones de entrega y pago.</p>
+        </div>
+        <div class="section">
+          <h3>Comportamiento automático</h3>
+          <p>El parser extrae artículos y señales como hoy, mañana, pickup, delivery, SINPE o efectivo.</p>
+        </div>
+        <div class="section">
+          <h3>Resultado visible</h3>
+          <p>El pedido muestra fecha, hora, método de entrega y método de pago.</p>
+        </div>
+        <div class="section warning">
+          <h3>Excepción posible</h3>
+          <p>Si el texto es ambiguo, el sistema conserva una confianza baja o deja campos sin definir.</p>
+        </div>
+      </article>
+
+      <article class="stage" role="listitem">
+        <div class="stage-head">
+          <div class="num">3</div>
+          <div class="icon" aria-hidden="true">⚑</div>
+        </div>
+        <h2>Benditio organiza y prioriza</h2>
+        <div class="section callout">
+          <h3>Entrada del cliente</h3>
+          <p>Pedidos del mismo cliente o de clientes frecuentes en canales distintos.</p>
+        </div>
+        <div class="section">
+          <h3>Comportamiento automático</h3>
+          <p>El motor calcula prioridad, riesgo, SLA y posible duplicado de negocio.</p>
+        </div>
+        <div class="section">
+          <h3>Resultado visible</h3>
+          <p>Los pedidos se ordenan en `DO NOW`, `NEXT` o `COMPLETED` según su estado.</p>
+        </div>
+        <div class="section warning">
+          <h3>Excepción posible</h3>
+          <p>Un pedido puede quedar marcado como posible duplicado y requerir revisión humana.</p>
+        </div>
+      </article>
+
+      <article class="stage" role="listitem">
+        <div class="stage-head">
+          <div class="num">4</div>
+          <div class="icon" aria-hidden="true">⌂</div>
+        </div>
+        <h2>Operador prepara</h2>
+        <div class="section callout">
+          <h3>Entrada del cliente</h3>
+          <p>El operador abre la tarjeta y revisa lo que pidió el cliente.</p>
+        </div>
+        <div class="section">
+          <h3>Comportamiento automático</h3>
+          <p>La acción primaria cambia según el estado: confirmar, preparar o marcar listo.</p>
+        </div>
+        <div class="section">
+          <h3>Resultado visible</h3>
+          <p>El panel lateral muestra artículos, cumplimiento, prioridad, duplicado y contexto del cliente.</p>
+        </div>
+        <div class="section warning">
+          <h3>Excepción posible</h3>
+          <p>Si faltan datos o la tarjeta es ambigua, el operador debe revisar antes de avanzar.</p>
+        </div>
+      </article>
+
+      <article class="stage" role="listitem">
+        <div class="stage-head">
+          <div class="num">5</div>
+          <div class="icon" aria-hidden="true">✓</div>
+        </div>
+        <h2>Pedido se despacha y completa</h2>
+        <div class="section callout">
+          <h3>Entrada del cliente</h3>
+          <p>El pedido ya fue validado, preparado y marcado listo para salir.</p>
+        </div>
+        <div class="section">
+          <h3>Comportamiento automático</h3>
+          <p>Al despachar, el estado cambia a `Despachado` y el historial queda guardado.</p>
+        </div>
+        <div class="section done">
+          <h3>Resultado visible</h3>
+          <p>Tras refrescar, el pedido aparece en `COMPLETED` y sigue disponible para consulta.</p>
+        </div>
+        <div class="section warning">
+          <h3>Excepción posible</h3>
+          <p>Si no persiste el estado o cambió el filtro, el pedido puede no verse donde se espera.</p>
+        </div>
+      </article>
+    </div>
+
+    <p class="footer-note">
+      Documento de apoyo visual para facilitación, soporte y capacitación del piloto.
+    </p>
+  </div>
+</body>
+</html>
+

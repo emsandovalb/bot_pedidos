@@ -1,0 +1,32 @@
+{
+  "browser": "chromium",
+  "console_errors": [],
+  "page_errors": [],
+  "http_500_responses": [],
+  "failed_requests": [],
+  "warnings": [],
+  "failures": [],
+  "screenshots": {
+    "login": "screenshots/01-login.png",
+    "developerToolkit": "screenshots/02-developer-toolkit.png",
+    "operationsHome": "screenshots/03-operations-home.png",
+    "doNowOrder": "screenshots/04-do-now-order.png",
+    "orderDrawer": "screenshots/05-order-drawer.png",
+    "orderPreparing": "screenshots/06-order-preparing.png",
+    "orderReady": "screenshots/07-order-ready.png",
+    "orderDispatched": "screenshots/08-order-dispatched.png",
+    "completedAfterRefresh": "screenshots/09-completed-after-refresh.png",
+    "customerDetail": "screenshots/10-customer-detail.png"
+  },
+  "metrics": {
+    "whatsapp_tested": true,
+    "telegram_tested": true,
+    "login_visible": true,
+    "developer_toolkit_visible": true,
+    "operations_home_visible": true,
+    "operations_drawer_visible": true,
+    "operations_transitions_completed": true,
+    "completed_after_refresh_visible": true,
+    "customer_detail_visible": true
+  }
+}

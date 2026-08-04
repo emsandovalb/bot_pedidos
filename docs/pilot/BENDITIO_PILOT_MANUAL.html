@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Manual del piloto Benditio</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #122033;
+      --muted: #5a6b82;
+      --border: #d9e1ec;
+      --blue: #146edb;
+      --green: #0f7a4c;
+      --amber: #9a6700;
+      --red: #b42318;
+      --purple: #6b5bd2;
+      --shadow: 0 18px 44px rgba(18,32,51,.08);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(20,110,219,.12), transparent 24%),
+        radial-gradient(circle at top right, rgba(15,122,76,.10), transparent 22%),
+        linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+    }
+
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .wrap { max-width: 1240px; margin: 0 auto; padding: 28px 18px 50px; }
+
+    .cover, .panel, .section {
+      background: rgba(255,255,255,.94);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .cover { padding: 30px; }
+    .kicker {
+      text-transform: uppercase;
+      letter-spacing: .18em;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--muted);
+    }
+    h1 {
+      margin: 10px 0 8px;
+      font-size: clamp(2.4rem, 6vw, 4rem);
+      line-height: 1.02;
+    }
+    .subtitle { margin: 0; max-width: 75ch; color: var(--muted); line-height: 1.6; }
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 22px;
+    }
+    .meta div {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px 16px;
+    }
+    .meta span {
+      display: block;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+    }
+    .meta strong { display: block; margin-top: 6px; font-size: 15px; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      gap: 18px;
+      margin-top: 18px;
+      align-items: start;
+    }
+    .toc { position: sticky; top: 18px; padding: 20px; }
+    .toc h2, .section h2, .panel h2 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+    .toc ol { margin: 12px 0 0; padding-left: 18px; color: var(--muted); line-height: 1.8; }
+    .toc li { margin: 4px 0; }
+
+    .content { display: grid; gap: 18px; }
+    .section { padding: 24px; }
+    .section h3 { margin: 0 0 12px; font-size: 1.35rem; }
+    .section p, .section li { line-height: 1.65; color: #223146; }
+    .section ul { margin: 0; padding-left: 20px; }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .chip, .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid var(--border);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .dot { width: 10px; height: 10px; border-radius: 999px; display: inline-block; }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .status-card {
+      padding: 16px;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: #f8fbff;
+    }
+    .status-card h4 { margin: 0 0 8px; font-size: 15px; }
+    .status-card p { margin: 0; color: var(--muted); font-size: 14px; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      overflow: hidden;
+      border-radius: 18px;
+    }
+    th, td {
+      border-top: 1px solid #edf1f6;
+      padding: 12px 10px;
+      text-align: left;
+      vertical-align: top;
+      font-size: 14px;
+    }
+    th { width: 24%; color: #31455d; }
+    td { color: var(--muted); }
+
+    .flowbox {
+      margin-top: 14px;
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      background: linear-gradient(180deg, #f8fbff 0%, #fff 100%);
+      padding: 16px;
+      overflow: auto;
+    }
+    .flow-svg { width: 100%; min-width: 980px; height: auto; display: block; }
+
+    .shot-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    figure {
+      margin: 0;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      overflow: hidden;
+      box-shadow: 0 12px 28px rgba(18,32,51,.05);
+    }
+    figure img { display: block; width: 100%; height: auto; background: #f8fbff; }
+    figcaption {
+      padding: 12px 14px 14px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .screenshot-path {
+      display: block;
+      margin-top: 6px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      color: #31455d;
+      word-break: break-all;
+    }
+
+    .callout {
+      border-left: 4px solid var(--blue);
+      background: linear-gradient(90deg, rgba(20,110,219,.08), rgba(20,110,219,.03));
+    }
+    .warn {
+      border-left-color: var(--amber);
+      background: linear-gradient(90deg, rgba(154,103,0,.08), rgba(154,103,0,.03));
+    }
+    .ok {
+      border-left-color: var(--green);
+      background: linear-gradient(90deg, rgba(15,122,76,.08), rgba(15,122,76,.03));
+    }
+    .soft {
+      border-left-color: var(--purple);
+      background: linear-gradient(90deg, rgba(107,91,210,.08), rgba(107,91,210,.03));
+    }
+
+    .muted { color: var(--muted); }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .break { break-before: page; page-break-before: always; }
+
+    @media (max-width: 1040px) {
+      .layout { grid-template-columns: 1fr; }
+      .toc { position: static; }
+      .status-grid, .shot-grid, .grid-2 { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 720px) {
+      .wrap { padding: 16px 12px 32px; }
+      .cover, .section, .panel { border-radius: 22px; }
+      .status-grid, .shot-grid, .grid-2 { grid-template-columns: 1fr; }
+      .flow-svg { min-width: 900px; }
+    }
+
+    @media print {
+      body { background: #fff; }
+      .wrap { max-width: none; padding: 0; }
+      .cover, .section, .panel { box-shadow: none; }
+      .toc { position: static; }
+      .break { break-before: page; page-break-before: always; }
+      figure { break-inside: avoid; page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="cover">
+      <div class="kicker">Benditio Pilot Manual</div>
+      <h1>Manual del piloto Benditio</h1>
+      <p class="subtitle">
+        Documento operativo para facilitación, entrenamiento y soporte. Resume el comportamiento actual del sistema, lo que ya está disponible y lo que sigue pendiente.
+      </p>
+      <div class="meta">
+        <div><span>Generado</span><strong>2026-08-03</strong></div>
+        <div><span>Idioma</span><strong>Español</strong></div>
+        <div><span>Estado actual</span><strong>Operativo con limitaciones</strong></div>
+        <div><span>Fuente</span><strong>Código actual del piloto</strong></div>
+      </div>
+
+      <div class="chips" aria-label="Resumen de estado">
+        <span class="badge"><i class="dot" style="background: var(--green)"></i> Automatizado</span>
+        <span class="badge"><i class="dot" style="background: var(--blue)"></i> Revisión asistida</span>
+        <span class="badge"><i class="dot" style="background: var(--amber)"></i> Pendiente / parcial</span>
+        <span class="badge"><i class="dot" style="background: var(--purple)"></i> Finalizado</span>
+      </div>
+    </section>
+
+    <div class="layout">
+      <aside class="panel toc">
+        <h2>Tabla de contenido</h2>
+        <ol>
+          <li><a href="#producto">Producto</a></li>
+          <li><a href="#flujo">Flujo de canal a pedido</a></li>
+          <li><a href="#visual">Flujo visual</a></li>
+          <li><a href="#operador">Flujo del operador</a></li>
+          <li><a href="#operaciones">Operaciones actual</a></li>
+          <li><a href="#screenshots">Capturas</a></li>
+          <li><a href="#guide">Guía rápida</a></li>
+          <li><a href="#checklist">Checklist</a></li>
+          <li><a href="#limitations">Limitaciones</a></li>
+          <li><a href="#support">Soporte</a></li>
+        </ol>
+      </aside>
+
+      <main class="content">
+        <section class="section" id="producto">
+          <h3>Producto</h3>
+          <p>
+            Benditio organiza pedidos que llegan por mensajería, resuelve identidad de cliente, interpreta el contenido del mensaje y guía al operador hasta el despacho. El objetivo es reducir lectura manual y mantener una cola operativa clara.
+          </p>
+          <div class="status-grid">
+            <div class="status-card">
+              <h4>Qué hace</h4>
+              <p>Recibe mensajes, crea pedidos, interpreta cumplimiento y prioriza trabajo.</p>
+            </div>
+            <div class="status-card">
+              <h4>Qué no hace</h4>
+              <p>No reemplaza al operador ni promete integraciones externas cerradas.</p>
+            </div>
+            <div class="status-card">
+              <h4>Canales</h4>
+              <p>WhatsApp, Telegram e Instagram, con distinto nivel de madurez actual.</p>
+            </div>
+            <div class="status-card">
+              <h4>Cola</h4>
+              <p>`DO NOW`, `NEXT` y `COMPLETED` ordenan el trabajo operativo del día.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="flujo">
+          <h3>Flujo de canal a pedido</h3>
+          <p class="muted">Resumen del recorrido desde el mensaje del cliente hasta el pedido listo para operar.</p>
+          <table>
+            <tr><th>Canal</th><td>WhatsApp, Telegram o Instagram.</td></tr>
+            <tr><th>Entrada</th><td>Webhook, simulador o carga controlada.</td></tr>
+            <tr><th>Identidad</th><td>Se resuelve por proveedor, chat, teléfono y nombre.</td></tr>
+            <tr><th>Pedido</th><td>Se crean artículos y estado inicial.</td></tr>
+            <tr><th>Cumplimiento</th><td>Se calculan fecha, hora, entrega, pago y urgencia.</td></tr>
+            <tr><th>Duplicados</th><td>Se separa duplicado técnico de posible duplicado de negocio.</td></tr>
+            <tr><th>Operación</th><td>El pedido entra a la cola visible para revisión humana.</td></tr>
+          </table>
+        </section>
+
+        <section class="section" id="visual">
+          <h3>Flujo visual</h3>
+          <p class="muted">Versión HTML/SVG equivalente al flujo Mermaid del manual técnico.</p>
+          <div class="flowbox" aria-label="Flujo visual">
+            <svg class="flow-svg" viewBox="0 0 1440 480" role="img" aria-labelledby="journeyTitle journeyDesc">
+              <title id="journeyTitle">Flujo visual de Benditio</title>
+              <desc id="journeyDesc">Secuencia desde el mensaje del cliente hasta el pedido completado, con ramas para duplicados, revisión manual y notificaciones.</desc>
+              <defs>
+                <marker id="arrow" markerWidth="12" markerHeight="12" refX="8" refY="6" orient="auto">
+                  <path d="M0,0 L12,6 L0,12 z" fill="#7b8ba6"></path>
+                </marker>
+                <linearGradient id="nodeFill" x1="0" x2="1">
+                  <stop offset="0%" stop-color="#ffffff"></stop>
+                  <stop offset="100%" stop-color="#f6f9fe"></stop>
+                </linearGradient>
+              </defs>
+              <g fill="none" stroke="#7b8ba6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M180 95 H255" marker-end="url(#arrow)"></path>
+                <path d="M395 95 H470" marker-end="url(#arrow)"></path>
+                <path d="M610 95 H685" marker-end="url(#arrow)"></path>
+                <path d="M825 95 H900" marker-end="url(#arrow)"></path>
+                <path d="M1040 95 H1115" marker-end="url(#arrow)"></path>
+                <path d="M1260 95 H1330" marker-end="url(#arrow)"></path>
+                <path d="M1330 175 V250 H1110" marker-end="url(#arrow)"></path>
+                <path d="M900 175 V250 H690" marker-end="url(#arrow)"></path>
+                <path d="M470 175 V250 H250" marker-end="url(#arrow)"></path>
+                <path d="M250 250 H120" marker-end="url(#arrow)"></path>
+                <path d="M690 250 H560" marker-end="url(#arrow)"></path>
+                <path d="M1110 250 H980" marker-end="url(#arrow)"></path>
+                <path d="M560 320 H690" marker-end="url(#arrow)"></path>
+                <path d="M980 320 H1110" marker-end="url(#arrow)"></path>
+                <path d="M1110 390 H1250" marker-end="url(#arrow)"></path>
+              </g>
+
+              <g font-family="Inter, Arial, sans-serif" font-size="18" font-weight="700" fill="#122033" text-anchor="middle">
+                <rect x="40" y="50" rx="18" ry="18" width="140" height="90" fill="url(#nodeFill)" stroke="#d9e1ec"></rect>
+                <text x="110" y="88">Cliente</text>
+                <text x="110" y="115" font-size="13" font-weight="600" fill="#5a6b82">escribe</text>
+
+                <rect x="255" y="50" rx="18" ry="18" width="140" height="90" fill="url(#nodeFill)" stroke="#d9e1ec"></rect>
+                <text x="325" y="88">WhatsApp</text>
+                <text x="325" y="115" font-size="13" font-weight="600" fill="#5a6b82">Telegram / IG</text>
+
+                <rect x="470" y="50" rx="18" ry="18" width="140" height="90" fill="url(#nodeFill)" stroke="#d9e1ec"></rect>
+                <text x="540" y="88">Proveedor</text>
+                <text x="540" y="115" font-size="13" font-weight="600" fill="#5a6b82">o webhook</text>
+
+                <rect x="685" y="50" rx="18" ry="18" width="140" height="90" fill="url(#nodeFill)" stroke="#d9e1ec"></rect>
+                <text x="755" y="88">Ingesta</text>
+                <text x="755" y="115" font-size="13" font-weight="600" fill="#5a6b82">de mensajes</text>
+
+                <rect x="900" y="50" rx="18" ry="18" width="140" height="90" fill="url(#nodeFill)" stroke="#d9e1ec"></rect>
+                <text x="970" y="88">Deduplicación</text>
+                <text x="970" y="115" font-size="13" font-weight="600" fill="#5a6b82">técnica</text>
+
+                <rect x="1115" y="50" rx="18" ry="18" width="140" height="90" fill="url(#nodeFill)" stroke="#d9e1ec"></rect>
+                <text x="1185" y="88">Identidad</text>
+                <text x="1185" y="115" font-size="13" font-weight="600" fill="#5a6b82">cliente</text>
+
+                <rect x="1330" y="50" rx="18" ry="18" width="140" height="90" fill="url(#nodeFill)" stroke="#d9e1ec" transform="translate(-30,0)"></rect>
+                <text x="1370" y="88">Parser</text>
+                <text x="1370" y="115" font-size="13" font-weight="600" fill="#5a6b82">productos</text>
+
+                <rect x="90" y="210" rx="18" ry="18" width="160" height="90" fill="url(#nodeFill)" stroke="#d9e1ec"></rect>
+                <text x="170" y="246">Pedido</text>
+
+                <rect x="330" y="210" rx="18" ry="18" width="160" height="90" fill="url(#nodeFill)" stroke="#d9e1ec"></rect>
+                <text x="410" y="246">Plan</text>
+                <text x="410" y="273" font-size="13" font-weight="600" fill="#5a6b82">de cumplimiento</text>
+
+                <rect x="570" y="210" rx="18" ry="18" width="160" height="90" fill="url(#nodeFill)" stroke="#d9e1ec"></rect>
+                <text x="650" y="246">Parser de</text>
+                <text x="650" y="273" font-size="13" font-weight="600" fill="#5a6b82">intención</text>
+
+                <rect x="810" y="210" rx="18" ry="18" width="160" height="90" fill="url(#nodeFill)" stroke="#d9e1ec"></rect>
+                <text x="890" y="246">Motor</text>
+                <text x="890" y="273" font-size="13" font-weight="600" fill="#5a6b82">de decisión</text>
+
+                <rect x="1050" y="210" rx="18" ry="18" width="160" height="90" fill="url(#nodeFill)" stroke="#d9e1ec"></rect>
+                <text x="1130" y="246">Operaciones</text>
+                <text x="1130" y="273" font-size="13" font-weight="600" fill="#5a6b82">revisión</text>
+
+                <rect x="1290" y="210" rx="18" ry="18" width="150" height="90" fill="url(#nodeFill)" stroke="#d9e1ec" transform="translate(-40,0)"></rect>
+                <text x="1325" y="246">Confirmado</text>
+                <text x="1325" y="273" font-size="13" font-weight="600" fill="#5a6b82">operador</text>
+
+                <rect x="1110" y="330" rx="18" ry="18" width="160" height="90" fill="url(#nodeFill)" stroke="#d9e1ec"></rect>
+                <text x="1190" y="366">Preparando</text>
+
+                <rect x="1285" y="330" rx="18" ry="18" width="140" height="90" fill="url(#nodeFill)" stroke="#d9e1ec" transform="translate(-15,0)"></rect>
+                <text x="1355" y="366">Listo</text>
+                <text x="1355" y="393" font-size="13" font-weight="600" fill="#5a6b82">para despacho</text>
+
+                <rect x="1250" y="400" rx="18" ry="18" width="150" height="68" fill="url(#nodeFill)" stroke="#d9e1ec" transform="translate(-20,-40)"></rect>
+                <text x="1305" y="402">Despachado</text>
+                <text x="1305" y="426" font-size="13" font-weight="600" fill="#5a6b82">Completado</text>
+              </g>
+
+              <g fill="#122033" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="700">
+                <text x="180" y="170" text-anchor="middle">duplicado técnico</text>
+                <text x="670" y="305" text-anchor="middle">posible duplicado de negocio</text>
+                <text x="890" y="305" text-anchor="middle">información faltante</text>
+                <text x="1135" y="305" text-anchor="middle">rechazado / cancelado / bitácora</text>
+              </g>
+            </svg>
+          </div>
+        </section>
+
+        <section class="section" id="operador">
+          <h3>Flujo del operador</h3>
+          <div class="grid-2">
+            <div class="section callout" style="margin:0">
+              <h3>DO NOW</h3>
+              <p>Atiende primero lo urgente. La tarjeta te muestra el compromiso y el botón principal que toca ahora.</p>
+            </div>
+            <div class="section callout" style="margin:0">
+              <h3>NEXT</h3>
+              <p>Estos pedidos vienen después. No son urgentes, pero ya tienen contexto operativo.</p>
+            </div>
+            <div class="section ok" style="margin:0">
+              <h3>COMPLETED</h3>
+              <p>Pedidos despachados en el día. Deben seguir visibles después de refrescar.</p>
+            </div>
+            <div class="section warn" style="margin:0">
+              <h3>Indicador live</h3>
+              <p>`Live`, `Reconectando...` o `Sin conexion` te dicen si la cola sigue leyendo el feed.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="operaciones">
+          <h3>Operaciones actual</h3>
+          <p>
+            La experiencia actual usa tarjetas, un drawer lateral y una acción guiada. Los textos visibles hoy mezclan nombres en inglés y español, por lo que conviene operar con el significado funcional de cada zona, no solo con la etiqueta literal.
+          </p>
+          <table>
+            <tr><th>Tarjeta</th><td>Cliente, compromiso, entrega, pago, sucursal y botón de acción.</td></tr>
+            <tr><th>Drawer</th><td>Detalle completo, artículos, parser, plan, riesgo, duplicado, historial y contexto.</td></tr>
+            <tr><th>Acción</th><td>Confirmar, preparar, marcar listo o despachar según el estado.</td></tr>
+            <tr><th>Refresh</th><td>El pedido despachado debe permanecer en `COMPLETED` tras refrescar.</td></tr>
+          </table>
+          <div class="chips">
+            <span class="chip"><i class="dot" style="background: var(--blue)"></i> Automatizado</span>
+            <span class="chip"><i class="dot" style="background: var(--green)"></i> Acción del operador</span>
+            <span class="chip"><i class="dot" style="background: var(--amber)"></i> Revisión requerida</span>
+            <span class="chip"><i class="dot" style="background: var(--purple)"></i> Finalizado</span>
+          </div>
+        </section>
+
+        <section class="section break" id="screenshots">
+          <h3>Capturas del piloto</h3>
+          <p class="muted">Las rutas son relativas y se resuelven desde esta carpeta HTML.</p>
+          <div class="shot-grid">
+            <figure>
+              <img src="screenshots/01-login.png" alt="Pantalla de inicio de sesión">
+              <figcaption>
+                01. Login. Verifica el acceso al entorno del piloto.
+                <span class="screenshot-path">screenshots/01-login.png</span>
+              </figcaption>
+            </figure>
+            <figure>
+              <img src="screenshots/02-developer-toolkit.png" alt="Developer Toolkit con mensaje de prueba">
+              <figcaption>
+                02. Developer Toolkit. Muestra la inyección del mensaje controlado a través del flujo de producción.
+                <span class="screenshot-path">screenshots/02-developer-toolkit.png</span>
+              </figcaption>
+            </figure>
+            <figure>
+              <img src="screenshots/03-operations-home.png" alt="Pantalla principal de Operaciones">
+              <figcaption>
+                03. Operations home. La cola muestra `DO NOW`, `NEXT`, `COMPLETED` e indicador live.
+                <span class="screenshot-path">screenshots/03-operations-home.png</span>
+              </figcaption>
+            </figure>
+            <figure>
+              <img src="screenshots/04-do-now-order.png" alt="Tarjeta del pedido en DO NOW">
+              <figcaption>
+                04. Tarjeta en `DO NOW`. El operador ve la prioridad antes de abrir el drawer.
+                <span class="screenshot-path">screenshots/04-do-now-order.png</span>
+              </figcaption>
+            </figure>
+            <figure>
+              <img src="screenshots/05-order-drawer.png" alt="Drawer de detalle del pedido">
+              <figcaption>
+                05. Drawer. Revisión de artículos, cumplimiento, riesgo y duplicado.
+                <span class="screenshot-path">screenshots/05-order-drawer.png</span>
+              </figcaption>
+            </figure>
+            <figure>
+              <img src="screenshots/06-order-preparing.png" alt="Pedido en Preparando">
+              <figcaption>
+                06. Estado `Preparando`. La acción primaria ya cambió después de confirmar.
+                <span class="screenshot-path">screenshots/06-order-preparing.png</span>
+              </figcaption>
+            </figure>
+            <figure>
+              <img src="screenshots/07-order-ready.png" alt="Pedido listo para despacho">
+              <figcaption>
+                07. Estado `Listo`. El pedido espera despacho.
+                <span class="screenshot-path">screenshots/07-order-ready.png</span>
+              </figcaption>
+            </figure>
+            <figure>
+              <img src="screenshots/08-order-dispatched.png" alt="Pedido despachado">
+              <figcaption>
+                08. Estado `Despachado`. El pedido ya está cerrado operativamente.
+                <span class="screenshot-path">screenshots/08-order-dispatched.png</span>
+              </figcaption>
+            </figure>
+            <figure>
+              <img src="screenshots/09-completed-after-refresh.png" alt="Pedido en COMPLETED después de refrescar">
+              <figcaption>
+                09. Después del refresh. El pedido sigue en `COMPLETED`.
+                <span class="screenshot-path">screenshots/09-completed-after-refresh.png</span>
+              </figcaption>
+            </figure>
+            <figure>
+              <img src="screenshots/10-customer-detail.png" alt="Detalle del cliente con identidades y duplicados">
+              <figcaption>
+                10. Detalle del cliente. Identidades, historial y posibles duplicados.
+                <span class="screenshot-path">screenshots/10-customer-detail.png</span>
+              </figcaption>
+            </figure>
+          </div>
+        </section>
+
+        <section class="section" id="guide">
+          <h3>Guía rápida</h3>
+          <div class="grid-2">
+            <div class="section soft" style="margin:0">
+              <h3>Qué hace Benditio</h3>
+              <p>Organiza pedidos, interpreta cumplimiento y ayuda a decidir qué atender primero.</p>
+            </div>
+            <div class="section soft" style="margin:0">
+              <h3>Acción principal</h3>
+              <p>Confirmar, preparar, marcar listo o despachar según el estado.</p>
+            </div>
+            <div class="section soft" style="margin:0">
+              <h3>Qué revisar</h3>
+              <p>Artículos, entrega, pago, duplicados, riesgo y contexto del cliente.</p>
+            </div>
+            <div class="section soft" style="margin:0">
+              <h3>Duplicados</h3>
+              <p>Diferencia duplicado técnico de posible duplicado de negocio antes de avanzar.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="checklist">
+          <h3>Checklist del piloto</h3>
+          <table>
+            <tr><th>Antes</th><td>`npm run pilot` reporta `READY`, el entorno está aislado y los artefactos existen.</td></tr>
+            <tr><th>Durante</th><td>Login, toolkit, home de operaciones, drawer, workflow y refresh verificados.</td></tr>
+            <tr><th>Después</th><td>Screenshots capturados, feedback del usuario registrado y evidencia guardada.</td></tr>
+          </table>
+        </section>
+
+        <section class="section" id="limitations">
+          <h3>Limitaciones</h3>
+          <ul>
+            <li>Instagram sigue como placeholder.</li>
+            <li>Telegram no tiene recepción real de webhook completamente cerrada.</li>
+            <li>WhatsApp externo sigue siendo una integración parcial para el piloto.</li>
+            <li>El operador sigue siendo quien confirma el avance final.</li>
+            <li>Los casos ambiguos aún requieren revisión humana.</li>
+          </ul>
+        </section>
+
+        <section class="section" id="support">
+          <h3>Soporte y escalamiento</h3>
+          <p>
+            Si algo falla, registra el `order_id`, canal, estado y captura. Luego revisa
+            <a href="artifacts/pilot/latest/report.html">artifacts/pilot/latest/report.html</a>
+            y el resumen E2E antes de escalar al facilitador.
+          </p>
+          <div class="chips">
+            <span class="badge"><i class="dot" style="background: var(--blue)"></i> `artifacts/pilot/latest/report.html`</span>
+            <span class="badge"><i class="dot" style="background: var(--green)"></i> `artifacts/pilot/latest/e2e-summary.json`</span>
+            <span class="badge"><i class="dot" style="background: var(--amber)"></i> Evidencia concreta</span>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+</body>
+</html>
+

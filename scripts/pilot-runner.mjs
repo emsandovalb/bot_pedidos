@@ -37,7 +37,7 @@ async function main() {
             await runSinglePhase('build', 'npm run build');
             return;
         case 'e2e':
-            await runSinglePhase('e2e', 'npx playwright test tests/e2e/operations-pilot.spec.js');
+            await runSinglePhase('e2e', 'npx playwright test tests/e2e/pilot-documentation.spec.js');
             return;
         case 'report':
             await runReportFromLatest();
@@ -62,7 +62,7 @@ async function runFull() {
     phaseResults.push(await executePhase('prepare', 'php artisan pilot:prepare', runDir));
     phaseResults.push(await executePhase('backend', 'php artisan test --filter=HardwareStorePilotTest', runDir));
     phaseResults.push(await executePhase('build', 'npm run build', runDir));
-    phaseResults.push(await executePhase('e2e', 'npx playwright test tests/e2e/operations-pilot.spec.js', runDir));
+    phaseResults.push(await executePhase('e2e', 'npx playwright test tests/e2e/pilot-documentation.spec.js', runDir));
 
     const aggregated = await buildAggregatedPayload({
         startedAt,

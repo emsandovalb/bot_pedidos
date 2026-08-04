@@ -1,0 +1,333 @@
+{
+    "status": "ready",
+    "started_at": "2026-08-03T20:11:25.408Z",
+    "finished_at": "2026-08-03T20:12:40.554Z",
+    "duration_seconds": 75.146,
+    "phases": [
+        {
+            "name": "prepare",
+            "status": "passed",
+            "duration_seconds": 0.603,
+            "command": "php artisan pilot:prepare",
+            "exit_code": 0,
+            "stdout": "Pilot database ready at C:\\Users\\Ema\\Desktop\\Code\\bot_pedidos\\database\\pilot.sqlite on port 8010.\r\n",
+            "stderr": "",
+            "warnings": [],
+            "failures": [],
+            "artifacts": []
+        },
+        {
+            "name": "backend",
+            "status": "passed",
+            "duration_seconds": 2.588,
+            "command": "php artisan test --filter=HardwareStorePilotTest",
+            "exit_code": 0,
+            "stdout": "{\"tool\":\"phpunit\",\"result\":\"passed\",\"tests\":7,\"passed\":7,\"assertions\":92,\"duration_ms\":1645}\r\n",
+            "stderr": "",
+            "warnings": [],
+            "failures": [],
+            "artifacts": []
+        },
+        {
+            "name": "build",
+            "status": "passed",
+            "duration_seconds": 2.021,
+            "command": "npm run build",
+            "exit_code": 0,
+            "stdout": "\n> build\n> vite build\n\n\u001b[36mvite v7.3.3 \u001b[32mbuilding client environment for production...\u001b[36m\u001b[39m\ntransforming...\n\u001b[32m✓\u001b[39m 6 modules transformed.\nrendering chunks...\ncomputing gzip size...\n\u001b[2mpublic/build/\u001b[22m\u001b[32mmanifest.json            \u001b[39m\u001b[1m\u001b[2m 0.33 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  0.17 kB\u001b[22m\n\u001b[2mpublic/build/\u001b[22m\u001b[35massets/app-B9UukG4s.css  \u001b[39m\u001b[1m\u001b[2m76.99 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip: 12.50 kB\u001b[22m\n\u001b[2mpublic/build/\u001b[22m\u001b[36massets/app-B3ZVWeLq.js   \u001b[39m\u001b[1m\u001b[2m90.85 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip: 26.58 kB\u001b[22m\n\u001b[32m✓ built in 1.27s\u001b[39m\n",
+            "stderr": "",
+            "warnings": [],
+            "failures": [],
+            "artifacts": []
+        },
+        {
+            "name": "e2e",
+            "status": "passed",
+            "duration_seconds": 69.551,
+            "command": "npx playwright test tests/e2e/pilot-documentation.spec.js",
+            "exit_code": 0,
+            "stdout": "\nRunning 1 test using 1 worker\n\n  ok 1 tests\\e2e\\pilot-documentation.spec.js:15:1 › pilot documentation package captures the Benditio flow end to end (1.1m)\n\n  1 passed (1.1m)\n",
+            "stderr": "",
+            "warnings": [],
+            "failures": [],
+            "artifacts": []
+        }
+    ],
+    "metrics": {
+        "backend_tests_passed": null,
+        "backend_assertions": null,
+        "backend_failures": null,
+        "build_warnings": [],
+        "vite_manifest_exists": true,
+        "whatsapp_tested": true,
+        "telegram_tested": true,
+        "login_visible": true,
+        "developer_toolkit_visible": true,
+        "operations_home_visible": true,
+        "operations_drawer_visible": true,
+        "operations_transitions_completed": true,
+        "completed_after_refresh_visible": true,
+        "customer_detail_visible": true,
+        "completed_ui_inconsistent": false,
+        "browser": "chromium",
+        "console_error_count": 0,
+        "http_500_count": 0,
+        "failed_request_count": 0,
+        "backend_status_dispatched": true,
+        "workflow_completed": true
+    },
+    "warnings": [],
+    "failures": [],
+    "artifacts": {
+        "screenshots": {
+            "login": "screenshots/01-login.png",
+            "developerToolkit": "screenshots/02-developer-toolkit.png",
+            "operationsHome": "screenshots/03-operations-home.png",
+            "doNowOrder": "screenshots/04-do-now-order.png",
+            "orderDrawer": "screenshots/05-order-drawer.png",
+            "orderPreparing": "screenshots/06-order-preparing.png",
+            "orderReady": "screenshots/07-order-ready.png",
+            "orderDispatched": "screenshots/08-order-dispatched.png",
+            "completedAfterRefresh": "screenshots/09-completed-after-refresh.png",
+            "customerDetail": "screenshots/10-customer-detail.png"
+        },
+        "run_dir": "C:\\Users\\Ema\\Desktop\\Code\\bot_pedidos\\artifacts\\pilot\\runs\\2026-08-03_20-11-25",
+        "playwright_report": "C:\\Users\\Ema\\Desktop\\Code\\bot_pedidos\\playwright-report\\index.html"
+    },
+    "environment": {
+        "php_version": "8.3.9",
+        "laravel_version": "Laravel Framework 13.8.0",
+        "node_version": "v24.18.0",
+        "database_driver": "sqlite",
+        "pilot_database_path": "C:\\Users\\Ema\\Desktop\\Code\\bot_pedidos\\database\\pilot.sqlite",
+        "application_url": "http://127.0.0.1:8010",
+        "timestamp": "2026-08-03T20:11:25.777Z"
+    },
+    "recommendation": "Ready for pilot",
+    "sections": [
+        {
+            "title": "Environment",
+            "status": "Context and runtime",
+            "items": [
+                {
+                    "label": "PHP version",
+                    "value": "8.3.9"
+                },
+                {
+                    "label": "Laravel version",
+                    "value": "Laravel Framework 13.8.0"
+                },
+                {
+                    "label": "Node version",
+                    "value": "v24.18.0"
+                },
+                {
+                    "label": "Database driver",
+                    "value": "sqlite"
+                },
+                {
+                    "label": "Pilot database path",
+                    "value": "C:\\Users\\Ema\\Desktop\\Code\\bot_pedidos\\database\\pilot.sqlite"
+                },
+                {
+                    "label": "Application URL",
+                    "value": "http://127.0.0.1:8010"
+                },
+                {
+                    "label": "Timestamp",
+                    "value": "2026-08-03T20:11:25.777Z"
+                }
+            ]
+        },
+        {
+            "title": "Backend",
+            "status": "passed",
+            "items": [
+                {
+                    "label": "Tests passed",
+                    "value": "PASS"
+                },
+                {
+                    "label": "Assertions",
+                    "value": "n/a"
+                },
+                {
+                    "label": "Duration",
+                    "value": "2.59 s"
+                },
+                {
+                    "label": "Failures",
+                    "value": 0
+                }
+            ]
+        },
+        {
+            "title": "Build",
+            "status": "passed",
+            "items": [
+                {
+                    "label": "Vite build status",
+                    "value": "PASS"
+                },
+                {
+                    "label": "Duration",
+                    "value": "2.02 s"
+                },
+                {
+                    "label": "Warnings",
+                    "value": []
+                },
+                {
+                    "label": "Asset manifest exists",
+                    "value": "Yes"
+                }
+            ]
+        },
+        {
+            "title": "Browser E2E",
+            "status": "passed",
+            "items": [
+                {
+                    "label": "Tests passed",
+                    "value": "PASS"
+                },
+                {
+                    "label": "Browser used",
+                    "value": "chromium"
+                },
+                {
+                    "label": "Duration",
+                    "value": "69.55 s"
+                },
+                {
+                    "label": "Console errors",
+                    "value": 0
+                },
+                {
+                    "label": "HTTP 500 responses",
+                    "value": 0
+                },
+                {
+                    "label": "Failed requests",
+                    "value": 0
+                },
+                {
+                    "label": "Screenshots",
+                    "value": [
+                        "screenshots/01-login.png",
+                        "screenshots/02-developer-toolkit.png",
+                        "screenshots/03-operations-home.png",
+                        "screenshots/04-do-now-order.png",
+                        "screenshots/05-order-drawer.png",
+                        "screenshots/06-order-preparing.png",
+                        "screenshots/07-order-ready.png",
+                        "screenshots/08-order-dispatched.png",
+                        "screenshots/09-completed-after-refresh.png",
+                        "screenshots/10-customer-detail.png"
+                    ]
+                }
+            ]
+        },
+        {
+            "title": "Business Flow",
+            "status": "Review",
+            "items": [
+                {
+                    "label": "WhatsApp tested",
+                    "value": "Yes"
+                },
+                {
+                    "label": "Telegram tested",
+                    "value": "Yes"
+                },
+                {
+                    "label": "Incoming messages created",
+                    "value": 0
+                },
+                {
+                    "label": "Customers created",
+                    "value": 0
+                },
+                {
+                    "label": "Identities created",
+                    "value": 0
+                },
+                {
+                    "label": "Orders created",
+                    "value": 0
+                },
+                {
+                    "label": "Fulfillment plans created",
+                    "value": 0
+                },
+                {
+                    "label": "Workflow completed",
+                    "value": "Yes"
+                },
+                {
+                    "label": "Dispatched orders verified",
+                    "value": "No"
+                }
+            ]
+        },
+        {
+            "title": "Operations UX",
+            "status": "Healthy",
+            "items": [
+                {
+                    "label": "Do Now visible",
+                    "value": "No"
+                },
+                {
+                    "label": "Next visible",
+                    "value": "No"
+                },
+                {
+                    "label": "Drawer opens",
+                    "value": "No"
+                },
+                {
+                    "label": "Items visible",
+                    "value": "No"
+                },
+                {
+                    "label": "Valid action shown",
+                    "value": "No"
+                },
+                {
+                    "label": "Status transition succeeds",
+                    "value": "No"
+                },
+                {
+                    "label": "Live indicator visible",
+                    "value": "No"
+                },
+                {
+                    "label": "Search/filter stable",
+                    "value": "No"
+                }
+            ]
+        },
+        {
+            "title": "Known Warnings",
+            "status": "None",
+            "list": [
+                "No known warnings."
+            ]
+        },
+        {
+            "title": "Final Recommendation",
+            "status": "READY",
+            "items": [
+                {
+                    "label": "Recommendation",
+                    "value": "Ready for pilot"
+                },
+                {
+                    "label": "Failures",
+                    "value": "None"
+                }
+            ]
+        }
+    ]
+}
