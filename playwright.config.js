@@ -20,7 +20,7 @@ export default defineConfig({
         trace: 'retain-on-failure',
     },
     webServer: {
-        command: `php artisan serve --host 127.0.0.1 --port ${process.env.PILOT_APP_PORT ?? '8010'}`,
+        command: `npm run build && php artisan serve --host 127.0.0.1 --port ${process.env.PILOT_APP_PORT ?? '8010'}`,
         url: process.env.PLAYWRIGHT_BASE_URL ?? `http://127.0.0.1:${process.env.PILOT_APP_PORT ?? '8010'}`,
         reuseExistingServer: false,
         timeout: 120000,

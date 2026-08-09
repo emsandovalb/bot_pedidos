@@ -68,6 +68,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/closures/{closure}/export', [BranchDailyClosureController::class, 'export'])->name('closures.export');
     Route::get('/incoming-messages', [IncomingMessageController::class, 'index'])->name('incoming-messages.index');
     Route::get('/operations', [OperationsController::class, 'index'])->name('operations.index');
+    Route::get('/operations/focus', [OperationsController::class, 'focus'])->name('operations.focus');
     Route::get('/operations/feed', [OperationsController::class, 'feed'])->name('operations.feed');
     Route::get('/operations/orders/{order}/snapshot', [OperationsController::class, 'snapshot'])->name('operations.orders.snapshot');
 

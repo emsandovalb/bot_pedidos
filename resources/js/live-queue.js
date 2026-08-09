@@ -129,9 +129,20 @@ export class LiveQueue {
         }
 
         if (diff.newOrders.length > 0) {
-            this.showNotification(diff.newOrders[0]);
+            const notificationHandled = typeof this.component.onLiveQueueNewOrder === 'function'
+                ? this.component.onLiveQueueNewOrder(diff.newOrders, payload)
+                : false;
+
+            if (!notificationHandled) {
+                this.showNotification(diff.newOrders[0]);
+            }
+
             this.playSound();
             this.flashOrders(diff.newOrders.map((order) => order.id));
+        }
+
+        if (typeof this.component.onLiveQueueApplied === 'function') {
+            this.component.onLiveQueueApplied(diff, payload);
         }
 
         return diff;
@@ -658,7 +669,7 @@ export class LiveQueue {
             },
             reconnecting: {
                 state: 'reconnecting',
-                label: 'Reconectando...',
+                label: 'Reconectando…',
                 tone: 'yellow',
                 description: 'Reintentando',
             },

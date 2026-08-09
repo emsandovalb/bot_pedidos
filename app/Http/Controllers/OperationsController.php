@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderNotificationLog;
+use App\Services\Operations\FocusModePresenter;
 use App\Services\OrderWorkflowActionPresenter;
 use App\Services\Operations\NextActionQueue;
 use App\Services\Operations\OperationsAgenda;
@@ -23,6 +24,7 @@ class OperationsController extends Controller
         private readonly OrderWorkflowActionPresenter $orderWorkflowActionPresenter,
         private readonly OperationsAgenda $operationsAgenda,
         private readonly NextActionQueue $nextActionQueue,
+        private readonly FocusModePresenter $focusModePresenter,
     ) {
     }
 
@@ -48,6 +50,10 @@ class OperationsController extends Controller
 
     public function index(Request $request): View
     {
+        if (config('operations.focus_mode_default', false)) {
+            return redirect()->route('operations.focus');
+        }
+
         $payload = $this->buildOperationsPayload($request);
 
         return view('operations.index', [
@@ -61,6 +67,13 @@ class OperationsController extends Controller
             'statusFilters' => self::STATUS_FILTERS,
             'channelFilters' => self::CHANNEL_FILTERS,
             'priorityFilters' => self::PRIORITY_FILTERS,
+        ]);
+    }
+
+    public function focus(Request $request): View
+    {
+        return view('operations.focus', [
+            'focusData' => $this->focusModePresenter->build($request),
         ]);
     }
 

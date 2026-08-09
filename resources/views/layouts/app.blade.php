@@ -45,6 +45,7 @@
                             ['label' => 'Panel', 'href' => 'dashboard', 'active' => 'dashboard', 'icon' => 'M4 11.5 12 5l8 6.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1v-8.5Z'],
                             ['label' => 'Analítica', 'href' => 'analytics.index', 'active' => 'analytics.*', 'icon' => 'M4 19V5M4 19h16M8 16v-4m4 4V8m4 8v-6'],
                             ['label' => 'Operaciones', 'href' => 'operations.index', 'active' => 'operations.*', 'icon' => 'M3.5 7.5h17M6 4.5h12M6 10.5h12M6 15.5h12M6 20.5h12'],
+                            ['label' => 'Modo simple', 'href' => 'operations.focus', 'active' => 'operations.focus', 'icon' => 'M8 12h8M8 16h5M4 6h16M4 18h16'],
                             ['label' => 'Pedidos', 'href' => 'orders.index', 'active' => 'orders.*', 'icon' => 'M4 6h16M4 12h16M4 18h10'],
                             ['label' => 'Revisión de pedidos', 'href' => 'order-reviews.index', 'active' => 'order-reviews.*', 'icon' => 'M9 11h6M9 15h6M7 4h7l4 4v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z'],
                             ['label' => 'Clientes', 'href' => 'customers.index', 'active' => 'customers.*', 'icon' => 'M17 21a4 4 0 0 0-8 0M12 14a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm7-2a3 3 0 0 0-3-3m-4-5a3 3 0 0 1 0 6'],
