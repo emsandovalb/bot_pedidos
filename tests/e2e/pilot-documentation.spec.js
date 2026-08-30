@@ -49,9 +49,14 @@ test('pilot documentation package captures the Benditio flow end to end', async 
     });
 
     page.on('requestfailed', (request) => {
+        const failure = request.failure()?.errorText ?? 'request failed';
+        if (/ERR_ABORTED|canceled/i.test(failure)) {
+            return;
+        }
+
         failedRequests.push({
             url: request.url(),
-            failure: request.failure()?.errorText ?? 'request failed',
+            failure,
         });
     });
 
@@ -79,6 +84,7 @@ test('pilot documentation package captures the Benditio flow end to end', async 
     await customMessageSection.locator('textarea[name="message"]').fill('Ocupo 20 bloques para hoy a las 2 pm, me lo llevan y pago por SINPE');
     await page.getByRole('button', { name: 'Inject Message' }).click();
     await expect(page.getByText('Custom message injected through the production pipeline.')).toBeVisible();
+    await expect(page).toHaveURL(/\/developer\/webhook-simulator\/generate/);
     await page.screenshot({ path: path.resolve(screenshotDir, '02-developer-toolkit.png'), fullPage: true });
 
     await postBusinessMessage(page, csrfToken, {
@@ -116,54 +122,106 @@ test('pilot documentation package captures the Benditio flow end to end', async 
         throw new Error('Could not find the Telegram pickup order in the operations feed.');
     }
 
-    await page.goto('/operations');
-    await expect(page.getByText('DO NOW', { exact: true })).toBeVisible();
-    await expect(page.getByText('NEXT', { exact: true })).toBeVisible();
-    await expect(page.getByText('COMPLETED', { exact: true })).toBeVisible();
-    await page.screenshot({ path: path.resolve(screenshotDir, '03-operations-home.png'), fullPage: true });
+    const operationsPage = await page.context().newPage();
+    operationsPage.on('console', (message) => {
+        if (message.type() === 'error') {
+            consoleErrors.push(message.text());
+        }
+    });
+    operationsPage.on('pageerror', (error) => {
+        pageErrors.push(error.message);
+    });
+    operationsPage.on('response', (response) => {
+        if (response.status() >= 500) {
+            http500Responses.push({ url: response.url(), status: response.status() });
+        }
+    });
+    operationsPage.on('requestfailed', (request) => {
+        const failure = request.failure()?.errorText ?? 'request failed';
+        if (/ERR_ABORTED|canceled/i.test(failure)) {
+            return;
+        }
 
-    const doNowSection = page.locator('section').filter({ hasText: 'DO NOW' });
+        failedRequests.push({
+            url: request.url(),
+            failure,
+        });
+    });
+
+    await operationsPage.goto('/operations', { waitUntil: 'domcontentloaded' });
+    await expect(operationsPage.getByText('DO NOW', { exact: true })).toBeVisible();
+    await expect(operationsPage.getByText('NEXT', { exact: true })).toBeVisible();
+    await expect(operationsPage.getByText('COMPLETED', { exact: true })).toBeVisible();
+    await operationsPage.screenshot({ path: path.resolve(screenshotDir, '03-operations-home.png'), fullPage: true });
+
+    const doNowSection = operationsPage.locator('section').filter({ hasText: 'DO NOW' });
     const doNowCard = doNowSection.locator('article').filter({ hasText: 'Maria Lopez' }).first();
     await expect(doNowCard).toBeVisible();
     await doNowCard.screenshot({ path: path.resolve(screenshotDir, '04-do-now-order.png') });
 
     await Promise.all([
-        page.waitForResponse((response) => response.url().includes(`/operations/orders/${firstOrder.id}/snapshot`) && response.status() === 200),
+        operationsPage.waitForResponse((response) => response.url().includes(`/operations/orders/${firstOrder.id}/snapshot`) && response.status() === 200),
         doNowCard.click(),
     ]);
 
-    const drawer = page.locator('aside').filter({ hasText: 'Detail drawer' });
+    const drawer = operationsPage.locator('aside').filter({ hasText: 'Detail drawer' });
     await expect(drawer).toBeVisible();
     await expect(drawer.getByText('Items', { exact: true })).toBeVisible();
     await expect(drawer).toContainText('Prepare');
-    await page.screenshot({ path: path.resolve(screenshotDir, '05-order-drawer.png'), fullPage: true });
+    await operationsPage.screenshot({ path: path.resolve(screenshotDir, '05-order-drawer.png'), fullPage: true });
 
-    await transitionOrder(page, drawer, 'Prepare', 'Prepare', 'Confirmado');
+    await transitionOrder(operationsPage, drawer, 'Prepare', 'Prepare', 'Confirmado');
 
-    await transitionOrder(page, drawer, 'Prepare', 'Ready', 'Preparando');
-    await page.screenshot({ path: path.resolve(screenshotDir, '06-order-preparing.png'), fullPage: true });
+    await transitionOrder(operationsPage, drawer, 'Prepare', 'Ready', 'Preparando');
+    await operationsPage.screenshot({ path: path.resolve(screenshotDir, '06-order-preparing.png'), fullPage: true });
 
-    await transitionOrder(page, drawer, 'Ready', 'Dispatch', 'Listo');
-    await page.screenshot({ path: path.resolve(screenshotDir, '07-order-ready.png'), fullPage: true });
+    await transitionOrder(operationsPage, drawer, 'Ready', 'Dispatch', 'Listo');
+    await operationsPage.screenshot({ path: path.resolve(screenshotDir, '07-order-ready.png'), fullPage: true });
 
-    await transitionOrder(page, drawer, 'Dispatch', null, 'Despachado');
+    await transitionOrder(operationsPage, drawer, 'Dispatch', null, 'Despachado');
     await expect(drawer).toContainText('Complete');
-    await page.screenshot({ path: path.resolve(screenshotDir, '08-order-dispatched.png'), fullPage: true });
+    await operationsPage.screenshot({ path: path.resolve(screenshotDir, '08-order-dispatched.png'), fullPage: true });
 
     await drawer.getByRole('button', { name: 'Close' }).click();
-    await page.reload();
-    await expect(page.getByText('DO NOW', { exact: true })).toBeVisible();
-    await page.locator('details').filter({ hasText: 'COMPLETED' }).locator('summary').click();
-    await expect(page.locator('details').filter({ hasText: 'COMPLETED' })).toContainText('Maria Lopez');
-    await page.screenshot({ path: path.resolve(screenshotDir, '09-completed-after-refresh.png'), fullPage: true });
+    await operationsPage.reload();
+    await expect(operationsPage.getByText('DO NOW', { exact: true })).toBeVisible();
+    await operationsPage.locator('details').filter({ hasText: 'COMPLETED' }).locator('summary').click();
+    await expect(operationsPage.locator('details').filter({ hasText: 'COMPLETED' })).toContainText('Maria Lopez');
+    await operationsPage.screenshot({ path: path.resolve(screenshotDir, '09-completed-after-refresh.png'), fullPage: true });
 
-    await page.goto('/customers', { waitUntil: 'networkidle' });
-    await expect(page.getByRole('heading', { name: 'Clientes', exact: true })).toBeVisible();
-    const customerCard = page.locator('article').filter({ hasText: 'Maria Lopez' }).first();
+    const customersPage = await page.context().newPage();
+    customersPage.on('console', (message) => {
+        if (message.type() === 'error') {
+            consoleErrors.push(message.text());
+        }
+    });
+    customersPage.on('pageerror', (error) => {
+        pageErrors.push(error.message);
+    });
+    customersPage.on('response', (response) => {
+        if (response.status() >= 500) {
+            http500Responses.push({ url: response.url(), status: response.status() });
+        }
+    });
+    customersPage.on('requestfailed', (request) => {
+        const failure = request.failure()?.errorText ?? 'request failed';
+        if (/ERR_ABORTED|canceled/i.test(failure)) {
+            return;
+        }
+
+        failedRequests.push({
+            url: request.url(),
+            failure,
+        });
+    });
+
+    await customersPage.goto('/customers', { waitUntil: 'domcontentloaded' });
+    await expect(customersPage.getByRole('heading', { name: 'Clientes', exact: true })).toBeVisible();
+    const customerCard = customersPage.locator('article').filter({ hasText: 'Maria Lopez' }).first();
     await expect(customerCard).toBeVisible();
     await customerCard.getByRole('link', { name: 'Ver cliente' }).click();
-    await expect(page.getByRole('heading', { name: 'Cliente', exact: true })).toBeVisible();
-    await page.screenshot({ path: path.resolve(screenshotDir, '10-customer-detail.png'), fullPage: true });
+    await expect(customersPage.getByRole('heading', { name: 'Cliente', exact: true })).toBeVisible();
+    await customersPage.screenshot({ path: path.resolve(screenshotDir, '10-customer-detail.png'), fullPage: true });
 
     const summary = {
         browser: browserName,

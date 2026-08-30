@@ -20,11 +20,18 @@ class WhatsAppIncomingWebhookTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        config()->set('services.whatsapp.app_secret', 'test-whatsapp-app-secret');
+    }
+
     public function test_text_payload_creates_incoming_message_and_order(): void
     {
         [$organization, $branch, $connection] = $this->makeOrganizationBranchConnection();
 
-        $response = $this->postJson(route('webhooks.store', ['provider' => 'whatsapp']), $this->payload([
+        $response = $this->postWhatsAppWebhook($this->payload([
             $this->textMessage('wamid.text-1', '50255510001', '2 bolsas de jardin', '1719230400', 'Maria Lopez'),
         ], $connection->provider_phone_number_id, 'Maria Lopez'));
 
@@ -55,6 +62,65 @@ class WhatsAppIncomingWebhookTest extends TestCase
         ]);
     }
 
+    public function test_valid_signature_is_accepted_and_processes_the_payload(): void
+    {
+        [$organization, $branch, $connection] = $this->makeOrganizationBranchConnection();
+        $payload = $this->payload([
+            $this->textMessage('wamid.valid-signature-1', '50255510010', '3 cubetas de pintura', '1719230410', 'Valid Signature'),
+        ], $connection->provider_phone_number_id, 'Valid Signature');
+        $content = json_encode($payload, JSON_THROW_ON_ERROR);
+        $signature = 'sha256='.hash_hmac('sha256', $content, 'test-whatsapp-app-secret');
+
+        $response = $this->call(
+            'POST',
+            route('webhooks.store', ['provider' => 'whatsapp']),
+            [],
+            [],
+            [],
+            [
+                'CONTENT_TYPE' => 'application/json',
+                'HTTP_X_HUB_SIGNATURE_256' => $signature,
+            ],
+            $content,
+        );
+
+        $response->assertOk()
+            ->assertSee('1 processed')
+            ->assertDontSee('Invalid WhatsApp webhook signature.');
+
+        $this->assertDatabaseHas('incoming_messages', [
+            'organization_id' => $organization->id,
+            'branch_id' => $branch->id,
+            'provider' => 'whatsapp',
+            'external_message_id' => 'wamid.valid-signature-1',
+        ]);
+
+        $this->assertDatabaseHas('orders', [
+            'organization_id' => $organization->id,
+            'branch_id' => $branch->id,
+            'source_channel' => 'whatsapp',
+            'external_message_id' => 'wamid.valid-signature-1',
+        ]);
+    }
+
+    public function test_invalid_signature_is_rejected_before_processing_the_payload(): void
+    {
+        [$organization, $branch, $connection] = $this->makeOrganizationBranchConnection();
+
+        $response = $this->postWhatsAppWebhook(
+            $this->payload([
+                $this->textMessage('wamid.invalid-signature-1', '50255510999', '2 bolsas de jardin', '1719230400', 'Maria Lopez'),
+            ], $connection->provider_phone_number_id, 'Maria Lopez'),
+            'sha256='.hash_hmac('sha256', 'different payload', 'test-whatsapp-app-secret'),
+        );
+
+        $response->assertStatus(401)
+            ->assertSee('Invalid WhatsApp webhook signature.');
+
+        $this->assertDatabaseCount('incoming_messages', 0);
+        $this->assertDatabaseCount('orders', 0);
+    }
+
     public function test_uses_phone_number_id_to_resolve_organization(): void
     {
         $firstOrganization = Organization::query()->create([
@@ -72,7 +138,7 @@ class WhatsAppIncomingWebhookTest extends TestCase
 
         [$organization, $branch, $connection] = $this->makeOrganizationBranchConnection('555550000000099');
 
-        $response = $this->postJson(route('webhooks.store', ['provider' => 'whatsapp']), $this->payload([
+        $response = $this->postWhatsAppWebhook($this->payload([
             $this->textMessage('wamid.resolve-1', '50255510002', '2 bolsas de jardin', '1719230401', 'Customer Resolve'),
         ], $connection->provider_phone_number_id, 'Customer Resolve'));
 
@@ -94,7 +160,7 @@ class WhatsAppIncomingWebhookTest extends TestCase
     {
         $this->makeOrganizationBranchConnection();
 
-        $response = $this->postJson(route('webhooks.store', ['provider' => 'whatsapp']), $this->payload([
+        $response = $this->postWhatsAppWebhook($this->payload([
             $this->textMessage('wamid.unknown-1', '50255510003', '2 bolsas de jardin', '1719230402', 'Unknown Connection'),
         ], '999999999999999', 'Unknown Connection'));
 
@@ -113,7 +179,7 @@ class WhatsAppIncomingWebhookTest extends TestCase
     {
         $this->makeOrganizationBranchConnection();
 
-        $response = $this->postJson(route('webhooks.store', ['provider' => 'whatsapp']), [
+        $response = $this->postWhatsAppWebhook([
             'object' => 'whatsapp_business_account',
             'entry' => [
                 [
@@ -155,7 +221,7 @@ class WhatsAppIncomingWebhookTest extends TestCase
     {
         [$organization, $branch, $connection] = $this->makeOrganizationBranchConnection();
 
-        $response = $this->postJson(route('webhooks.store', ['provider' => 'whatsapp']), $this->payload([
+        $response = $this->postWhatsAppWebhook($this->payload([
             [
                 'from' => '50255510004',
                 'id' => 'wamid.image-1',
@@ -188,8 +254,8 @@ class WhatsAppIncomingWebhookTest extends TestCase
             $this->textMessage('wamid.dup-1', '50255510005', '2 bolsas de jardin', '1719230405', 'Duplicate Customer'),
         ], $connection->provider_phone_number_id, 'Duplicate Customer');
 
-        $firstResponse = $this->postJson(route('webhooks.store', ['provider' => 'whatsapp']), $payload);
-        $secondResponse = $this->postJson(route('webhooks.store', ['provider' => 'whatsapp']), $payload);
+        $firstResponse = $this->postWhatsAppWebhook($payload);
+        $secondResponse = $this->postWhatsAppWebhook($payload);
 
         $firstResponse->assertOk();
         $secondResponse->assertOk();
@@ -207,7 +273,7 @@ class WhatsAppIncomingWebhookTest extends TestCase
     {
         [$organization, $branch, $connection] = $this->makeOrganizationBranchConnection();
 
-        $response = $this->postJson(route('webhooks.store', ['provider' => 'whatsapp']), $this->payload([
+        $response = $this->postWhatsAppWebhook($this->payload([
             $this->textMessage('wamid.name-1', '50255510006', '2 bolsas de jardin', '1719230406', 'Maria Lopez'),
         ], $connection->provider_phone_number_id, 'Maria Lopez'));
 
@@ -233,7 +299,7 @@ class WhatsAppIncomingWebhookTest extends TestCase
     {
         [$organization, $branch, $connection] = $this->makeOrganizationBranchConnection();
 
-        $response = $this->postJson(route('webhooks.store', ['provider' => 'whatsapp']), $this->payload([
+        $response = $this->postWhatsAppWebhook($this->payload([
             $this->textMessage('wamid.log-1', '50255510007', '2 bolsas de jardin', '1719230407', 'Log Customer'),
         ], $connection->provider_phone_number_id, 'Log Customer'));
 
@@ -262,15 +328,15 @@ class WhatsAppIncomingWebhookTest extends TestCase
             ->once()
             ->andReturn([
                 'duplicate' => false,
-                'incoming_message' => new IncomingMessage(),
-                'order' => new Order(),
-                'customer' => new Customer(),
+                'incoming_message' => new IncomingMessage,
+                'order' => new Order,
+                'customer' => new Customer,
                 'status' => 'processed',
             ]);
 
         $this->app->instance(MessagingIngestionService::class, $ingestionService);
 
-        $response = $this->postJson(route('webhooks.store', ['provider' => 'whatsapp']), $this->payload([
+        $response = $this->postWhatsAppWebhook($this->payload([
             $this->textMessage('wamid.partial-1', '50255510008', '2 bolsas de jardin', '1719230408', 'Partial Customer'),
             $this->textMessage('wamid.partial-2', '50255510008', '1 caja de vasos', '1719230409', 'Partial Customer'),
         ], $connection->provider_phone_number_id, 'Partial Customer'));
@@ -387,5 +453,31 @@ class WhatsAppIncomingWebhookTest extends TestCase
                 ],
             ],
         ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    private function postWhatsAppWebhook(array $payload, ?string $signature = null)
+    {
+        $content = json_encode($payload, JSON_THROW_ON_ERROR);
+        $signature ??= 'sha256='.hash_hmac(
+            'sha256',
+            $content,
+            (string) config('services.whatsapp.app_secret'),
+        );
+
+        return $this->call(
+            'POST',
+            route('webhooks.store', ['provider' => 'whatsapp']),
+            [],
+            [],
+            [],
+            [
+                'CONTENT_TYPE' => 'application/json',
+                'HTTP_X_HUB_SIGNATURE_256' => $signature,
+            ],
+            $content,
+        );
     }
 }

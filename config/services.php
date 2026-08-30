@@ -42,6 +42,13 @@ return [
         'verify_ssl' => (bool) env('TELEGRAM_VERIFY_SSL', true),
     ],
 
+    'whatsapp' => [
+        // Meta signs webhook POST bodies with the App Secret, never with an access token.
+        'app_secret' => env('WHATSAPP_APP_SECRET'),
+        // Fallback used only when a ChannelConnection has no provider_api_version set.
+        'api_version' => env('WHATSAPP_API_VERSION', 'v21.0'),
+    ],
+
     'order_ingestion' => [
         'enabled' => (bool) env('ORDER_INGESTION_ENABLED', true),
     ],

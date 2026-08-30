@@ -5,10 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderNotificationLog;
+use App\Services\Operations\CommitmentDisplayFormatter;
 use App\Services\Operations\FocusModePresenter;
-use App\Services\OrderWorkflowActionPresenter;
 use App\Services\Operations\NextActionQueue;
 use App\Services\Operations\OperationsAgenda;
+use App\Services\OrderWorkflowActionPresenter;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -25,8 +26,7 @@ class OperationsController extends Controller
         private readonly OperationsAgenda $operationsAgenda,
         private readonly NextActionQueue $nextActionQueue,
         private readonly FocusModePresenter $focusModePresenter,
-    ) {
-    }
+    ) {}
 
     private const STATUS_FILTERS = [
         'all',
@@ -110,7 +110,7 @@ class OperationsController extends Controller
 
     /**
      * @return array{
-     *     orders: \Illuminate\Support\Collection<int, Order>,
+     *     orders: Collection<int, Order>,
      *     ordersData: array<int, array<string, mixed>>,
      *     feedData: array<string, mixed>,
      *     filters: array<string, mixed>,
@@ -194,11 +194,11 @@ class OperationsController extends Controller
         return $query
             ->orderByRaw(
                 "CASE
-                    WHEN status = '" . Order::STATUS_PENDING_REVIEW . "' AND reviewed_at IS NULL THEN 0
-                    WHEN status = '" . Order::STATUS_PENDING_REVIEW . "' THEN 1
-                    WHEN status = '" . Order::STATUS_PREPARING . "' THEN 2
-                    WHEN status = '" . Order::STATUS_READY_FOR_DISPATCH . "' THEN 3
-                    WHEN status = '" . Order::STATUS_DISPATCHED . "' THEN 4
+                    WHEN status = '".Order::STATUS_PENDING_REVIEW."' AND reviewed_at IS NULL THEN 0
+                    WHEN status = '".Order::STATUS_PENDING_REVIEW."' THEN 1
+                    WHEN status = '".Order::STATUS_PREPARING."' THEN 2
+                    WHEN status = '".Order::STATUS_READY_FOR_DISPATCH."' THEN 3
+                    WHEN status = '".Order::STATUS_DISPATCHED."' THEN 4
                     ELSE 5
                 END"
             )
@@ -291,7 +291,7 @@ class OperationsController extends Controller
             return;
         }
 
-        $like = '%' . str_replace(['%', '_'], ['\\%', '\\_'], $search) . '%';
+        $like = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $search).'%';
 
         $query->where(function (Builder $searchQuery) use ($like, $search): void {
             $searchQuery
@@ -444,7 +444,7 @@ class OperationsController extends Controller
             ->take(5)
             ->map(function (Order $order): array {
                 return [
-                    'label' => 'Pedido #' . $order->id,
+                    'label' => 'Pedido #'.$order->id,
                     'status' => $this->statusLabel($order->status),
                     'channel' => $this->channelLabel($order->source_channel),
                     'elapsed' => $this->elapsedLabel($order->created_at),
@@ -462,7 +462,7 @@ class OperationsController extends Controller
             'favorite_channel' => $favoriteChannel,
             'last_order' => $lastOrder !== null ? [
                 'id' => $lastOrder->id,
-                'label' => 'Pedido #' . $lastOrder->id,
+                'label' => 'Pedido #'.$lastOrder->id,
                 'elapsed' => $this->elapsedLabel($lastOrder->created_at),
                 'status' => $this->statusLabel($lastOrder->status),
             ] : null,
@@ -482,8 +482,8 @@ class OperationsController extends Controller
         foreach ($history as $order) {
             foreach ($order->orderItems as $item) {
                 $key = $item->product_id !== null
-                    ? 'product:' . $item->product_id
-                    : 'raw:' . Str::of((string) $item->raw_text)->squish()->lower()->toString();
+                    ? 'product:'.$item->product_id
+                    : 'raw:'.Str::of((string) $item->raw_text)->squish()->lower()->toString();
 
                 if ($key === 'raw:') {
                     $key = 'raw:sin-texto';
@@ -510,7 +510,7 @@ class OperationsController extends Controller
 
         return array_slice(
             array_map(
-                static fn (array $entry): string => $entry['label'] . ' x' . $entry['count'],
+                static fn (array $entry): string => $entry['label'].' x'.$entry['count'],
                 array_values($groups),
             ),
             0,
@@ -590,7 +590,7 @@ class OperationsController extends Controller
         }
 
         if ($customerContext['open_notifications'] > 0) {
-            $alerts[] = $customerContext['open_notifications'] . ' notificacion(es) abiertas';
+            $alerts[] = $customerContext['open_notifications'].' notificacion(es) abiertas';
         }
 
         if ($order->possible_duplicate_of_order_id !== null) {
@@ -614,6 +614,7 @@ class OperationsController extends Controller
     private function serializeOrder(Order $order, ?array $customerContext): array
     {
         $workflow = $this->orderWorkflowActionPresenter->present($order);
+        $commitment = $this->commitmentDisplay($order);
 
         $customerContext ??= [
             'name' => $order->customer?->name ?? 'Sin cliente',
@@ -671,8 +672,11 @@ class OperationsController extends Controller
             'parser_confidence' => $order->parser_confidence !== null ? (float) $order->parser_confidence : null,
             'delivery_method' => $order->fulfillmentPlan?->delivery_method,
             'payment_method' => $order->fulfillmentPlan?->payment_method,
+            'requested_date' => $order->fulfillmentPlan?->requested_date?->toDateString(),
             'commitment_date' => $order->fulfillmentPlan?->commitment_date?->toDateString(),
             'commitment_time' => $order->fulfillmentPlan?->commitment_time,
+            'commitment_display' => $commitment,
+            'commitment_label' => $commitment['label'],
             'remaining_sla_minutes' => $order->fulfillmentPlan?->remaining_sla_minutes,
             'risk_level' => $order->fulfillmentPlan?->risk_level,
             'priority_level' => $order->fulfillmentPlan?->priority_level,
@@ -819,6 +823,33 @@ class OperationsController extends Controller
         ];
     }
 
+    /**
+     * @param  array<string, mixed>|Order  $order
+     * @return array{label:string,date_label:string,time_label:string,time_window_label:?string,date_value:?string,time_value:?string}
+     */
+    private function commitmentDisplay(array|Order $order): array
+    {
+        $requestedDate = $order instanceof Order
+            ? $order->fulfillmentPlan?->requested_date?->toDateString()
+            : ($order['requested_date'] ?? $order['fulfillment_plan']['requested_date'] ?? null);
+        $commitmentDate = $order instanceof Order
+            ? $order->fulfillmentPlan?->commitment_date?->toDateString()
+            : ($order['commitment_date'] ?? $order['fulfillment_plan']['commitment_date'] ?? null);
+        $requestedTimeWindow = $order instanceof Order
+            ? $order->fulfillmentPlan?->requested_time_window
+            : ($order['requested_time_window'] ?? $order['fulfillment_plan']['requested_time_window'] ?? null);
+        $commitmentTime = $order instanceof Order
+            ? $order->fulfillmentPlan?->commitment_time
+            : ($order['commitment_time'] ?? $order['fulfillment_plan']['commitment_time'] ?? null);
+
+        return app(CommitmentDisplayFormatter::class)->format(
+            requestedDate: is_string($requestedDate) ? $requestedDate : null,
+            commitmentDate: is_string($commitmentDate) ? $commitmentDate : null,
+            requestedTimeWindow: is_string($requestedTimeWindow) ? $requestedTimeWindow : null,
+            commitmentTime: is_string($commitmentTime) ? $commitmentTime : null,
+        );
+    }
+
     private function resolveSelectedOrderId(Request $request, array $ordersData): int
     {
         $requestedOrderId = $request->integer('order');
@@ -880,18 +911,18 @@ class OperationsController extends Controller
         $minutes = $date->diffInMinutes(now());
 
         if ($minutes < 60) {
-            return 'Hace ' . max(1, (int) $minutes) . ' min';
+            return 'Hace '.max(1, (int) $minutes).' min';
         }
 
         $hours = intdiv((int) $minutes, 60);
 
         if ($hours < 24) {
-            return 'Hace ' . $hours . ' h';
+            return 'Hace '.$hours.' h';
         }
 
         $days = intdiv($hours, 24);
 
-        return 'Hace ' . $days . ' d';
+        return 'Hace '.$days.' d';
     }
 
     private function resolveItemLabel(?int $productId, ?string $rawText, ?string $productName): string
@@ -901,7 +932,7 @@ class OperationsController extends Controller
         }
 
         if ($productId !== null) {
-            return 'Producto #' . $productId;
+            return 'Producto #'.$productId;
         }
 
         $label = Str::of((string) $rawText)->squish()->toString();
@@ -917,7 +948,7 @@ class OperationsController extends Controller
                 $label = $this->resolveItemLabel($item->product_id, $item->raw_text, $item->product?->name);
                 $quantity = (float) ($item->quantity ?? 1);
 
-                return $quantity > 1 ? $quantity . ' x ' . $label : $label;
+                return $quantity > 1 ? $quantity.' x '.$label : $label;
             })
             ->filter(static fn (string $value): bool => $value !== '')
             ->values()

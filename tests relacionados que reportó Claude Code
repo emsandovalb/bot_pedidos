@@ -1,0 +1,70 @@
+ .env.example                                       |   5 [32m+[m
+ app/Console/Commands/TelegramPollCommand.php       |  24 [32m+[m[31m-[m
+ app/Http/Controllers/OperationsController.php      |  73 [32m++[m[31m--[m
+ app/Http/Controllers/OrderController.php           |  11 [32m+[m[31m-[m
+ app/Models/ChannelConnection.php                   |  29 [32m++[m
+ app/Models/Customer.php                            |   5 [32m+[m
+ app/Models/CustomerIdentity.php                    |   6 [32m+[m
+ app/Models/IncomingMessage.php                     |  10 [32m+[m
+ app/Services/Developer/ScenarioFactory.php         |  14 [32m+[m[31m-[m
+ .../Messaging/MessagingIngestionService.php        |  10 [32m+[m[31m-[m
+ .../Messaging/Providers/WhatsAppProvider.php       |  40 [32m+[m[31m-[m
+ app/Services/Operations/FocusModePresenter.php     |  98 [32m+++[m[31m--[m
+ app/Services/OrderIngestionService.php             |  95 [32m++++[m[31m-[m
+ app/Services/OrderParserService.php                | 133 [32m++++++[m[31m-[m
+ app/Services/ProductMatchingService.php            |  15 [32m+[m[31m-[m
+ artifacts/pilot/latest/report.html                 |  14 [32m+[m[31m-[m
+ artifacts/pilot/latest/report.json                 | 114 [32m+++[m[31m---[m
+ artifacts/pilot/latest/run.json                    |  70 [32m++[m[31m--[m
+ artifacts/pilot/latest/screenshots/01-my-day.png   | Bin [31m94099[m -> [32m0[m bytes
+ .../latest/screenshots/02-developer-toolkit.png    | Bin [31m1894940[m -> [32m1899949[m bytes
+ .../pilot/latest/screenshots/02-review-order.png   | Bin [31m112815[m -> [32m0[m bytes
+ .../latest/screenshots/03-operations-home.png      | Bin [31m5771067[m -> [32m2574698[m bytes
+ .../latest/screenshots/03-preparing-checklist.png  | Bin [31m106594[m -> [32m0[m bytes
+ .../pilot/latest/screenshots/04-do-now-order.png   | Bin [31m31970[m -> [32m32012[m bytes
+ .../pilot/latest/screenshots/04-ready-order.png    | Bin [31m100498[m -> [32m0[m bytes
+ .../latest/screenshots/05-completed-order.png      | Bin [31m102535[m -> [32m0[m bytes
+ .../pilot/latest/screenshots/06-next-order.png     | Bin [31m102535[m -> [32m0[m bytes
+ artifacts/pilot/latest/screenshots/focus-home.png  | Bin [31m430874[m -> [32m0[m bytes
+ .../latest/screenshots/focus-order-workspace.png   | Bin [31m415142[m -> [32m0[m bytes
+ bootstrap/app.php                                  |   4 [32m+[m[31m-[m
+ config/services.php                                |   7 [32m+[m
+ docs/pilot/e2e-summary.json                        |   5 [32m+[m[31m-[m
+ docs/pilot/screenshots/02-developer-toolkit.png    | Bin [31m1895493[m -> [32m1897523[m bytes
+ docs/pilot/screenshots/03-operations-home.png      | Bin [31m5865810[m -> [32m2505310[m bytes
+ docs/pilot/screenshots/04-do-now-order.png         | Bin [31m31975[m -> [32m32023[m bytes
+ docs/pilot/screenshots/05-order-drawer.png         | Bin [31m5031811[m -> [32m2506495[m bytes
+ docs/pilot/screenshots/06-order-preparing.png      | Bin [31m5031181[m -> [32m2504583[m bytes
+ docs/pilot/screenshots/07-order-ready.png          | Bin [31m5032992[m -> [32m2506403[m bytes
+ docs/pilot/screenshots/08-order-dispatched.png     | Bin [31m5036110[m -> [32m2487656[m bytes
+ .../screenshots/09-completed-after-refresh.png     | Bin [31m5533480[m -> [32m2599322[m bytes
+ docs/pilot/screenshots/10-customer-detail.png      | Bin [31m989137[m -> [32m1666654[m bytes
+ playwright-report/index.html                       |   2 [32m+[m[31m-[m
+ resources/js/operations-board.js                   | 104 [32m+++++[m[31m-[m
+ resources/js/operations-focus.js                   | 109 [32m+++[m[31m---[m
+ resources/views/operations/focus.blade.php         | 369 [32m+++++++++[m[31m----------[m
+ resources/views/operations/index.blade.php         |  55 [32m++[m[31m-[m
+ tests/Feature/BranchDailyClosureTest.php           |  17 [31m-[m
+ tests/Feature/ExampleTest.php                      |   2 [32m+[m[31m-[m
+ tests/Feature/FulfillmentIntentParserTest.php      |   7 [32m+[m
+ tests/Feature/IntakeRequestManagementTest.php      | 338 [31m-----------------[m
+ tests/Feature/MessagingIngestionServiceTest.php    |  31 [32m++[m
+ tests/Feature/NumberBoardTest.php                  | 402 [31m---------------------[m
+ tests/Feature/NumberLimitManagementTest.php        | 354 [31m------------------[m
+ tests/Feature/OperationsFocusModeTest.php          |  19 [32m+[m[31m-[m
+ tests/Feature/OrderIngestionTest.php               |  47 [32m++[m[31m-[m
+ tests/Feature/OrderNotificationSendingTest.php     |  20 [32m+[m
+ tests/Feature/OrderParserTest.php                  |   8 [32m+[m[31m-[m
+ tests/Feature/OrderReviewTest.php                  |  51 [32m++[m[31m-[m
+ tests/Feature/OrderWorkflowTest.php                |  20 [32m+[m
+ tests/Feature/Pilot/HardwareStorePilotTest.php     |  25 [32m++[m
+ tests/Feature/PilotPagesTest.php                   |  48 [31m---[m
+ tests/Feature/PrimaryNavigationCleanupTest.php     |   2 [32m+[m[31m-[m
+ tests/Feature/ScopeVisibilityTest.php              |   4 [31m-[m
+ tests/Feature/SimulatorIntakeTest.php              | 351 [31m------------------[m
+ tests/Feature/TelegramIntakeTest.php               |   2 [32m+[m[31m-[m
+ tests/Feature/WhatsAppIncomingWebhookTest.php      | 118 [32m+++++[m[31m-[m
+ tests/e2e/operations-focus.spec.js                 | 108 [32m+++[m[31m---[m
+ tests/e2e/operations-pilot.spec.js                 | 103 [32m+++[m[31m---[m
+ tests/e2e/pilot-documentation.spec.js              | 114 [32m++++[m[31m--[m
+ 69 files changed, 1467 insertions(+), 2145 deletions(-)

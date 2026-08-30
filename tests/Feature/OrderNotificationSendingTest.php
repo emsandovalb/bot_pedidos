@@ -9,6 +9,8 @@ use App\Models\NotificationSetting;
 use App\Models\Order;
 use App\Models\OrderNotificationLog;
 use App\Models\Organization;
+use App\Models\Product;
+use App\Models\ProductAlias;
 use App\Models\User;
 use App\Services\Messaging\Contracts\MessagingProvider;
 use App\Services\Messaging\DTO\MessagingSendResult;
@@ -261,6 +263,24 @@ class OrderNotificationSendingTest extends TestCase
         ]);
 
         $organization->update(['owner_user_id' => $user->id]);
+
+        $product = Product::create([
+            'organization_id' => $organization->id,
+            'branch_id' => null,
+            'name' => 'Bolsas de jardin',
+            'sku' => 'JARDIN-01',
+            'unit_label' => 'bolsa',
+            'is_active' => true,
+            'sort_order' => 0,
+        ]);
+
+        ProductAlias::create([
+            'organization_id' => $organization->id,
+            'product_id' => $product->id,
+            'alias' => 'bolsas de jardin',
+            'match_weight' => 100,
+            'is_active' => true,
+        ]);
 
         $order = app(OrderIngestionService::class)->ingest(
             organization: $organization,

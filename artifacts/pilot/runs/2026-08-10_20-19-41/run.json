@@ -1,0 +1,90 @@
+{
+  "status": "not_ready",
+  "started_at": "2026-08-10T20:19:41.704Z",
+  "finished_at": "2026-08-10T20:20:01.247Z",
+  "duration_seconds": 19.543,
+  "phases": [
+    {
+      "name": "prepare",
+      "status": "passed",
+      "duration_seconds": 0.692,
+      "command": "php artisan pilot:prepare",
+      "exit_code": 0,
+      "stdout": "Pilot database ready at C:\\Users\\Ema\\Desktop\\Code\\bot_pedidos\\database\\pilot.sqlite on port 8010.\r\n",
+      "stderr": "",
+      "warnings": [],
+      "failures": [],
+      "artifacts": {}
+    },
+    {
+      "name": "backend",
+      "status": "passed",
+      "duration_seconds": 2.959,
+      "command": "php artisan test --filter=HardwareStorePilotTest",
+      "exit_code": 0,
+      "stdout": "{\"tool\":\"phpunit\",\"result\":\"passed\",\"tests\":7,\"passed\":7,\"assertions\":92,\"duration_ms\":1972}\r\n",
+      "stderr": "",
+      "warnings": [],
+      "failures": [],
+      "artifacts": {}
+    },
+    {
+      "name": "build",
+      "status": "passed",
+      "duration_seconds": 2.346,
+      "command": "npm run build",
+      "exit_code": 0,
+      "stdout": "\n> build\n> vite build\n\n\u001b[36mvite v7.3.3 \u001b[32mbuilding client environment for production...\u001b[36m\u001b[39m\ntransforming...\n\u001b[32m✓\u001b[39m 7 modules transformed.\nrendering chunks...\ncomputing gzip size...\n\u001b[2mpublic/build/\u001b[22m\u001b[32mmanifest.json            \u001b[39m\u001b[1m\u001b[2m  0.33 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  0.17 kB\u001b[22m\n\u001b[2mpublic/build/\u001b[22m\u001b[35massets/app-j5LX_t4X.css  \u001b[39m\u001b[1m\u001b[2m 78.05 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip: 12.60 kB\u001b[22m\n\u001b[2mpublic/build/\u001b[22m\u001b[36massets/app-CsNdvhdf.js   \u001b[39m\u001b[1m\u001b[2m110.12 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip: 31.00 kB\u001b[22m\n\u001b[32m✓ built in 1.42s\u001b[39m\n",
+      "stderr": "",
+      "warnings": [],
+      "failures": [],
+      "artifacts": {}
+    },
+    {
+      "name": "e2e",
+      "status": "failed",
+      "duration_seconds": 13.115,
+      "command": "npx playwright test tests/e2e/pilot-documentation.spec.js",
+      "exit_code": 1,
+      "stdout": "\nRunning 1 test using 1 worker\n\n  x  1 tests\\e2e\\pilot-documentation.spec.js:15:1 › pilot documentation package captures the Benditio flow end to end (6.9s)\n\n\n  1) tests\\e2e\\pilot-documentation.spec.js:15:1 › pilot documentation package captures the Benditio flow end to end \n\n    Error: page.goto: net::ERR_ABORTED at http://127.0.0.1:8010/operations\n    Call log:\n      - navigating to \"http://127.0.0.1:8010/operations\", waiting until \"domcontentloaded\"\n\n\n      118 |     }\n      119 |\n    > 120 |     await page.goto('/operations', { waitUntil: 'domcontentloaded' });\n          |                ^\n      121 |     await expect(page.getByText('DO NOW', { exact: true })).toBeVisible();\n      122 |     await expect(page.getByText('NEXT', { exact: true })).toBeVisible();\n      123 |     await expect(page.getByText('COMPLETED', { exact: true })).toBeVisible();\n        at C:\\Users\\Ema\\Desktop\\Code\\bot_pedidos\\tests\\e2e\\pilot-documentation.spec.js:120:16\n\n    attachment #1: video (video/webm) ──────────────────────────────────────────────────────────────\n    test-results\\pilot-documentation-pilot--66d44-he-Benditio-flow-end-to-end\\video.webm\n    ────────────────────────────────────────────────────────────────────────────────────────────────\n\n    Error Context: test-results\\pilot-documentation-pilot--66d44-he-Benditio-flow-end-to-end\\error-context.md\n\n    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────\n    test-results\\pilot-documentation-pilot--66d44-he-Benditio-flow-end-to-end\\trace.zip\n    Usage:\n\n        npx playwright show-trace test-results\\pilot-documentation-pilot--66d44-he-Benditio-flow-end-to-end\\trace.zip\n\n    ────────────────────────────────────────────────────────────────────────────────────────────────\n\n  1 failed\n    tests\\e2e\\pilot-documentation.spec.js:15:1 › pilot documentation package captures the Benditio flow end to end \n",
+      "stderr": "",
+      "warnings": [],
+      "failures": [
+        "e2e failed with exit code 1."
+      ],
+      "artifacts": {}
+    }
+  ],
+  "metrics": {
+    "backend_tests_passed": null,
+    "backend_assertions": null,
+    "backend_failures": null,
+    "build_warnings": [],
+    "vite_manifest_exists": true,
+    "browser": "chromium",
+    "console_error_count": 0,
+    "http_500_count": 0,
+    "failed_request_count": 0,
+    "backend_status_dispatched": false,
+    "workflow_completed": false,
+    "completed_ui_inconsistent": false
+  },
+  "warnings": [],
+  "failures": [
+    "Browser E2E failed."
+  ],
+  "artifacts": {
+    "screenshots": {},
+    "run_dir": "C:\\Users\\Ema\\Desktop\\Code\\bot_pedidos\\artifacts\\pilot\\runs\\2026-08-10_20-19-41",
+    "playwright_report": "C:\\Users\\Ema\\Desktop\\Code\\bot_pedidos\\playwright-report\\index.html"
+  },
+  "environment": {
+    "php_version": "8.3.9",
+    "laravel_version": "Laravel Framework 13.8.0",
+    "node_version": "v24.18.0",
+    "database_driver": "sqlite",
+    "pilot_database_path": "C:\\Users\\Ema\\Desktop\\Code\\bot_pedidos\\database\\pilot.sqlite",
+    "application_url": "http://127.0.0.1:8010",
+    "timestamp": "2026-08-10T20:19:42.123Z"
+  }
+}

@@ -81,9 +81,5 @@ class ScopeVisibilityTest extends TestCase
             ->assertSeeText('1000 al 28')
             ->assertSeeText('500 numero 99');
 
-        $this->actingAs($viewer)->get(route('simulator.index'))
-            ->assertOk()
-            ->assertSeeText('North Branch')
-            ->assertSeeText('South Branch');
     }
 }

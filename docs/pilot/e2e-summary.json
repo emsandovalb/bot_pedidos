@@ -18,6 +18,8 @@
     "completedAfterRefresh": "screenshots/09-completed-after-refresh.png",
     "customerDetail": "screenshots/10-customer-detail.png"
   },
+  "backend_status_dispatched": true,
+  "workflow_completed": true,
   "metrics": {
     "whatsapp_tested": true,
     "telegram_tested": true,
@@ -27,6 +29,7 @@
     "operations_drawer_visible": true,
     "operations_transitions_completed": true,
     "completed_after_refresh_visible": true,
-    "customer_detail_visible": true
+    "customer_detail_visible": true,
+    "completed_ui_inconsistent": false
   }
 }

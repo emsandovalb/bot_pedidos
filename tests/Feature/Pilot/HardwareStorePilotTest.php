@@ -6,6 +6,8 @@ use App\Models\Branch;
 use App\Models\Order;
 use App\Models\OrderNotificationLog;
 use App\Models\Organization;
+use App\Models\Product;
+use App\Models\ProductAlias;
 use App\Models\User;
 use App\Services\Messaging\Contracts\MessagingProvider;
 use App\Services\Messaging\DTO\MessagingSendResult;
@@ -345,6 +347,29 @@ class HardwareStorePilotTest extends TestCase
             'channel_identifier' => '@pilot-telegram-' . $organization->id,
             'status' => Branch::STATUS_ACTIVE,
         ]);
+
+        foreach ([
+            ['name' => 'Bloques', 'sku' => 'BLOQUE-01', 'unit' => 'unidad', 'alias' => 'bloques'],
+            ['name' => 'Pinturas', 'sku' => 'PINTURA-01', 'unit' => 'unidad', 'alias' => 'pinturas'],
+        ] as $catalogItem) {
+            $product = Product::query()->create([
+                'organization_id' => $organization->id,
+                'branch_id' => null,
+                'name' => $catalogItem['name'],
+                'sku' => $catalogItem['sku'],
+                'unit_label' => $catalogItem['unit'],
+                'is_active' => true,
+                'sort_order' => 0,
+            ]);
+
+            ProductAlias::query()->create([
+                'organization_id' => $organization->id,
+                'product_id' => $product->id,
+                'alias' => $catalogItem['alias'],
+                'match_weight' => 100,
+                'is_active' => true,
+            ]);
+        }
 
         $this->actingAs($user)
             ->get(route('developer.webhook-simulator'))

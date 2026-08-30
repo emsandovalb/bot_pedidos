@@ -10,9 +10,8 @@ use App\Models\OrderItem;
 use App\Models\OrderStatusHistory;
 use App\Models\Organization;
 use App\Services\Fulfillment\FulfillmentPlannerService;
-use App\Services\OrderDuplicateDetectionService;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class OrderIngestionService
 {
@@ -22,8 +21,7 @@ class OrderIngestionService
         private readonly OrderDuplicateDetectionService $orderDuplicateDetectionService,
         private readonly OrderNotificationDispatcher $orderNotificationDispatcher,
         private readonly FulfillmentPlannerService $fulfillmentPlannerService,
-    ) {
-    }
+    ) {}
 
     public function ingest(
         Organization $organization,
@@ -33,11 +31,75 @@ class OrderIngestionService
         string $sourceChannel = 'telegram',
         ?string $externalMessageId = null,
         ?IncomingMessage $incomingMessage = null,
-    ): Order {
+    ): ?Order {
         $parserResult = $this->orderParserService->parse($rawMessageText);
         $orderNotes = $parserResult['notes_text'] ?? null;
 
+        if (in_array($parserResult['status'], [OrderParserService::STATUS_INVALID, OrderParserService::STATUS_NOT_ORDER], true)) {
+            if ($incomingMessage !== null) {
+                $incomingMessage->forceFill([
+                    'parser_result_json' => $parserResult,
+                    'parser_confidence' => $parserResult['final_confidence'],
+                    'status' => IncomingMessage::STATUS_PROCESSED,
+                    'parse_status' => $parserResult['status'],
+                    'status_reason' => $parserResult['review_reason'],
+                    'processed_at' => now(),
+                ])->save();
+            }
+
+            return null;
+        }
+
         $order = DB::transaction(function () use ($organization, $branch, $customer, $rawMessageText, $sourceChannel, $externalMessageId, $incomingMessage, $parserResult, $orderNotes): Order {
+            $resolvedItems = [];
+
+            foreach ($parserResult['items'] as $item) {
+                $match = $this->productMatchingService->match(
+                    organization: $organization,
+                    productName: $item['product_name'],
+                    rawText: $item['raw_text'],
+                );
+
+                $resolvedItems[] = [
+                    'item' => $item,
+                    'match' => $match,
+                ];
+            }
+
+            $hasUnmatchedProduct = collect($resolvedItems)->contains(static fn (array $resolved): bool => $resolved['match']['product'] === null);
+
+            if ($hasUnmatchedProduct) {
+                $parserResult['status'] = OrderParserService::STATUS_UNMATCHED;
+                $parserResult['needs_review'] = true;
+                $parserResult['review_reason'] = 'One or more parsed products could not be resolved in the active catalog.';
+                $parserResult['warnings'][] = 'No unresolved product can be treated as a valid catalog product.';
+            }
+
+            $finalConfidenceValues = [];
+            foreach ($resolvedItems as $index => $resolved) {
+                $item = $resolved['item'];
+                $match = $resolved['match'];
+                $productResolved = $match['product'] !== null;
+                $finalItemConfidence = $productResolved
+                    ? min((float) $item['confidence_score'], (float) $match['confidence_score'])
+                    : (float) $match['confidence_score'];
+
+                $finalConfidenceValues[] = $finalItemConfidence;
+                $parserResult['items'][$index]['product_resolution'] = [
+                    'resolved' => $productResolved,
+                    'confidence' => (float) $match['confidence_score'],
+                    'matched_text' => $match['matched_text'],
+                ];
+                $parserResult['items'][$index]['final_confidence_score'] = round($finalItemConfidence, 2);
+            }
+
+            $finalConfidence = round(array_sum($finalConfidenceValues) / max(count($finalConfidenceValues), 1), 2);
+            if ($parserResult['needs_review']) {
+                $finalConfidence = min($finalConfidence, 0.84);
+            }
+            $parserResult['final_confidence'] = $finalConfidence;
+            $parserResult['confidence'] = $finalConfidence;
+
             $order = Order::create([
                 'organization_id' => $organization->id,
                 'branch_id' => $branch->id,
@@ -46,7 +108,7 @@ class OrderIngestionService
                 'source_channel' => $sourceChannel,
                 'external_message_id' => $externalMessageId,
                 'status' => Order::STATUS_PENDING_REVIEW,
-                'parser_confidence' => $parserResult['confidence'],
+                'parser_confidence' => $parserResult['final_confidence'],
                 'raw_message_text' => $rawMessageText,
                 'parsed_payload_json' => $parserResult,
                 'notes' => $orderNotes !== '' ? $orderNotes : null,
@@ -61,12 +123,9 @@ class OrderIngestionService
                 'rejected_at' => null,
             ]);
 
-            foreach ($parserResult['items'] as $index => $item) {
-                $match = $this->productMatchingService->match(
-                    organization: $organization,
-                    productName: $item['product_name'],
-                    rawText: $item['raw_text'],
-                );
+            foreach ($resolvedItems as $index => $resolved) {
+                $item = $resolved['item'];
+                $match = $resolved['match'];
 
                 OrderItem::create([
                     'order_id' => $order->id,
@@ -75,7 +134,7 @@ class OrderIngestionService
                     'unit' => $item['unit'],
                     'raw_text' => $item['raw_text'],
                     'matched_text' => $match['matched_text'] ?? $item['matched_text'],
-                    'confidence_score' => $match['product'] !== null ? $match['confidence_score'] : $item['confidence_score'],
+                    'confidence_score' => $parserResult['items'][$index]['final_confidence_score'],
                     'notes' => null,
                     'sort_order' => $index,
                 ]);
@@ -87,7 +146,7 @@ class OrderIngestionService
                 'to_status' => Order::STATUS_PENDING_REVIEW,
                 'changed_by_user_id' => null,
                 'changed_via' => 'system',
-                'reason' => $parserResult['needs_review'] ? 'Parsed order needs manual review.' : 'Parsed order ready for review.',
+                'reason' => $parserResult['review_reason'] ?? ($parserResult['needs_review'] ? 'Parsed order needs manual review.' : 'Parsed order ready for review.'),
                 'metadata_json' => [
                     'parser_result' => $parserResult,
                     'source_channel' => $sourceChannel,
@@ -99,12 +158,10 @@ class OrderIngestionService
                 $incomingMessage->forceFill([
                     'order_id' => $order->id,
                     'parser_result_json' => $parserResult,
-                    'parser_confidence' => $parserResult['confidence'],
+                    'parser_confidence' => $parserResult['final_confidence'],
                     'status' => IncomingMessage::STATUS_PROCESSED,
-                    'parse_status' => Order::STATUS_PENDING_REVIEW,
-                    'status_reason' => $parserResult['needs_review']
-                        ? 'Order parsed and queued for manual review.'
-                        : 'Order parsed successfully.',
+                    'parse_status' => $parserResult['status'],
+                    'status_reason' => $parserResult['review_reason'] ?? 'Order parsed successfully.',
                     'processed_at' => now(),
                 ])->save();
             }

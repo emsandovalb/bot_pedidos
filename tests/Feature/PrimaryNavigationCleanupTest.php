@@ -19,7 +19,7 @@ class PrimaryNavigationCleanupTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Pedidos pendientes');
-        $response->assertSee('Catalogo de productos');
+        $response->assertSee('Catálogo de productos');
         $response->assertDontSee('/requests');
         $response->assertDontSee('/numbers');
         $response->assertDontSee('/limits');

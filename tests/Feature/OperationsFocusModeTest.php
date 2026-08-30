@@ -58,8 +58,11 @@ class OperationsFocusModeTest extends TestCase
 
         $this->assertSame($fixture['urgentOrder']->id, data_get($payload, 'recommendedOrder.id'));
         $this->assertSame('REVIEW', data_get($payload, 'recommendedOrder.focus_state'));
-        $this->assertSame('Revisar y confirmar', data_get($payload, 'recommendedOrder.recommended_action_label'));
+        $this->assertSame('Revisar pedido', data_get($payload, 'recommendedOrder.recommended_action_label'));
         $this->assertSame('Confirmar pedido', data_get($payload, 'recommendedOrder.workspace_action_label'));
+        $this->assertSame('miércoles 5 de agosto a las 1:30 p. m.', data_get($payload, 'recommendedOrder.commitment_label'));
+        $this->assertSame('miércoles 5 de agosto', data_get($payload, 'recommendedOrder.fulfillment.date'));
+        $this->assertSame('1:30 p. m.', data_get($payload, 'recommendedOrder.fulfillment.time'));
     }
 
     public function test_friendly_labels_are_exposed_without_technical_status_names(): void
@@ -76,13 +79,17 @@ class OperationsFocusModeTest extends TestCase
         $this->assertSame('SINPE', data_get($payload, 'recommendedOrder.payment_label'));
         $this->assertSame('WhatsApp', data_get($payload, 'recommendedOrder.channel_label'));
         $this->assertSame('Urgente', data_get($payload, 'recommendedOrder.priority_label'));
+        $this->assertSame('miércoles 5 de agosto a las 1:30 p. m.', data_get($payload, 'recommendedOrder.commitment_display.label'));
 
         $this->actingAs($user)
             ->get(route('operations.focus'))
             ->assertOk()
+            ->assertSee('data-focus-inline-review')
+            ->assertDontSee('role="dialog"')
             ->assertDontSeeText('pending_review')
             ->assertDontSeeText('preparing')
-            ->assertDontSeeText('ready_for_dispatch');
+            ->assertDontSeeText('ready_for_dispatch')
+            ->assertDontSeeText('Sin fecha confirmada');
     }
 
     public function test_completed_and_no_work_states_are_supported(): void
@@ -92,10 +99,10 @@ class OperationsFocusModeTest extends TestCase
         $this->actingAs($user)
             ->get(route('operations.focus'))
             ->assertOk()
-            ->assertSeeText('Todo al día')
-            ->assertSeeText('Ya no hay pedidos pendientes por trabajar.')
-            ->assertSeeText('Actualizar pedidos')
-            ->assertSeeText('Completados hoy');
+            ->assertSeeText('Excelente.')
+            ->assertSeeText('No quedan pedidos pendientes.')
+            ->assertSeeText('Actualizar')
+            ->assertSeeText('Ir a Operaciones');
 
         Carbon::setTestNow(Carbon::parse('2026-08-05 09:00:00'));
 

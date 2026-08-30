@@ -10,6 +10,7 @@ use App\Services\IntakeIntentService;
 use App\Services\IntakeMessageService;
 use App\Services\Messaging\DTO\IncomingMessageDTO;
 use App\Services\Messaging\MessagingIngestionService;
+use App\Services\OrderParserService;
 use App\Services\Telegram\TelegramBotService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
@@ -45,7 +46,7 @@ class TelegramPollCommand extends Command
             ->find($defaultBranchId);
 
         if (! $branch) {
-            $this->error('Telegram default branch [' . $defaultBranchId . '] was not found.');
+            $this->error('Telegram default branch ['.$defaultBranchId.'] was not found.');
 
             return self::FAILURE;
         }
@@ -53,7 +54,7 @@ class TelegramPollCommand extends Command
         $user = $branch->organization?->ownerUser
             ?? User::query()
                 ->where('organization_id', $branch->organization_id)
-                ->orderByRaw("CASE WHEN role = ? THEN 0 ELSE 1 END, id ASC", [User::ROLE_OWNER])
+                ->orderByRaw('CASE WHEN role = ? THEN 0 ELSE 1 END, id ASC', [User::ROLE_OWNER])
                 ->first();
 
         if (! $user) {
@@ -83,7 +84,7 @@ class TelegramPollCommand extends Command
                     $stats['duplicates'],
                 ));
             } catch (\Throwable $e) {
-                $this->error('Telegram polling failed: ' . $e->getMessage());
+                $this->error('Telegram polling failed: '.$e->getMessage());
 
                 if (! $loop) {
                     return self::FAILURE;
@@ -150,6 +151,7 @@ class TelegramPollCommand extends Command
             if ($alreadyProcessed) {
                 $duplicateCount++;
                 $this->rememberProcessedTelegramUpdateId($updateId);
+
                 continue;
             }
 
@@ -192,6 +194,7 @@ class TelegramPollCommand extends Command
                     $this->rememberProcessedTelegramUpdateId($updateId);
                     if ($result['duplicate']) {
                         $duplicateCount++;
+
                         continue;
                     }
 
@@ -199,7 +202,12 @@ class TelegramPollCommand extends Command
                         throw new \RuntimeException($result['failure_reason'] ?? 'Telegram order ingestion failed.');
                     }
 
-                    $telegramBotService->sendMessage($chatId, $this->orderIngestionReply($messageText));
+                    $telegramBotService->sendMessage(
+                        $chatId,
+                        $result['order'] === null
+                            ? $this->nonOrderIngestionReply((string) ($result['incoming_message']->parse_status ?? ''))
+                            : $this->orderIngestionReply($messageText),
+                    );
                     $processedCount++;
 
                     continue;
@@ -338,6 +346,14 @@ class TelegramPollCommand extends Command
             "Recibimos tu pedido y sera revisado por un operador.\n\nMensaje recibido:\n'%s'\n\nPronto confirmaremos tu pedido.",
             $messageText,
         );
+    }
+
+    private function nonOrderIngestionReply(string $parseStatus): string
+    {
+        return match ($parseStatus) {
+            OrderParserService::STATUS_INVALID => 'No pude identificar un pedido en ese mensaje. Envíame la cantidad y el producto para que el equipo pueda revisarlo.',
+            default => 'Ese mensaje no parece ser un pedido. Puedes enviarme la cantidad y el producto que necesitas.',
+        };
     }
 
     private function orderStartReply(): string

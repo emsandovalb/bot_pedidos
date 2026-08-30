@@ -140,6 +140,93 @@ function buildChannelPill(order) {
     };
 }
 
+function deliveryLabel(method) {
+    return ({
+        pickup: 'Retiro',
+        delivery: 'Entrega',
+        express: 'Express',
+    })[String(method ?? '')] ?? 'Por confirmar';
+}
+
+function paymentLabel(method) {
+    return ({
+        sinpe: 'SINPE',
+        cash: 'Efectivo',
+        transfer: 'Transferencia',
+        card: 'Tarjeta',
+        credit: 'Crédito',
+    })[String(method ?? '')] ?? 'Por confirmar';
+}
+
+function commitmentLabel(order) {
+    const commitmentDate = String(order?.commitment_date ?? '');
+    const commitmentTime = String(order?.commitment_time ?? '');
+    const today = new Date().toISOString().slice(0, 10);
+    const tomorrow = new Date(Date.now() + (24 * 60 * 60 * 1000)).toISOString().slice(0, 10);
+
+    if (commitmentDate === '') {
+        return 'Sin fecha confirmada';
+    }
+
+    if (commitmentDate === today) {
+        return commitmentTime !== '' ? `Hoy ${String(commitmentTime).slice(0, 5)}` : 'Hoy';
+    }
+
+    if (commitmentDate === tomorrow) {
+        return commitmentTime !== '' ? `Mañana ${String(commitmentTime).slice(0, 5)}` : 'Mañana';
+    }
+
+    return commitmentDate;
+}
+
+function priorityLabel(order) {
+    const risk = String(order?.risk_level ?? '');
+    const priority = String(order?.priority_level ?? '');
+    const remaining = order?.remaining_sla_minutes;
+    const commitmentDate = String(order?.commitment_date ?? '');
+    const today = new Date().toISOString().slice(0, 10);
+    const tomorrow = new Date(Date.now() + (24 * 60 * 60 * 1000)).toISOString().slice(0, 10);
+
+    if (risk === 'critical' || risk === 'high' || priority === 'urgent' || (remaining !== null && remaining !== undefined && Number(remaining) < 0)) {
+        return 'Urgente';
+    }
+
+    if (commitmentDate === today) {
+        return 'Hoy';
+    }
+
+    if (commitmentDate === tomorrow) {
+        return 'Mañana';
+    }
+
+    return commitmentDate !== '' ? 'Hoy' : 'Sin fecha';
+}
+
+function buildItemLines(items) {
+    return (Array.isArray(items) ? items : []).map((item) => {
+        const quantity = Number(item?.quantity ?? 1);
+        const qty = Number.isFinite(quantity) ? quantity : 1;
+        const name = String(item?.name ?? item?.product_name ?? item?.raw_text ?? 'Sin descripción');
+        const parts = [`${qty} x ${name}`];
+
+        if (String(item?.unit ?? '').trim() !== '') {
+            parts.push(String(item.unit).trim());
+        }
+
+        if (String(item?.notes ?? '').trim() !== '') {
+            parts.push(String(item.notes).trim());
+        }
+
+        return {
+            id: item?.id ?? null,
+            text: parts.join(' · '),
+            quantity: qty,
+            quantity_label: String(qty),
+            name,
+        };
+    });
+}
+
 function buildWorkflow(orderId, status, ordersBaseUrl) {
     const base = `${ordersBaseUrl}/${orderId}`;
 
@@ -270,6 +357,11 @@ function normalizeOrder(order, ordersBaseUrl) {
         update_url: order?.update_url ?? `${ordersBaseUrl}/${normalizedId}`,
         show_url: order?.show_url ?? `${ordersBaseUrl}/${normalizedId}`,
         items: Array.isArray(order?.items) ? order.items.map((item) => ({ ...item })) : [],
+        item_lines: buildItemLines(order?.items ?? []),
+        delivery_label: deliveryLabel(order?.delivery_method ?? null),
+        payment_label: paymentLabel(order?.payment_method ?? null),
+        commitment_label: commitmentLabel(order),
+        priority_label: priorityLabel(order),
         fulfillment_plan: order?.fulfillment_plan ?? {
             requested_date: order?.commitment_date ?? null,
             requested_time_window: order?.requested_time_window ?? null,
@@ -557,11 +649,11 @@ export function createOperationsBoard(config = {}) {
                 return `${order.commitment_date} ${String(order.commitment_time).slice(0, 5)}`;
             }
 
-            if (order.commitment_date) {
-                return order.commitment_date;
-            }
+        if (order.commitment_date) {
+            return order.commitment_date;
+        }
 
-            return 'No commitment';
+        return 'Sin fecha confirmada';
         },
 
         workflowLabel(order) {
@@ -824,7 +916,7 @@ export function createOperationsBoard(config = {}) {
                 return;
             }
 
-            if (action.requires_confirmation && !window.confirm('This action will change the order status. Continue?')) {
+            if (action.requires_confirmation && !window.confirm('Esta acción cambiará el estado del pedido. ¿Deseás continuar?')) {
                 return;
             }
 
@@ -1165,7 +1257,7 @@ export function createOperationsBoard(config = {}) {
                 order.duplicate ? 'Duplicate' : null,
             ];
 
-            return labels.filter((label) => label && label !== 'No delivery' && label !== 'No payment' && label !== 'No commitment');
+            return labels.filter((label) => label && label !== 'No delivery' && label !== 'No payment' && label !== 'Sin fecha confirmada');
         },
 
         cardAccentClass(order) {

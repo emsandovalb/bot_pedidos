@@ -59,71 +59,60 @@ test('operations focus mode guides one order through the full workflow', async (
     const feed = await feedResponse.json();
     expect(Array.isArray(feed.inbox) ? feed.inbox.length : 0).toBeGreaterThan(0);
 
-    const actionableOrder = Array.isArray(feed.inbox)
-        ? feed.inbox.find((order) => ['pending_review', 'confirmed', 'preparing', 'ready_for_dispatch'].includes(String(order?.status ?? '')))
+    const customOrder = Array.isArray(feed.inbox)
+        ? feed.inbox.find((order) =>
+            String(order?.customer_name ?? '') === 'Cliente Focus'
+            || String(order?.original_message ?? '').includes('Ocupo 20 bloques para hoy a las 2 pm, me lo llevan y pago por SINPE'))
         : null;
 
-    expect(actionableOrder?.id, 'expected at least one actionable order in the generated scenario').toBeTruthy();
+    expect(customOrder?.id, 'expected the generated custom message order to be present in the feed').toBeTruthy();
 
-    await page.goto(`/operations/focus?order=${actionableOrder.id}`);
-    await page.screenshot({ path: path.resolve(screenshotDir, '01-my-day.png'), fullPage: true });
+    await page.goto(`/operations/focus?order=${customOrder.id}`);
+    await page.screenshot({ path: path.resolve(screenshotDir, '01-focus-clean-summary.png'), fullPage: true });
 
-    const dialog = page.getByRole('dialog');
-    await expect(dialog).toBeVisible();
-    await expect(dialog.locator('[data-focus-stage]')).toBeVisible();
-    await expect(dialog.getByText('Más detalles')).toBeVisible();
-    await dialog.getByText('Más detalles').click();
-    await expect(dialog.getByText('Mensaje original')).toBeVisible();
-    await page.screenshot({ path: path.resolve(screenshotDir, '02-review-order.png'), fullPage: true });
+    await expect(page.locator('[role="dialog"]')).toHaveCount(0);
+    await expect(page.locator('[data-focus-inline-workspace]')).toBeVisible();
+    await expect(page.locator('[role="dialog"]')).toHaveCount(0);
+    await expect(page.locator('[data-focus-inline-review]')).toContainText('Qué preparar');
+    await expect(page.locator('[data-focus-inline-review]')).toContainText('20 bloques');
+    await expect(page.locator('[data-focus-inline-review]')).toContainText('Entrega');
+    await expect(page.locator('[data-focus-inline-review]')).toContainText('SINPE');
+    await expect(page.locator('[data-focus-inline-review]')).toContainText('Hoy a las 2:00 p. m.');
+    const reviewedItem = page.locator('[data-focus-inline-review] .space-y-3 > div.rounded-2xl.border.border-slate-100.bg-white').first();
+    await expect(reviewedItem).toContainText('20 bloques');
+    await expect(reviewedItem).not.toContainText('me lo llevan');
+    await expect(reviewedItem).not.toContainText('pago por sinpe');
+    await expect(page.locator('[data-focus-inline-review]')).toContainText('20 bloques');
+    await expect(page.locator('[data-focus-inline-review]')).toContainText('Hoy a las 2:00 p. m.');
+    await page.screenshot({ path: path.resolve(screenshotDir, '02-focus-inline-review.png'), fullPage: true });
 
-    const workflowButton = dialog.getByRole('button', { name: /Confirmar pedido|Comenzar preparación/ });
-    await expect(workflowButton).toBeVisible();
+    const confirmButton = page.getByRole('button', { name: 'Confirmar pedido' });
+    await expect(confirmButton).toBeVisible();
+    await confirmButton.click();
+    await expect(page.getByRole('button', { name: 'Empezar preparación' })).toBeVisible();
 
-    if ((await workflowButton.textContent())?.includes('Confirmar pedido')) {
-        await workflowButton.click();
-        await expect(workflowButton).toHaveText('Comenzar preparación');
-    }
+    await page.getByRole('button', { name: 'Empezar preparación' }).click();
+    const checkboxes = page.locator('[data-focus-item-checkbox]');
+    await expect(checkboxes).toHaveCount(1);
+    await expect(page.getByText('Revisá cada artículo')).toBeVisible();
+    await checkboxes.first().check();
+    await expect(page.locator('[data-focus-progress]')).toContainText('1 de 1 artículos revisados');
+    await page.screenshot({ path: path.resolve(screenshotDir, '03-focus-preparing.png'), fullPage: true });
 
-    await workflowButton.click();
-    await expect(dialog.locator('[data-focus-item-checkbox]').first()).toBeVisible();
-    await expect(dialog.getByText('Revisá cada artículo')).toBeVisible();
-    await page.screenshot({ path: path.resolve(screenshotDir, '03-preparing-checklist.png'), fullPage: true });
-
-    const checkboxes = dialog.locator('[data-focus-item-checkbox]');
-    const checkboxCount = await checkboxes.count();
-    expect(checkboxCount).toBeGreaterThan(0);
-
-    for (let index = 0; index < checkboxCount; index += 1) {
-        await checkboxes.nth(index).check();
-    }
-
-    await expect(dialog.locator('[data-focus-progress]')).toContainText(`${checkboxCount} de ${checkboxCount} artículos revisados`);
-    await expect(dialog.getByText('100%')).toBeVisible();
-
-    const readyButton = dialog.getByRole('button', { name: 'Marcar pedido como listo' });
+    const readyButton = page.getByRole('button', { name: 'Marcar como listo' });
     await expect(readyButton).toBeEnabled();
     await readyButton.click();
+    await expect(page.getByRole('button', { name: 'Despachar pedido' })).toBeVisible();
+    await page.screenshot({ path: path.resolve(screenshotDir, '04-focus-ready.png'), fullPage: true });
 
-    await expect(dialog.getByRole('heading', { name: 'Pedido listo para entregar' }).first()).toBeVisible();
-    await expect(dialog.getByRole('button', { name: /Despachar pedido|Entregar al cliente/ })).toBeVisible();
-    await page.screenshot({ path: path.resolve(screenshotDir, '04-ready-order.png'), fullPage: true });
+    await page.getByRole('button', { name: 'Despachar pedido' }).click();
+    await expect(page.getByText('Este pedido ya quedó listo.')).toBeVisible();
+    await page.screenshot({ path: path.resolve(screenshotDir, '05-focus-completed.png'), fullPage: true });
 
-    const dispatchButton = dialog.getByRole('button', { name: /Despachar pedido|Entregar al cliente/ });
-    await dispatchButton.click();
-
-    await expect(dialog.getByRole('heading', { name: 'Pedido completado' }).first()).toBeVisible();
-    await page.screenshot({ path: path.resolve(screenshotDir, '05-completed-order.png'), fullPage: true });
-
-    const completedCustomerName = (await dialog.getByRole('heading').first().textContent())?.trim() ?? '';
-    const continueButton = dialog.getByRole('button', { name: 'Continuar con el siguiente pedido' });
-
+    const continueButton = page.getByRole('button', { name: 'Ir al siguiente pedido' });
     if (await continueButton.isVisible()) {
         await continueButton.click();
     }
-
-    await page.screenshot({ path: path.resolve(screenshotDir, '06-next-order.png'), fullPage: true });
-
-    await expect(page.getByText('Cargando pedido...')).toBeHidden();
 
     if (pageErrors.length > 0 || http500Responses.length > 0 || failedRequests.length > 0) {
         throw new Error(`Focus mode browser run recorded errors: ${JSON.stringify({
@@ -143,9 +132,12 @@ async function postToolkitScenario(page, csrfToken) {
             'X-Requested-With': 'XMLHttpRequest',
         },
         form: {
-            action: 'quick',
+            action: 'business_custom_message',
             provider: 'whatsapp',
-            count: '1',
+            customer_mode: 'new',
+            customer_name: 'Cliente Focus',
+            customer_phone: '50255510050',
+            message: 'Ocupo 20 bloques para hoy a las 2 pm, me lo llevan y pago por SINPE',
         },
     });
 

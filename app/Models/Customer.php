@@ -48,4 +48,9 @@ class Customer extends Model
     {
         return $this->hasMany(CustomerIdentity::class);
     }
+
+    public function conversations(): HasMany
+    {
+        return $this->hasMany(Conversation::class);
+    }
 }

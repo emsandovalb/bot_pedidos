@@ -79,6 +79,13 @@ class FulfillmentIntentParserTest extends TestCase
         $this->assertSame('afternoon', $intent->requested_time_window);
     }
 
+    public function test_detects_specific_time_mentions(): void
+    {
+        $intent = $this->parser()->parse($this->makeOrder(), 'Ocupo 20 bloques para hoy a las 2 pm, me lo llevan');
+
+        $this->assertContains('a las 2 pm', $intent->metadata['specific_time_mentions'] ?? []);
+    }
+
     public function test_detects_after_work(): void
     {
         $intent = $this->parser()->parse($this->makeOrder(), 'Despues del trabajo');

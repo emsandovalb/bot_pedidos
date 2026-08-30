@@ -99,7 +99,7 @@ class OrderReviewTest extends TestCase
 
     public function test_confirming_pending_review_order_sets_status_confirmed(): void
     {
-        [$user, $order] = $this->makeUserAndOrder();
+        [$user, $order] = $this->makeUserAndOrder(true);
 
         $this->actingAs($user)
             ->post(route('orders.confirm', $order))
@@ -110,6 +110,53 @@ class OrderReviewTest extends TestCase
         $this->assertSame(Order::STATUS_CONFIRMED, $order->status);
         $this->assertSame($user->id, $order->confirmed_by);
         $this->assertNotNull($order->confirmed_at);
+    }
+
+    public function test_unmatched_product_cannot_be_confirmed(): void
+    {
+        [$user, $order] = $this->makeUserAndOrder(false, '2 bolsas de arena');
+
+        $this->actingAs($user)
+            ->post(route('orders.confirm', $order))
+            ->assertStatus(422);
+
+        $order->refresh();
+
+        $this->assertSame(Order::STATUS_PENDING_REVIEW, $order->status);
+        $this->assertNull($order->confirmed_at);
+        $this->assertDatabaseMissing('order_status_histories', [
+            'order_id' => $order->id,
+            'to_status' => Order::STATUS_CONFIRMED,
+        ]);
+    }
+
+    public function test_order_with_parser_review_marker_cannot_be_confirmed(): void
+    {
+        [$user, $order] = $this->makeUserAndOrder(true);
+        $order->forceFill([
+            'parsed_payload_json' => array_merge($order->parsed_payload_json, [
+                'status' => 'pending_review',
+                'needs_review' => true,
+            ]),
+        ])->save();
+
+        $this->actingAs($user)
+            ->post(route('orders.confirm', $order))
+            ->assertStatus(422);
+
+        $this->assertSame(Order::STATUS_PENDING_REVIEW, $order->fresh()->status);
+    }
+
+    public function test_json_confirmation_cannot_bypass_catalog_review_rule(): void
+    {
+        [$user, $order] = $this->makeUserAndOrder(false, '2 bolsas de arena');
+
+        $this->actingAs($user)
+            ->postJson(route('orders.confirm', $order))
+            ->assertUnprocessable()
+            ->assertJsonPath('message', 'No se puede confirmar el pedido: hay productos pendientes de revisión.');
+
+        $this->assertSame(Order::STATUS_PENDING_REVIEW, $order->fresh()->status);
     }
 
     public function test_rejecting_pending_review_order_sets_status_rejected(): void
@@ -142,7 +189,7 @@ class OrderReviewTest extends TestCase
 
     public function test_status_changes_create_order_status_history(): void
     {
-        [$user, $order] = $this->makeUserAndOrder();
+        [$user, $order] = $this->makeUserAndOrder(true);
 
         $this->actingAs($user)
             ->post(route('orders.confirm', $order))

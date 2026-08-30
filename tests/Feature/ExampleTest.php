@@ -35,6 +35,6 @@ class ExampleTest extends TestCase
 
         $response->assertOk();
         $response->assertSee(route('orders.index', ['status' => Order::STATUS_PENDING_REVIEW]));
-        $response->assertDontSee(route('intake-requests.index'));
+        $response->assertDontSee('/requests');
     }
 }

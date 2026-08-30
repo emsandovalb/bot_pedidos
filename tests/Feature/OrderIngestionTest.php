@@ -138,6 +138,45 @@ class OrderIngestionTest extends TestCase
 
         $this->assertNull($order->orderItems->first()->product_id);
         $this->assertSame('bolsas de arena', $order->orderItems->first()->matched_text);
+        $this->assertSame('unmatched', $order->parsed_payload_json['status']);
+        $this->assertTrue($order->parsed_payload_json['needs_review']);
+        $this->assertLessThan(0.85, (float) $order->parser_confidence);
+        $this->assertSame(0.15, (float) $order->orderItems->first()->confidence_score);
+        $this->assertSame('2 bolsas de arena', $order->raw_message_text);
+    }
+
+    public function test_partially_similar_catalog_alias_is_not_resolved_as_a_product(): void
+    {
+        [$organization, $branch, $customer] = $this->makeOrganizationBranchCustomer();
+
+        $product = Product::create([
+            'organization_id' => $organization->id,
+            'branch_id' => null,
+            'name' => 'Bolsas de jardin',
+            'sku' => 'JARDIN-01',
+            'unit_label' => 'bolsa',
+            'is_active' => true,
+            'sort_order' => 0,
+        ]);
+        ProductAlias::create([
+            'organization_id' => $organization->id,
+            'product_id' => $product->id,
+            'alias' => 'bolsas de jardin',
+            'match_weight' => 100,
+            'is_active' => true,
+        ]);
+
+        $order = app(OrderIngestionService::class)->ingest(
+            organization: $organization,
+            branch: $branch,
+            customer: $customer,
+            rawMessageText: '2 bolsas de jardinero',
+        );
+
+        $this->assertNotNull($order);
+        $this->assertNull($order->orderItems->first()->product_id);
+        $this->assertSame('unmatched', $order->parsed_payload_json['status']);
+        $this->assertLessThan(0.85, (float) $order->parser_confidence);
     }
 
     public function test_order_ingestion_updates_incoming_message_tracking_fields(): void
@@ -158,9 +197,9 @@ class OrderIngestionTest extends TestCase
 
         $this->assertSame($order->id, $incomingMessage->order_id);
         $this->assertIsArray($incomingMessage->parser_result_json);
-        $this->assertGreaterThan(0.9, (float) $incomingMessage->parser_confidence);
-        $this->assertSame(Order::STATUS_PENDING_REVIEW, $incomingMessage->parse_status);
-        $this->assertSame('Order parsed successfully.', $incomingMessage->status_reason);
+        $this->assertLessThanOrEqual(0.84, (float) $incomingMessage->parser_confidence);
+        $this->assertSame('unmatched', $incomingMessage->parse_status);
+        $this->assertSame('One or more parsed products could not be resolved in the active catalog.', $incomingMessage->status_reason);
         $this->assertNotNull($incomingMessage->processed_at);
     }
 
@@ -244,7 +283,7 @@ class OrderIngestionTest extends TestCase
         $plan = $order->fresh(['fulfillmentPlan'])?->fulfillmentPlan;
 
         $this->assertNotNull($plan);
-        $this->assertSame('2026-07-11', $plan->requested_date?->toDateString());
+        $this->assertSame(today()->addDay()->toDateString(), $plan->requested_date?->toDateString());
         $this->assertSame('morning', $plan->requested_time_window);
         $this->assertSame('pickup', $plan->delivery_method);
         $this->assertSame('sinpe', $plan->payment_method);

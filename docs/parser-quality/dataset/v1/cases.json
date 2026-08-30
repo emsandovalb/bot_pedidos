@@ -1,0 +1,77 @@
+{
+  "dataset_version": "1.0.0",
+  "cases": [
+    {
+      "id": "PQI-TEST-001",
+      "anonymized_text": "2 bolsas de jardin",
+      "category": "valid_order",
+      "expected_products": [{"name": "bolsas de jardin", "quantity": 2, "unit": "bolsa"}],
+      "expected_operational_status": "pending_review",
+      "annotator_notes": "Existing parser test fixture; catalog resolution is evaluated separately.",
+      "source": {"type": "test", "reference": "tests/Feature/OrderParserTest.php"},
+      "incorporated_on": "2026-08-12",
+      "dataset_version": "1.0.0",
+      "label_status": "confirmed"
+    },
+    {
+      "id": "PQI-TEST-002",
+      "anonymized_text": "5 bolsas de apretados y 1 caja de vasos",
+      "category": "valid_order",
+      "expected_products": [{"name": "bolsas de apretados", "quantity": 5, "unit": "bolsa"}, {"name": "caja de vasos", "quantity": 1, "unit": "caja"}],
+      "expected_operational_status": "pending_review",
+      "annotator_notes": "Existing multi-product baseline fixture.",
+      "source": {"type": "test", "reference": "docs/parser-quality/baseline-cases.json"},
+      "incorporated_on": "2026-08-12",
+      "dataset_version": "1.0.0",
+      "label_status": "confirmed"
+    },
+    {
+      "id": "PQI-TEST-003",
+      "anonymized_text": "hola",
+      "category": "not_order",
+      "expected_products": [],
+      "expected_operational_status": "no_order_created",
+      "annotator_notes": "Greeting fixture; it must not create an order.",
+      "source": {"type": "test", "reference": "tests/Feature/TelegramIntakeTest.php"},
+      "incorporated_on": "2026-08-12",
+      "dataset_version": "1.0.0",
+      "label_status": "confirmed"
+    },
+    {
+      "id": "PQI-TEST-004",
+      "anonymized_text": "???",
+      "category": "invalid",
+      "expected_products": [],
+      "expected_operational_status": "no_order_created",
+      "annotator_notes": "Punctuation-only fixture.",
+      "source": {"type": "test", "reference": "tests/Feature/OrderParserTest.php"},
+      "incorporated_on": "2026-08-12",
+      "dataset_version": "1.0.0",
+      "label_status": "confirmed"
+    },
+    {
+      "id": "PQI-TEST-005",
+      "anonymized_text": "2 bolsas de arena",
+      "category": "unknown_product",
+      "expected_products": [{"name": "bolsas de arena", "quantity": 2, "unit": "bolsa"}],
+      "expected_operational_status": "pending_review",
+      "annotator_notes": "Existing ingestion fixture; product is expected to remain unmatched in the active test catalog.",
+      "source": {"type": "test", "reference": "docs/parser-quality/baseline-cases.json"},
+      "incorporated_on": "2026-08-12",
+      "dataset_version": "1.0.0",
+      "label_status": "confirmed"
+    },
+    {
+      "id": "PQI-TEST-006",
+      "anonymized_text": "Ocupo bolsas negras grandes, servilletas y vasos",
+      "category": "ambiguous",
+      "expected_products": [],
+      "expected_operational_status": "pending_review",
+      "annotator_notes": "Existing fixture with omitted quantities. Product and quantity labels require reviewer confirmation before use in accuracy reporting.",
+      "source": {"type": "test", "reference": "tests/Feature/OrderParserTest.php"},
+      "incorporated_on": "2026-08-12",
+      "dataset_version": "1.0.0",
+      "label_status": "pending"
+    }
+  ]
+}

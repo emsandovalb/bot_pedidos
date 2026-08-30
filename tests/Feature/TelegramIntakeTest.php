@@ -91,7 +91,7 @@ class TelegramIntakeTest extends TestCase
             'to_identifier' => '@loteriabot',
             'raw_text' => $messageText,
             'external_message_id' => '9010',
-            'parse_status' => Order::STATUS_PENDING_REVIEW,
+            'parse_status' => 'unmatched',
         ]);
 
         Http::assertSent(function ($request) use ($messageText): bool {

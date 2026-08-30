@@ -89,4 +89,14 @@ class IncomingMessage extends Model
     {
         return $this->hasOne(MessageResponse::class);
     }
+
+    /**
+     * Mensaje del módulo de conversaciones que este entrante originó, si lo hubo.
+     * El pipeline de pedidos (incoming_messages -> intake_requests -> orders) no
+     * depende de esta relación; es sólo un puente opcional hacia la bandeja.
+     */
+    public function conversationMessage(): HasOne
+    {
+        return $this->hasOne(Message::class);
+    }
 }

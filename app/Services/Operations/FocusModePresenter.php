@@ -4,6 +4,7 @@ namespace App\Services\Operations;
 
 use App\Models\Customer;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\OrderNotificationLog;
 use App\Services\OrderWorkflowActionPresenter;
 use Carbon\CarbonInterface;
@@ -18,8 +19,7 @@ class FocusModePresenter
     public function __construct(
         private readonly NextActionQueue $nextActionQueue,
         private readonly OrderWorkflowActionPresenter $orderWorkflowActionPresenter,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<string, mixed>
@@ -81,11 +81,11 @@ class FocusModePresenter
             ])
             ->orderByRaw(
                 "CASE
-                    WHEN status = '" . Order::STATUS_PENDING_REVIEW . "' AND reviewed_at IS NULL THEN 0
-                    WHEN status = '" . Order::STATUS_PENDING_REVIEW . "' THEN 1
-                    WHEN status = '" . Order::STATUS_PREPARING . "' THEN 2
-                    WHEN status = '" . Order::STATUS_READY_FOR_DISPATCH . "' THEN 3
-                    WHEN status = '" . Order::STATUS_DISPATCHED . "' THEN 4
+                    WHEN status = '".Order::STATUS_PENDING_REVIEW."' AND reviewed_at IS NULL THEN 0
+                    WHEN status = '".Order::STATUS_PENDING_REVIEW."' THEN 1
+                    WHEN status = '".Order::STATUS_PREPARING."' THEN 2
+                    WHEN status = '".Order::STATUS_READY_FOR_DISPATCH."' THEN 3
+                    WHEN status = '".Order::STATUS_DISPATCHED."' THEN 4
                     ELSE 5
                 END"
             )
@@ -218,30 +218,36 @@ class FocusModePresenter
         return [
             'id' => (int) ($order['id'] ?? 0),
             'customer_name' => (string) ($order['customer_name'] ?? 'Sin cliente'),
-            'order_number' => 'Pedido #' . (int) ($order['id'] ?? 0),
+            'order_number' => 'Pedido #'.(int) ($order['id'] ?? 0),
             'channel_label' => $this->channelLabel($order['source_channel'] ?? $order['channel_key'] ?? null),
             'focus_state' => $this->focusState($order['status'] ?? null),
             'recommended_action_label' => $this->recommendedActionLabel($order),
             'workspace_action_label' => $this->workspaceActionLabel($order),
             'priority_label' => $this->priorityLabel($order),
-            'commitment_label' => $this->commitmentLabel($order),
+            'commitment_label' => $this->commitmentDisplay($order)['label'],
+            'commitment_display' => $this->commitmentDisplay($order),
             'delivery_label' => $this->deliveryLabel($order['delivery_method'] ?? null),
             'payment_label' => $this->paymentLabel($order['payment_method'] ?? null),
             'summary' => (string) ($order['summary'] ?? $order['preview'] ?? 'Sin resumen'),
             'item_lines' => array_slice($items, 0, 3),
-            'more_items_label' => count($items) > 3 ? '+ ' . (count($items) - 3) . ' artículos más' : null,
+            'more_items_label' => count($items) > 3 ? '+ '.(count($items) - 3).' artículos más' : null,
             'status' => (string) ($order['status'] ?? ''),
             'status_label' => (string) ($order['status_label'] ?? ''),
             'primary_action' => $this->focusPrimaryAction($order),
             'show_url' => (string) ($order['show_url'] ?? route('orders.show', (int) ($order['id'] ?? 0))),
             'items' => $items,
             'fulfillment' => [
-                'date' => $this->fulfillmentDateLabel($order),
-                'time' => $this->fulfillmentTimeLabel($order),
+                'label' => $this->commitmentDisplay($order)['label'],
+                'date' => $this->commitmentDisplay($order)['date_label'],
+                'time' => $this->commitmentDisplay($order)['time_label'],
+                'date_value' => $this->commitmentDisplay($order)['date_value'],
+                'time_value' => $this->commitmentDisplay($order)['time_value'],
                 'delivery' => $this->deliveryLabel($order['delivery_method'] ?? null),
                 'payment' => $this->paymentLabel($order['payment_method'] ?? null),
                 'address' => $this->addressLabel($order),
             ],
+            'requested_date' => $order['requested_date'] ?? $order['fulfillment_plan']['requested_date'] ?? null,
+            'requested_time_window' => $order['requested_time_window'] ?? $order['fulfillment_plan']['requested_time_window'] ?? null,
         ];
     }
 
@@ -267,7 +273,7 @@ class FocusModePresenter
             return null;
         }
 
-        $workflowOrder = new Order();
+        $workflowOrder = new Order;
         $workflowOrder->setAttribute($workflowOrder->getKeyName(), $orderId);
         $workflowOrder->status = $status;
         $workflowOrder->exists = true;
@@ -291,8 +297,8 @@ class FocusModePresenter
     private function recommendedActionLabel(array $order): string
     {
         return match ((string) ($order['status'] ?? '')) {
-            Order::STATUS_PENDING_REVIEW => 'Revisar y confirmar',
-            Order::STATUS_CONFIRMED => 'Comenzar preparación',
+            Order::STATUS_PENDING_REVIEW => 'Revisar pedido',
+            Order::STATUS_CONFIRMED => 'Empezar preparación',
             Order::STATUS_PREPARING => 'Seguir preparando',
             Order::STATUS_READY_FOR_DISPATCH => $this->readyActionLabel($order),
             Order::STATUS_DISPATCHED => 'Pedido completado',
@@ -309,8 +315,8 @@ class FocusModePresenter
     {
         return match ((string) ($order['status'] ?? '')) {
             Order::STATUS_PENDING_REVIEW => 'Confirmar pedido',
-            Order::STATUS_CONFIRMED => 'Comenzar preparación',
-            Order::STATUS_PREPARING => 'Marcar pedido como listo',
+            Order::STATUS_CONFIRMED => 'Empezar preparación',
+            Order::STATUS_PREPARING => 'Marcar como listo',
             Order::STATUS_READY_FOR_DISPATCH => $this->readyActionLabel($order),
             default => 'Continuar',
         };
@@ -348,13 +354,15 @@ class FocusModePresenter
     private function buildUpcomingRow(array $order): array
     {
         $items = $this->itemLines($order);
+        $commitment = $this->commitmentDisplay($order);
 
         return [
             'id' => (int) ($order['id'] ?? 0),
             'customer_name' => (string) ($order['customer_name'] ?? 'Sin cliente'),
             'item_summary' => (string) ($order['summary'] ?? $order['preview'] ?? 'Sin resumen'),
-            'commitment_label' => $this->commitmentLabel($order),
-            'date_time_label' => trim(($this->fulfillmentDateLabel($order) ?? '') . ' ' . ($this->fulfillmentTimeLabel($order) ?? '')),
+            'commitment_label' => $commitment['label'],
+            'commitment_display' => $commitment,
+            'date_time_label' => $commitment['label'],
             'delivery_label' => $this->deliveryLabel($order['delivery_method'] ?? null),
             'payment_label' => $this->paymentLabel($order['payment_method'] ?? null),
             'channel_label' => $this->channelLabel($order['source_channel'] ?? $order['channel_key'] ?? null),
@@ -466,13 +474,7 @@ class FocusModePresenter
      */
     private function fulfillmentDateLabel(array $order): string
     {
-        $commitmentDate = $this->stringValue($order['commitment_date'] ?? null);
-
-        if ($commitmentDate === null) {
-            return 'Sin fecha confirmada';
-        }
-
-        return Carbon::parse($commitmentDate)->locale('es')->isoFormat('dddd D [de] MMMM');
+        return $this->commitmentDisplay($order)['date_label'];
     }
 
     /**
@@ -480,13 +482,7 @@ class FocusModePresenter
      */
     private function fulfillmentTimeLabel(array $order): string
     {
-        $commitmentTime = $this->stringValue($order['commitment_time'] ?? null);
-
-        if ($commitmentTime === null) {
-            return 'Sin hora definida';
-        }
-
-        return preg_match('/^\d{2}:\d{2}/', $commitmentTime) === 1 ? substr($commitmentTime, 0, 5) : $commitmentTime;
+        return $this->commitmentDisplay($order)['time_label'];
     }
 
     /**
@@ -607,7 +603,7 @@ class FocusModePresenter
 
         return collect($items)
             ->map(function ($item): string {
-                if ($item instanceof \App\Models\OrderItem) {
+                if ($item instanceof OrderItem) {
                     $quantity = (float) $item->quantity;
                     $name = $this->resolveItemLabel($item->product_id, $item->raw_text, $item->product?->name);
                     $unit = $item->unit;
@@ -619,7 +615,7 @@ class FocusModePresenter
                     $notes = $item['notes'] ?? null;
                 }
 
-                $parts = [rtrim(rtrim(number_format($quantity, 2, '.', ''), '0'), '.') . ' x ' . $name];
+                $parts = [rtrim(rtrim(number_format($quantity, 2, '.', ''), '0'), '.').' x '.$name];
 
                 if (is_string($unit) && trim($unit) !== '') {
                     $parts[] = trim($unit);
@@ -685,6 +681,12 @@ class FocusModePresenter
     private function serializeOrder(Order $order, ?array $customerContext): array
     {
         $workflow = $this->orderWorkflowActionPresenter->present($order);
+        $commitment = $this->commitmentDisplay([
+            'requested_date' => $order->fulfillmentPlan?->requested_date?->toDateString(),
+            'commitment_date' => $order->fulfillmentPlan?->commitment_date?->toDateString(),
+            'requested_time_window' => $order->fulfillmentPlan?->requested_time_window,
+            'commitment_time' => $order->fulfillmentPlan?->commitment_time,
+        ]);
 
         return [
             'id' => $order->id,
@@ -712,8 +714,11 @@ class FocusModePresenter
             'parser_confidence' => $order->parser_confidence !== null ? (float) $order->parser_confidence : null,
             'delivery_method' => $order->fulfillmentPlan?->delivery_method,
             'payment_method' => $order->fulfillmentPlan?->payment_method,
+            'requested_date' => $order->fulfillmentPlan?->requested_date?->toDateString(),
             'commitment_date' => $order->fulfillmentPlan?->commitment_date?->toDateString(),
             'commitment_time' => $order->fulfillmentPlan?->commitment_time,
+            'commitment_display' => $commitment,
+            'commitment_label' => $commitment['label'],
             'remaining_sla_minutes' => $order->fulfillmentPlan?->remaining_sla_minutes,
             'risk_level' => $order->fulfillmentPlan?->risk_level,
             'priority_level' => $order->fulfillmentPlan?->priority_level,
@@ -791,6 +796,20 @@ class FocusModePresenter
         ];
     }
 
+    /**
+     * @param  array<string, mixed>  $order
+     * @return array{label:string,date_label:string,time_label:string,time_window_label:?string,date_value:?string,time_value:?string}
+     */
+    private function commitmentDisplay(array $order): array
+    {
+        return app(CommitmentDisplayFormatter::class)->format(
+            requestedDate: $this->stringValue($order['requested_date'] ?? null),
+            commitmentDate: $this->stringValue($order['commitment_date'] ?? null),
+            requestedTimeWindow: $this->stringValue($order['requested_time_window'] ?? null),
+            commitmentTime: $this->stringValue($order['commitment_time'] ?? null),
+        );
+    }
+
     private function statusLabel(string $status): string
     {
         return match ($status) {
@@ -814,16 +833,16 @@ class FocusModePresenter
         $minutes = $date->diffInMinutes(now());
 
         if ($minutes < 60) {
-            return 'Hace ' . max(1, (int) $minutes) . ' min';
+            return 'Hace '.max(1, (int) $minutes).' min';
         }
 
         $hours = intdiv((int) $minutes, 60);
 
         if ($hours < 24) {
-            return 'Hace ' . $hours . ' h';
+            return 'Hace '.$hours.' h';
         }
 
-        return 'Hace ' . intdiv($hours, 24) . ' d';
+        return 'Hace '.intdiv($hours, 24).' d';
     }
 
     private function resolveItemLabel(?int $productId, ?string $rawText, ?string $productName): string
@@ -833,7 +852,7 @@ class FocusModePresenter
         }
 
         if ($productId !== null) {
-            return 'Producto #' . $productId;
+            return 'Producto #'.$productId;
         }
 
         $label = Str::of((string) $rawText)->squish()->toString();
@@ -877,4 +896,3 @@ class FocusModePresenter
         });
     }
 }
-

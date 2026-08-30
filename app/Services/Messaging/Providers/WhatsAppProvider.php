@@ -12,9 +12,9 @@ use App\Services\Messaging\DTO\OutgoingMessageDTO;
 use App\Services\Messaging\DTO\ProviderCapabilities;
 use App\Services\Messaging\DTO\ProviderHealth;
 use App\Services\Messaging\DTO\ProviderValidationResult;
-use App\Services\Messaging\MessagingIngestionService;
 use App\Services\Messaging\DTO\WebhookReceiveResult;
 use App\Services\Messaging\DTO\WebhookVerificationResult;
+use App\Services\Messaging\MessagingIngestionService;
 use App\Services\WhatsAppConfigurationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -158,6 +158,12 @@ class WhatsAppProvider implements MessagingProvider
 
     public function receiveWebhook(Request $request): WebhookReceiveResult|WebhookVerificationResult
     {
+        $signatureResult = $this->validateWebhookSignature($request);
+
+        if ($signatureResult !== null) {
+            return $signatureResult;
+        }
+
         $payload = $this->decodeWebhookPayload($request);
 
         if ($payload === null) {
@@ -478,6 +484,38 @@ class WhatsAppProvider implements MessagingProvider
         }
 
         return is_array($decoded) ? $decoded : null;
+    }
+
+    private function validateWebhookSignature(Request $request): ?WebhookReceiveResult
+    {
+        $appSecret = trim((string) config('services.whatsapp.app_secret', ''));
+
+        if ($appSecret === '') {
+            return new WebhookReceiveResult(
+                success: false,
+                status: 503,
+                challenge: null,
+                provider: $this->providerName(),
+                message: 'WhatsApp webhook signature validation is not configured.',
+                failed_count: 1,
+            );
+        }
+
+        $signature = trim((string) $request->header('X-Hub-Signature-256', ''));
+        $expectedSignature = 'sha256='.hash_hmac('sha256', (string) $request->getContent(), $appSecret);
+
+        if ($signature === '' || ! hash_equals($expectedSignature, $signature)) {
+            return new WebhookReceiveResult(
+                success: false,
+                status: 401,
+                challenge: null,
+                provider: $this->providerName(),
+                message: 'Invalid WhatsApp webhook signature.',
+                failed_count: 1,
+            );
+        }
+
+        return null;
     }
 
     /**

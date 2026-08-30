@@ -176,13 +176,13 @@ class OrderParserTest extends TestCase
         $this->assertStringNotContainsString('para manana', $result['items'][1]['raw_text']);
     }
 
-    public function test_parser_returns_at_least_one_item_for_unclear_message(): void
+    public function test_parser_marks_punctuation_only_message_as_invalid_without_a_fallback_item(): void
     {
         $result = app(OrderParserService::class)->parse('???');
 
-        $this->assertCount(1, $result['items']);
-        $this->assertSame(1, $result['items'][0]['quantity']);
-        $this->assertLessThan(0.5, $result['items'][0]['confidence_score']);
+        $this->assertSame(OrderParserService::STATUS_INVALID, $result['status']);
+        $this->assertSame([], $result['items']);
+        $this->assertSame(0.0, $result['final_confidence']);
     }
 
     public function test_parser_remains_domain_agnostic_and_does_not_depend_on_product_vocab(): void

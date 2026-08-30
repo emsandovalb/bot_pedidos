@@ -29,6 +29,7 @@ function normalizeOrder(order) {
     normalized.secondary_actions = Array.isArray(normalized.secondary_actions) ? normalized.secondary_actions : [];
     normalized.terminal_message = normalized.terminal_message ?? null;
     normalized.fulfillment_plan = normalized.fulfillment_plan ?? null;
+    normalized.commitment_display = normalized.commitment_display ?? null;
     normalized.parser_details = normalized.parser_details ?? null;
     normalized.duplicate_analysis = normalized.duplicate_analysis ?? null;
     normalized.customer_context = normalized.customer_context ?? null;
@@ -53,7 +54,7 @@ function channelLabel(channel) {
 
 function deliveryLabel(method) {
     return ({
-        pickup: 'Retiro en tienda',
+        pickup: 'Retiro',
         delivery: 'Entrega',
         express: 'Express',
     })[String(method ?? '')] ?? 'Por confirmar';
@@ -75,47 +76,29 @@ function priorityLabel(order) {
     const remaining = order?.remaining_sla_minutes;
     const commitmentDate = String(order?.commitment_date ?? '');
     const today = new Date().toISOString().slice(0, 10);
+    const tomorrow = new Date(Date.now() + (24 * 60 * 60 * 1000)).toISOString().slice(0, 10);
 
     if (risk === 'critical' || risk === 'high' || priority === 'urgent' || (remaining !== null && remaining !== undefined && Number(remaining) < 0)) {
         return 'Urgente';
     }
 
     if (commitmentDate === today) {
-        return 'Para hoy';
+        return 'Hoy';
+    }
+
+    if (commitmentDate === tomorrow) {
+        return 'Mañana';
     }
 
     if (commitmentDate === '') {
         return 'Sin fecha';
     }
 
-    return 'Próximo';
+    return 'Hoy';
 }
 
 function commitmentLabel(order) {
-    const commitmentDate = String(order?.commitment_date ?? '');
-    const commitmentTime = String(order?.commitment_time ?? '');
-    const today = new Date().toISOString().slice(0, 10);
-    const tomorrow = new Date(Date.now() + (24 * 60 * 60 * 1000)).toISOString().slice(0, 10);
-
-    if (commitmentDate === '') {
-        return 'Sin fecha confirmada';
-    }
-
-    if (commitmentDate === today) {
-        if (commitmentTime === '') {
-            return 'Hoy sin hora definida';
-        }
-
-        return Number(String(commitmentTime).slice(0, 2)) < 14
-            ? 'Hoy antes de las 2:00 p. m.'
-            : 'Hoy sin hora definida';
-    }
-
-    if (commitmentDate === tomorrow) {
-        return 'Mañana por la mañana';
-    }
-
-    return 'Sin fecha confirmada';
+    return String(order?.commitment_display?.label ?? order?.commitment_label ?? 'Sin fecha confirmada');
 }
 
 function buildItemLines(items) {
@@ -215,8 +198,8 @@ function readyActionLabel(order) {
 
 function recommendedActionLabel(order) {
     return ({
-        pending_review: 'Revisar y confirmar',
-        confirmed: 'Comenzar preparación',
+        pending_review: 'Revisar pedido',
+        confirmed: 'Empezar preparación',
         preparing: 'Seguir preparando',
         ready_for_dispatch: readyActionLabel(order),
         dispatched: 'Pedido completado',
@@ -228,8 +211,8 @@ function recommendedActionLabel(order) {
 function workspaceActionLabel(order) {
     return ({
         pending_review: 'Confirmar pedido',
-        confirmed: 'Comenzar preparación',
-        preparing: 'Marcar pedido como listo',
+        confirmed: 'Empezar preparación',
+        preparing: 'Marcar como listo',
         ready_for_dispatch: readyActionLabel(order),
     })[String(order?.status ?? '')] ?? 'Continuar';
 }
@@ -244,6 +227,16 @@ function buildFocusableOrder(order) {
     const itemLines = buildItemLines(normalized.items);
     const stage = focusStageLabel(normalized.status);
     const workspaceLabel = workspaceActionLabel(normalized);
+    const commitmentDisplay = normalized.commitment_display ?? {
+        label: commitmentLabel(normalized),
+        date_label: (normalized.commitment_date || normalized.requested_date)
+            ? (formatDateLabel(normalized.commitment_date || normalized.requested_date) || 'Sin fecha confirmada')
+            : 'Sin fecha confirmada',
+        time_label: formatTime(normalized.commitment_time),
+        time_window_label: null,
+        date_value: normalized.commitment_date ?? normalized.requested_date ?? null,
+        time_value: normalized.commitment_time ? formatTime(normalized.commitment_time) : null,
+    };
 
     return {
         ...normalized,
@@ -254,7 +247,8 @@ function buildFocusableOrder(order) {
         order_number: `Pedido #${normalized.id}`,
         channel_label: channelLabel(normalized.source_channel ?? normalized.channel_key ?? null),
         priority_label: priorityLabel(normalized),
-        commitment_label: commitmentLabel(normalized),
+        commitment_label: commitmentDisplay.label,
+        commitment_display: commitmentDisplay,
         delivery_label: deliveryLabel(normalized.delivery_method ?? null),
         payment_label: paymentLabel(normalized.payment_method ?? null),
         summary: String(normalized.summary ?? normalized.preview ?? 'Sin resumen'),
@@ -263,9 +257,18 @@ function buildFocusableOrder(order) {
         items_count_label: itemLines.length === 1 ? '1 artículo' : `${itemLines.length} artículos`,
         primary_action_label: workspaceLabel,
         has_items: itemLines.length > 0,
+        product_lines: itemLines.map((line) => line.text),
+        compact_sections: {
+            products: itemLines.map((line) => line.text),
+            delivery: deliveryLabel(normalized.delivery_method ?? null),
+            payment: paymentLabel(normalized.payment_method ?? null),
+            commitment: commitmentDisplay.label,
+            priority: priorityLabel(normalized),
+        },
         fulfillment: {
-            date: normalized.commitment_date ? formatDateLabel(normalized.commitment_date) : 'Sin fecha confirmada',
-            time: formatTime(normalized.commitment_time),
+            label: commitmentDisplay.label,
+            date: commitmentDisplay.date_label ?? 'Sin fecha confirmada',
+            time: commitmentDisplay.time_label ?? 'Sin hora definida',
             delivery: deliveryLabel(normalized.delivery_method ?? null),
             payment: paymentLabel(normalized.payment_method ?? null),
             address: normalized.delivery_method === 'pickup'
@@ -297,6 +300,7 @@ export function createOperationsFocus(config = {}) {
         selectedOrderId: null,
         selectedOrder: null,
         workspaceOpen: false,
+        autoOpenPending: false,
         workspaceLoading: false,
         workspaceError: '',
         workspaceNotice: '',
@@ -353,8 +357,10 @@ export function createOperationsFocus(config = {}) {
 
         get recommendedOrder() {
             const section = findSection(this.queueData, 'do_now');
-            const card = Array.isArray(section?.cards) ? section.cards[0] ?? null : null;
-            return buildFocusableOrder(card);
+            const actionableStatus = new Set(['pending_review', 'confirmed', 'preparing', 'ready_for_dispatch']);
+            const cards = Array.isArray(section?.cards) ? section.cards : [];
+            const card = cards.find((entry) => actionableStatus.has(String(entry?.status ?? ''))) ?? null;
+            return buildFocusableOrder(card) ?? this.recommendedOrderSeed ?? null;
         },
 
         get nextScheduledOrder() {
@@ -387,7 +393,7 @@ export function createOperationsFocus(config = {}) {
 
         get currentPrimaryActionLabel() {
             if (this.completionVisible || this.currentStatus === 'dispatched') {
-                return 'Continuar con el siguiente pedido';
+                return 'Ir al siguiente pedido';
             }
 
             return this.currentWorkspaceOrder?.workspace_action_label
@@ -452,10 +458,10 @@ export function createOperationsFocus(config = {}) {
                 return;
             }
 
-            void this.openOrder(order.id);
+            void this.openOrder(order.id, { autoOpen: true });
         },
 
-        async openOrder(orderId) {
+        async openOrder(orderId, { autoOpen = false } = {}) {
             const normalizedId = toNumber(orderId, 0);
             if (!normalizedId) {
                 return;
@@ -468,8 +474,17 @@ export function createOperationsFocus(config = {}) {
             this.activeId = normalizedId;
             this.selectedOrderId = normalizedId;
 
-            await this.loadSnapshot(normalizedId);
+            const loaded = await this.loadSnapshot(normalizedId);
+            if (!loaded) {
+                if (autoOpen) {
+                    this.closeWorkspace();
+                }
+
+                return;
+            }
+
             this.setLocationOrder(normalizedId);
+            this.autoOpenPending = false;
         },
 
         select(orderId, order = null) {
@@ -487,7 +502,7 @@ export function createOperationsFocus(config = {}) {
         async loadSnapshot(orderId) {
             const normalizedId = toNumber(orderId, 0);
             if (!normalizedId) {
-                return;
+                return false;
             }
 
             this.workspaceLoading = true;
@@ -519,8 +534,10 @@ export function createOperationsFocus(config = {}) {
                 this.completionVisible = decorated.status === 'dispatched';
                 this.mergeOrderIntoFeed(decorated);
                 this.syncPreparationProgress(decorated.id, { forceReset: decorated.status === 'preparing' });
+                return true;
             } catch (error) {
                 this.workspaceError = 'No pudimos cargar el pedido. Intenta nuevamente.';
+                return false;
             } finally {
                 this.workspaceLoading = false;
             }
@@ -803,6 +820,7 @@ export function createOperationsFocus(config = {}) {
             this.activeId = null;
             this.completionVisible = false;
             this.submittingActionKey = null;
+            this.autoOpenPending = false;
         },
 
         onLiveQueueNewOrder(newOrders) {
@@ -867,16 +885,11 @@ export function createOperationsFocus(config = {}) {
         },
 
         formatOrderDate(order) {
-            const commitmentDate = String(order?.commitment_date ?? '');
-            if (commitmentDate === '') {
-                return 'Sin fecha confirmada';
-            }
-
-            return formatDateLabel(commitmentDate) || 'Sin fecha confirmada';
+            return String(order?.commitment_display?.date_label ?? (order?.commitment_date || order?.requested_date ? formatDateLabel(order.commitment_date || order.requested_date) : 'Sin fecha confirmada'));
         },
 
         formatOrderTime(order) {
-            return formatTime(order?.commitment_time);
+            return String(order?.commitment_display?.time_label ?? formatTime(order?.commitment_time));
         },
 
         orderPriorityLabel(order) {

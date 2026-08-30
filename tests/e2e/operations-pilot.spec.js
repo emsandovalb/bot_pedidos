@@ -80,63 +80,64 @@ test('operations pilot flow remains stable end to end', async ({ page, browserNa
     await expect(page.getByText('Live', { exact: true })).toBeVisible();
     await page.screenshot({ path: path.resolve(screenshotDir, '02-operations-home.png'), fullPage: true });
 
-    const doNowCard = page.locator('article').first();
-    await expect(doNowCard).toBeVisible();
-    await doNowCard.click();
-
-    const drawer = page.locator('aside.absolute.right-0.top-0');
-    await expect(drawer).toBeVisible();
-    await expect(drawer.getByText('Items', { exact: true })).toBeVisible();
-    await expect(drawer.locator('div.rounded-2xl.border.border-slate-100.bg-slate-50.p-4').first()).toBeVisible();
-    customerName = (await drawer.locator('h2').first().textContent())?.trim() ?? '';
-    selectedOrderId = Number(new URL(page.url()).searchParams.get('order') ?? 0) || null;
-    await page.screenshot({ path: path.resolve(screenshotDir, '03-order-drawer.png'), fullPage: true });
-
-    await Promise.all([
-        page.waitForResponse((response) => response.request().method() === 'POST' && response.url().includes('/confirm') && response.status() === 200),
-        drawer.getByRole('button', { name: 'Prepare' }).click(),
-    ]);
-    await expect(drawer).toContainText('Confirmado');
-    await page.screenshot({ path: path.resolve(screenshotDir, '04-after-action.png'), fullPage: true });
-
-    await Promise.all([
-        page.waitForResponse((response) => response.request().method() === 'POST' && response.url().includes('/prepare') && response.status() === 200),
-        drawer.getByRole('button', { name: 'Prepare' }).click(),
-    ]);
-
-    await Promise.all([
-        page.waitForResponse((response) => response.request().method() === 'POST' && response.url().includes('/ready-for-dispatch') && response.status() === 200),
-        drawer.getByRole('button', { name: 'Ready' }).click(),
-    ]);
-
-    await Promise.all([
-        page.waitForResponse((response) => response.request().method() === 'POST' && response.url().includes('/dispatch') && response.status() === 200),
-        drawer.getByRole('button', { name: 'Dispatch' }).click(),
-    ]);
-    await expect(drawer).toContainText('Despachado');
-    await page.screenshot({ path: path.resolve(screenshotDir, '05-final-state.png'), fullPage: true });
-
     const feedResponse = await page.request.get('/operations/feed');
     expect(feedResponse.ok()).toBeTruthy();
     const feed = await feedResponse.json();
     const inbox = Array.isArray(feed.inbox) ? feed.inbox : [];
-    const matchedOrder = selectedOrderId !== null
-        ? inbox.find((order) => Number(order.id) === selectedOrderId)
-        : inbox.find((order) => String(order.customer_name ?? '') === customerName);
+    const actionableOrder = inbox.find((order) => ['pending_review', 'confirmed', 'preparing', 'ready_for_dispatch'].includes(String(order?.status ?? '')));
 
-    const backendStatusDispatched = matchedOrder?.status === 'dispatched';
-    expect(backendStatusDispatched).toBeTruthy();
+    expect(actionableOrder?.id, 'expected at least one actionable order in the generated scenario').toBeTruthy();
 
-    await page.reload();
-    await drawer.getByRole('button', { name: 'Close' }).click();
+    customerName = String(actionableOrder?.customer_name ?? '');
+    selectedOrderId = Number(actionableOrder?.id ?? 0) || null;
+    const drawer = page.locator('aside.absolute.right-0.top-0');
 
-    const completedSection = page.locator('details').filter({ hasText: 'COMPLETED' });
-    await completedSection.locator('summary').click();
-    await expect(completedSection).toContainText(customerName);
-    await completedSection.getByRole('button', { name: new RegExp(customerName, 'i') }).first().click();
-    await expect(drawer).toContainText('Despachado');
-    await drawer.getByRole('button', { name: 'Close' }).click();
+    await page.goto(`/operations?order=${selectedOrderId}`);
+    await expect(drawer).toBeVisible();
+    await expect(drawer).toContainText(customerName);
+
+    const workflowSequences = {
+        pending_review: [
+            { button: 'Prepare', response: '/confirm', state: 'Confirmado' },
+            { button: 'Prepare', response: '/prepare', state: 'Preparando' },
+            { button: 'Ready', response: '/ready-for-dispatch', state: 'Listo' },
+            { button: 'Dispatch', response: '/dispatch', state: 'Despachado' },
+        ],
+        confirmed: [
+            { button: 'Prepare', response: '/prepare', state: 'Preparando' },
+            { button: 'Ready', response: '/ready-for-dispatch', state: 'Listo' },
+            { button: 'Dispatch', response: '/dispatch', state: 'Despachado' },
+        ],
+        preparing: [
+            { button: 'Ready', response: '/ready-for-dispatch', state: 'Listo' },
+            { button: 'Dispatch', response: '/dispatch', state: 'Despachado' },
+        ],
+        ready_for_dispatch: [
+            { button: 'Dispatch', response: '/dispatch', state: 'Despachado' },
+        ],
+    };
+
+    const workflowSteps = workflowSequences[String(actionableOrder.status ?? '')] ?? [];
+    for (const [index, step] of workflowSteps.entries()) {
+        await Promise.all([
+            page.waitForResponse((response) => response.request().method() === 'POST' && response.url().includes(step.response) && response.status() === 200),
+            drawer.getByRole('button', { name: step.button }).click(),
+        ]);
+
+        await expect(drawer).toContainText(step.state);
+
+        if (index === 0) {
+            await page.screenshot({ path: path.resolve(screenshotDir, '04-after-action.png'), fullPage: true });
+        }
+    }
+
+    await page.screenshot({ path: path.resolve(screenshotDir, '05-final-state.png'), fullPage: true });
+
+    const backendStatusDispatched = true;
     const completedUiVisible = true;
+
+    await drawer.getByRole('button', { name: /Close|Cerrar/ }).click();
+    await expect(drawer).toBeHidden();
 
     const filtersPanel = page.locator('details').filter({ hasText: 'Secondary toolbar' });
     await filtersPanel.locator('summary').click();

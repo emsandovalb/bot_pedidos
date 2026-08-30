@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ManualReview;
 use App\Models\Order;
 use App\Models\OrderStatusHistory;
+use App\Services\OrderConfirmationReadinessService;
 use App\Services\OrderNotificationDispatcher;
 use App\Services\OrderWorkflowActionPresenter;
 use Illuminate\Contracts\View\View;
@@ -20,9 +21,9 @@ class OrderController extends Controller
 {
     public function __construct(
         private readonly OrderNotificationDispatcher $orderNotificationDispatcher,
+        private readonly OrderConfirmationReadinessService $orderConfirmationReadinessService,
         private readonly OrderWorkflowActionPresenter $orderWorkflowActionPresenter,
-    ) {
-    }
+    ) {}
 
     private const ORDER_STATUSES = [
         Order::STATUS_PENDING_REVIEW,
@@ -167,6 +168,11 @@ class OrderController extends Controller
     {
         $this->ensureVisible($order);
         $this->assertTransitionAllowed($order, [Order::STATUS_PENDING_REVIEW], 'confirm');
+        abort_unless(
+            $this->orderConfirmationReadinessService->canConfirm($order),
+            422,
+            OrderConfirmationReadinessService::BLOCKED_MESSAGE,
+        );
 
         $this->transitionOrder(
             order: $order,
@@ -379,6 +385,7 @@ class OrderController extends Controller
 
                 if ($isDeleted) {
                     $item?->delete();
+
                     continue;
                 }
 

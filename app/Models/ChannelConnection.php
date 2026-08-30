@@ -25,10 +25,17 @@ class ChannelConnection extends Model
     public const STATUS_WARNING = 'warning';
     public const STATUS_ERROR = 'error';
 
+    // --- agent_mode: modo de operación del agente de IA para este canal ---
+    public const AGENT_MODE_ACTIVE = 'active';     // el agente responde solo
+    public const AGENT_MODE_TRAINING = 'training'; // el agente redacta pero no envía (queda como 'draft')
+    public const AGENT_MODE_PAUSED = 'paused';     // el agente no responde nada
+
     protected $fillable = [
         'organization_id',
         'channel',
         'status',
+        'agent_mode',
+        'agent_mode_before_pause',
         'display_name',
         'phone_number',
         'provider',
@@ -100,5 +107,27 @@ class ChannelConnection extends Model
     public function setupRequests(): HasMany
     {
         return $this->hasMany(SetupRequest::class);
+    }
+
+    public function conversations(): HasMany
+    {
+        return $this->hasMany(Conversation::class);
+    }
+
+    public function isActive(): bool
+    {
+        return $this->agent_mode === self::AGENT_MODE_ACTIVE;
+    }
+
+    public function isTraining(): bool
+    {
+        // 'training' es el modo por defecto; trátalo como entrenamiento aun si la
+        // columna llegara nula en filas creadas antes de esta migración.
+        return $this->agent_mode === self::AGENT_MODE_TRAINING || $this->agent_mode === null;
+    }
+
+    public function isPaused(): bool
+    {
+        return $this->agent_mode === self::AGENT_MODE_PAUSED;
     }
 }

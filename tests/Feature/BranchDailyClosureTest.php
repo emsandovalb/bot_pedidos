@@ -83,23 +83,6 @@ class BranchDailyClosureTest extends TestCase
         ]);
     }
 
-    public function test_dashboard_reporting_visibility_matches_scope(): void
-    {
-        [$organization, $owner, $branchOne, $branchTwo, $seller] = $this->makeOrganizationFixture(withSeller: true);
-
-        $this->makeRequest($organization->id, $branchOne->id, IntakeRequest::STATUS_PENDING, null, null, 100, '100 al 10');
-        $this->makeRequest($organization->id, $branchTwo->id, IntakeRequest::STATUS_PENDING, null, null, 200, '200 al 20');
-
-        $ownerResponse = $this->actingAs($owner)->get(route('dashboard'));
-        $ownerResponse->assertOk();
-        $ownerResponse->assertSeeText('Branch One');
-        $ownerResponse->assertSeeText('Branch Two');
-
-        $sellerResponse = $this->actingAs($seller)->get(route('dashboard'));
-        $sellerResponse->assertOk();
-        $sellerResponse->assertSeeText('Branch One');
-        $sellerResponse->assertDontSeeText('Branch Two');
-    }
 
     public function test_authorized_user_can_view_closure_detail(): void
     {

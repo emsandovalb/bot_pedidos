@@ -1,0 +1,114 @@
+[
+  {
+    "id": "simple_quantity",
+    "source": "README.md: Telegram example",
+    "category": "simple_order",
+    "input": "2 bolsas de jardin",
+    "expectation_status": "characterized",
+    "evaluation_reason": "Existing README and OrderParserTest example.",
+    "expected": {"normalized_text": "2 bolsas de jardin", "confidence": 0.96, "needs_review": false, "notes": [], "items": [{"quantity": 2, "unit": "bolsa", "product_name": "jardin", "matched_text": "bolsas de jardin", "confidence_score": 0.96}]},
+    "catalog": {"product_name": "Bolsas de jardin", "aliases": ["bolsas de jardin"], "expected_alias": "bolsas de jardin"},
+    "metrics": {"interpretable": true, "ambiguous": false, "manual_review": false, "false_positive_risk": false, "false_negative_measurable": false}
+  },
+  {
+    "id": "quantity_suffix",
+    "source": "tests/Feature/OrderParserTest.php",
+    "category": "quantity",
+    "input": "bolsas de jardin 2",
+    "expectation_status": "characterized",
+    "evaluation_reason": "Existing parser characterization test.",
+    "expected": {"normalized_text": "bolsas de jardin 2", "confidence": 0.96, "needs_review": false, "notes": [], "items": [{"quantity": 2, "unit": "bolsa", "product_name": "jardin", "matched_text": "bolsas de jardin", "confidence_score": 0.96}]},
+    "metrics": {"interpretable": true, "ambiguous": false, "manual_review": false, "false_positive_risk": false, "false_negative_measurable": false}
+  },
+  {
+    "id": "multiple_products",
+    "source": "README.md and tests/Feature/OrderIngestionTest.php",
+    "category": "multiple_products",
+    "input": "5 bolsas de apretados y 1 caja de vasos",
+    "expectation_status": "characterized",
+    "evaluation_reason": "Existing README and order-ingestion example.",
+    "expected": {"normalized_text": "5 bolsas de apretados y 1 caja de vasos", "confidence": 0.96, "needs_review": false, "notes": [], "items": [{"quantity": 5, "unit": "bolsa", "product_name": "apretados", "matched_text": "bolsas de apretados", "confidence_score": 0.96}, {"quantity": 1, "unit": "caja", "product_name": "vasos", "matched_text": "caja de vasos", "confidence_score": 0.96}]},
+    "metrics": {"interpretable": true, "ambiguous": false, "manual_review": false, "false_positive_risk": false, "false_negative_measurable": false}
+  },
+  {
+    "id": "alias_resolution",
+    "source": "tests/Feature/ProductMatchingTest.php",
+    "category": "product_alias",
+    "input": "1 caja de vasos",
+    "expectation_status": "characterized",
+    "evaluation_reason": "Existing alias and order-ingestion examples.",
+    "expected": {"normalized_text": "1 caja de vasos", "confidence": 0.96, "needs_review": false, "notes": [], "items": [{"quantity": 1, "unit": "caja", "product_name": "vasos", "matched_text": "caja de vasos", "confidence_score": 0.96}]},
+    "catalog": {"product_name": "Vasos plasticos", "aliases": ["vasos", "caja de vasos"], "expected_alias": "vasos"},
+    "metrics": {"interpretable": true, "ambiguous": false, "manual_review": false, "false_positive_risk": false, "false_negative_measurable": false}
+  },
+  {
+    "id": "case_and_accent_normalization",
+    "source": "tests/Feature/OrderIngestionTest.php",
+    "category": "normalization",
+    "input": "2 BOLSAS de jard\u00edn",
+    "expectation_status": "characterized",
+    "evaluation_reason": "Existing accented garden-product example; normalization is implemented with Str::ascii.",
+    "expected": {"normalized_text": "2 bolsas de jardin", "confidence": 0.96, "needs_review": false, "notes": [], "items": [{"quantity": 2, "unit": "bolsa", "product_name": "jardin", "matched_text": "bolsas de jardin", "confidence_score": 0.96}]},
+    "metrics": {"interpretable": true, "ambiguous": false, "manual_review": false, "false_positive_risk": false, "false_negative_measurable": false}
+  },
+  {
+    "id": "irregular_punctuation",
+    "source": "tests/Feature/OrderParserTest.php",
+    "category": "normalization",
+    "input": " 2 bolsas de jardin ; 1 caja de vasos ",
+    "expectation_status": "characterized",
+    "evaluation_reason": "Existing semicolon-separated-item behavior.",
+    "expected": {"normalized_text": "2 bolsas de jardin , 1 caja de vasos", "confidence": 0.96, "needs_review": false, "notes": [], "items": [{"quantity": 2, "unit": "bolsa", "product_name": "jardin", "matched_text": "bolsas de jardin", "confidence_score": 0.96}, {"quantity": 1, "unit": "caja", "product_name": "vasos", "matched_text": "caja de vasos", "confidence_score": 0.96}]},
+    "metrics": {"interpretable": true, "ambiguous": false, "manual_review": false, "false_positive_risk": false, "false_negative_measurable": false}
+  },
+  {
+    "id": "incomplete_product",
+    "source": "Derived from README quantity-and-unit grammar",
+    "category": "incomplete",
+    "input": "2 bolsas",
+    "expectation_status": "characterized",
+    "evaluation_reason": "Current parser behavior measured directly; business meaning remains pending.",
+    "expected": {"normalized_text": "2 bolsas", "confidence": 0.72, "needs_review": true, "notes": [], "items": [{"quantity": 2, "unit": "bolsa", "product_name": "2 bolsas", "matched_text": "bolsas", "confidence_score": 0.72}]},
+    "metrics": {"interpretable": false, "ambiguous": true, "manual_review": true, "false_positive_risk": false, "false_negative_measurable": false}
+  },
+  {
+    "id": "unknown_product",
+    "source": "tests/Feature/OrderIngestionTest.php",
+    "category": "unknown_product",
+    "input": "2 bolsas de arena",
+    "expectation_status": "characterized",
+    "evaluation_reason": "Existing unmatched-product ingestion example; product resolution is intentionally not asserted in the parser result.",
+    "expected": {"normalized_text": "2 bolsas de arena", "confidence": 0.96, "needs_review": false, "notes": [], "items": [{"quantity": 2, "unit": "bolsa", "product_name": "arena", "matched_text": "bolsas de arena", "confidence_score": 0.96}]},
+    "metrics": {"interpretable": true, "ambiguous": false, "manual_review": false, "false_positive_risk": false, "false_negative_measurable": false}
+  },
+  {
+    "id": "ambiguous_no_quantity_multiple_items",
+    "source": "tests/Feature/OrderParserTest.php",
+    "category": "ambiguous",
+    "input": "Ocupo bolsas negras grandes, servilletas y vasos",
+    "expectation_status": "characterized",
+    "evaluation_reason": "Existing test explicitly describes the default quantity as one and requires review.",
+    "expected": {"normalized_text": "ocupo bolsas negras grandes, servilletas y vasos", "confidence": 0.72, "needs_review": true, "notes": [], "items": [{"quantity": 1, "unit": null, "product_name": "bolsas negras grandes", "matched_text": "bolsas negras grandes", "confidence_score": 0.72}, {"quantity": 1, "unit": null, "product_name": "servilletas", "matched_text": "servilletas", "confidence_score": 0.72}, {"quantity": 1, "unit": null, "product_name": "vasos", "matched_text": "vasos", "confidence_score": 0.72}]},
+    "metrics": {"interpretable": false, "ambiguous": true, "manual_review": true, "false_positive_risk": false, "false_negative_measurable": false}
+  },
+  {
+    "id": "non_order_greeting",
+    "source": "tests/Feature/TelegramIntakeTest.php",
+    "category": "non_order",
+    "input": "hola",
+    "expectation_status": "characterized",
+    "evaluation_reason": "Telegram filters greetings before the order parser; direct parser behavior is captured as false-positive risk.",
+    "expected": {"normalized_text": "hola", "confidence": 0.0, "needs_review": false, "notes": [], "items": []},
+    "metrics": {"interpretable": false, "ambiguous": false, "manual_review": false, "false_positive_risk": false, "false_negative_measurable": false}
+  },
+  {
+    "id": "empty_message",
+    "source": "Derived from OrderParserService fallback behavior",
+    "category": "invalid",
+    "input": "",
+    "expectation_status": "characterized",
+    "evaluation_reason": "Current parser behavior measured directly; whether an empty message should create an item is a business decision pending definition.",
+    "expected": {"normalized_text": "", "confidence": 0.0, "needs_review": false, "notes": [], "items": []},
+    "metrics": {"interpretable": false, "ambiguous": false, "manual_review": false, "false_positive_risk": false, "false_negative_measurable": false}
+  }
+]

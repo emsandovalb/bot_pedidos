@@ -1,0 +1,47 @@
+{
+  "schema_version": "1.0",
+  "cases": [
+    {
+      "id": "PILOT-FIXTURE-001",
+      "anonymized_message": "2 bolsas de jardin",
+      "expected_classification": "pedido",
+      "expected_products": [
+        {"name": "jardin", "quantity": 2, "unit": "bolsa", "catalog_alias": "bolsas de jardin"}
+      ],
+      "expected_status": "resolved",
+      "can_confirm": true,
+      "source": "docs/parser-quality/baseline-cases.json:simple_quantity"
+    },
+    {
+      "id": "PILOT-FIXTURE-002",
+      "anonymized_message": "2 bolsas",
+      "expected_classification": "pedido_incompleto",
+      "expected_products": [
+        {"name": "2 bolsas", "quantity": 2, "unit": "bolsa", "catalog_alias": "bolsas"}
+      ],
+      "expected_status": "pending_review",
+      "can_confirm": false,
+      "source": "docs/parser-quality/baseline-cases.json:incomplete_product"
+    },
+    {
+      "id": "PILOT-FIXTURE-003",
+      "anonymized_message": "hola",
+      "expected_classification": "saludo_o_pregunta",
+      "expected_products": [],
+      "expected_status": null,
+      "can_confirm": false,
+      "source": "docs/parser-quality/baseline-cases.json:non_order_greeting"
+    },
+    {
+      "id": "PILOT-FIXTURE-004",
+      "anonymized_message": "2 bolsas de arena",
+      "expected_classification": "producto_no_encontrado",
+      "expected_products": [
+        {"name": "arena", "quantity": 2, "unit": "bolsa"}
+      ],
+      "expected_status": "unmatched",
+      "can_confirm": false,
+      "source": "docs/parser-quality/baseline-cases.json:unknown_product"
+    }
+  ]
+}

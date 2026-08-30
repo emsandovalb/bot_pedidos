@@ -155,7 +155,7 @@
                             <option value="all">Any time</option>
                             <option value="today">Today</option>
                             <option value="tomorrow">Tomorrow</option>
-                            <option value="no_commitment">No commitment</option>
+                            <option value="no_commitment">Sin compromiso</option>
                         </select>
 
                         <select class="brand-input rounded-2xl px-4 py-3 text-sm" x-model="filters.delivery" @change="applyFilter('delivery', $event.target.value)">
@@ -215,19 +215,28 @@
                                             <span x-text="channelPill(order).glyph"></span>
                                         </span>
                                     </div>
-                                    <p class="mt-2 text-sm leading-6 text-slate-600" x-text="agendaSummary(order)"></p>
+                                    <div class="mt-3 space-y-2">
+                                        <template x-for="line in (order.item_lines ?? []).slice(0, 3)" :key="line.id ?? line.text">
+                                            <div class="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm font-semibold leading-6 text-brand-navy shadow-sm" x-text="line.text"></div>
+                                        </template>
+                                        <div class="rounded-2xl border border-dashed border-slate-200 px-4 py-4 text-sm text-slate-500" x-show="(order.item_lines ?? []).length === 0">
+                                            Sin productos visibles.
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="text-right">
-                                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Commitment</div>
-                                    <div class="mt-1 text-xl font-semibold text-brand-navy" x-text="order.commitment_date ? `${order.commitment_date} ${String(order.commitment_time ?? '').slice(0, 5)}` : 'No commitment'"></div>
+                                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Para cuándo</div>
+                                    <div class="mt-1 text-xl font-semibold text-brand-navy" x-text="order.commitment_label ?? formatCommitment(order)"></div>
+                                    <div class="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Prioridad</div>
+                                    <div class="mt-1 text-lg font-semibold text-brand-navy" x-text="order.priority_label ?? 'Sin fecha'"></div>
                                 </div>
                             </div>
 
-                            <div class="mt-4 flex flex-wrap items-center gap-2 text-sm text-slate-600">
-                                <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 font-semibold text-slate-700" x-text="agendaDeliveryLabel(order)"></span>
-                                <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 font-semibold text-slate-700" x-text="agendaPaymentLabel(order)"></span>
-                                <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 font-semibold text-slate-700" x-text="agendaTimeWindowLabel(order)"></span>
+                            <div class="mt-4 grid gap-3 sm:grid-cols-3">
+                                <div class="rounded-2xl border border-slate-100 bg-slate-50 px-3 py-3 text-sm font-semibold text-brand-navy" x-text="order.delivery_label ?? agendaDeliveryLabel(order)"></div>
+                                <div class="rounded-2xl border border-slate-100 bg-slate-50 px-3 py-3 text-sm font-semibold text-brand-navy" x-text="order.payment_label ?? agendaPaymentLabel(order)"></div>
+                                <div class="rounded-2xl border border-slate-100 bg-slate-50 px-3 py-3 text-sm font-semibold text-brand-navy" x-text="agendaTimeWindowLabel(order)"></div>
                             </div>
 
                             <div class="mt-4 flex flex-wrap gap-2">
@@ -289,18 +298,24 @@
                                                         <span x-text="channelPill(order).glyph"></span>
                                                     </span>
                                                 </div>
-                                                <div class="mt-1 text-sm text-slate-600" x-text="agendaSummary(order)"></div>
+                                                <div class="mt-2 space-y-1">
+                                                    <template x-for="line in (order.item_lines ?? []).slice(0, 2)" :key="line.id ?? line.text">
+                                                        <div class="rounded-2xl border border-slate-100 bg-white px-3 py-2 text-sm font-semibold text-brand-navy shadow-sm" x-text="line.text"></div>
+                                                    </template>
+                                                    <div class="text-sm text-slate-600" x-show="(order.item_lines ?? []).length === 0">Sin productos visibles.</div>
+                                                </div>
                                             </div>
 
                                             <div class="text-right text-xs text-slate-500">
-                                                <div class="font-semibold text-slate-700" x-text="order.commitment_date ? `${order.commitment_date} ${String(order.commitment_time ?? '').slice(0, 5)}` : 'No commitment'"></div>
+                                                <div class="font-semibold text-slate-700" x-text="order.commitment_label ?? formatCommitment(order)"></div>
                                                 <div class="mt-1" x-text="order.elapsed_label"></div>
                                             </div>
                                         </div>
 
-                                        <div class="mt-3 flex flex-wrap gap-2">
-                                            <span class="rounded-full px-2.5 py-1 text-xs font-semibold" :class="agendaRiskTone(order)" x-text="agendaRiskLabel(order)"></span>
-                                            <span class="rounded-full px-2.5 py-1 text-xs font-semibold" :class="agendaPriorityTone(order)" x-text="agendaPriorityLabel(order)"></span>
+                                        <div class="mt-3 grid gap-2 sm:grid-cols-3">
+                                            <div class="rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2 text-xs font-semibold text-brand-navy" x-text="order.delivery_label ?? agendaDeliveryLabel(order)"></div>
+                                            <div class="rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2 text-xs font-semibold text-brand-navy" x-text="order.payment_label ?? agendaPaymentLabel(order)"></div>
+                                            <div class="rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2 text-xs font-semibold text-brand-navy" x-text="order.priority_label ?? agendaPriorityLabel(order)"></div>
                                         </div>
                                     </button>
                                 </template>
@@ -340,12 +355,22 @@
                                 <div class="flex items-start justify-between gap-3">
                                     <div>
                                         <div class="text-lg font-semibold text-brand-navy" x-text="order.customer_name"></div>
-                                        <div class="mt-1 text-sm text-slate-600" x-text="agendaSummary(order)"></div>
+                                        <div class="mt-2 space-y-1">
+                                            <template x-for="line in (order.item_lines ?? []).slice(0, 2)" :key="line.id ?? line.text">
+                                                <div class="rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2 text-sm font-semibold text-brand-navy" x-text="line.text"></div>
+                                            </template>
+                                        </div>
                                     </div>
                                     <div class="text-right text-xs text-slate-500">
-                                        <div class="font-semibold text-slate-700" x-text="order.commitment_date ? `${order.commitment_date} ${String(order.commitment_time ?? '').slice(0, 5)}` : 'No commitment'"></div>
+                                        <div class="font-semibold text-slate-700" x-text="order.commitment_label ?? formatCommitment(order)"></div>
                                         <div class="mt-1" x-text="order.elapsed_label"></div>
                                     </div>
+                                </div>
+
+                                <div class="mt-3 grid gap-2 sm:grid-cols-3">
+                                    <div class="rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2 text-xs font-semibold text-brand-navy" x-text="order.delivery_label ?? agendaDeliveryLabel(order)"></div>
+                                    <div class="rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2 text-xs font-semibold text-brand-navy" x-text="order.payment_label ?? agendaPaymentLabel(order)"></div>
+                                    <div class="rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2 text-xs font-semibold text-brand-navy" x-text="order.priority_label ?? agendaPriorityLabel(order)"></div>
                                 </div>
                             </button>
                         </template>

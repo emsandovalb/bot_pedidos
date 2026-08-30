@@ -179,6 +179,37 @@ class MessagingIngestionServiceTest extends TestCase
         $this->assertDatabaseCount('orders', 1);
     }
 
+    public function test_empty_and_non_order_messages_are_preserved_without_creating_orders_or_items(): void
+    {
+        [$organization, $branch] = $this->makeOrganizationAndBranch();
+        $service = app(MessagingIngestionService::class);
+
+        foreach ([
+            ['id' => 'empty-1', 'text' => '   ', 'status' => 'invalid'],
+            ['id' => 'greeting-1', 'text' => 'hola', 'status' => 'not_order'],
+        ] as $case) {
+            $result = $service->ingest($organization, $branch, new IncomingMessageDTO(
+                provider: 'telegram',
+                external_message_id: $case['id'],
+                external_chat_id: 'chat-' . $case['id'],
+                customer_name: 'Maria',
+                customer_phone: '+50255550111',
+                message: $case['text'],
+                received_at: new DateTimeImmutable('2026-06-24 12:00:00'),
+                raw_payload: ['case' => $case['id']],
+                attachments: [],
+            ));
+
+            $this->assertNull($result['order']);
+            $this->assertSame($case['text'], $result['incoming_message']->raw_text);
+            $this->assertSame($case['status'], $result['incoming_message']->parse_status);
+            $this->assertSame([], $result['incoming_message']->parser_result_json['items']);
+        }
+
+        $this->assertDatabaseCount('orders', 0);
+        $this->assertDatabaseCount('order_items', 0);
+    }
+
     public function test_whatsapp_incoming_message_opens_customer_service_window(): void
     {
         Carbon::setTestNow(Carbon::parse('2026-06-24 15:00:00'));
