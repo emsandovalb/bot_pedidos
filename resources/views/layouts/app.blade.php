@@ -40,7 +40,7 @@
                         </div>
                     </div>
 
-                    <nav class="flex-1 space-y-1 px-4 py-5">
+                    <nav class="flex-1 min-h-0 overflow-y-auto space-y-1 px-4 py-5">
                         @foreach ([
                             ['label' => 'Panel', 'href' => 'dashboard', 'active' => 'dashboard', 'icon' => 'M4 11.5 12 5l8 6.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1v-8.5Z'],
                             ['label' => 'Analítica', 'href' => 'analytics.index', 'active' => 'analytics.*', 'icon' => 'M4 19V5M4 19h16M8 16v-4m4 4V8m4 8v-6'],

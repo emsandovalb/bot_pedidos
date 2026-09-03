@@ -18,6 +18,7 @@ class BusinessScenarioService
         private readonly ScenarioFactory $scenarioFactory,
         private readonly RandomMessageFactory $randomMessageFactory,
         private readonly SimulationRunner $simulationRunner,
+        private readonly DemoCatalog $demoCatalog,
     ) {
     }
 
@@ -43,6 +44,7 @@ class BusinessScenarioService
     public function generateScenario(Organization $organization, string $scenarioKey): array
     {
         $start = microtime(true);
+        $this->demoCatalog->ensure($organization);
         $scenario = $this->scenarioFactory->definition($scenarioKey);
         $messages = $this->scenarioFactory->buildScenarioMessages(
             organization: $organization,
@@ -70,6 +72,7 @@ class BusinessScenarioService
     public function generateCustomMessage(Organization $organization, array $input): array
     {
         $start = microtime(true);
+        $this->demoCatalog->ensure($organization);
         $provider = strtolower(trim((string) ($input['provider'] ?? 'whatsapp')));
         $customerMode = strtolower(trim((string) ($input['customer_mode'] ?? 'new')));
         $customerName = trim((string) ($input['customer_name'] ?? ''));
@@ -138,6 +141,7 @@ class BusinessScenarioService
     public function generateRandomMessages(Organization $organization, int $count): array
     {
         $start = microtime(true);
+        $this->demoCatalog->ensure($organization);
         $count = max(1, $count);
         $messages = [];
         $providerCycle = ['whatsapp', 'whatsapp', 'telegram'];
@@ -178,6 +182,7 @@ class BusinessScenarioService
     public function simulateBusinessDay(Organization $organization, int $speedMultiplier = 1): array
     {
         $start = microtime(true);
+        $this->demoCatalog->ensure($organization);
         $speedMultiplier = max(1, $speedMultiplier);
         $messages = $this->scenarioFactory->buildBusinessDayMessages(
             organization: $organization,

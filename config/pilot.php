@@ -55,5 +55,11 @@ return [
             'unit_label' => 'caja',
             'aliases' => ['clavos', 'caja de clavos', 'clavos 2in'],
         ],
+        'bloques' => [
+            'name' => 'Bloques de concreto',
+            'sku' => 'PILOT-BLOQUE',
+            'unit_label' => 'unidad',
+            'aliases' => ['bloque', 'bloques', 'bloque de concreto', 'bloques de concreto', 'block'],
+        ],
     ],
 ];

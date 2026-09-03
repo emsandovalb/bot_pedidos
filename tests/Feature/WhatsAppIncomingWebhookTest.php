@@ -320,19 +320,40 @@ class WhatsAppIncomingWebhookTest extends TestCase
     {
         [$organization, $branch, $connection] = $this->makeOrganizationBranchConnection();
 
+        // El webhook solo acepta y persiste el mensaje (acceptInbound); el
+        // procesamiento pesado va a un job. Si un mensaje no se puede ni aceptar,
+        // el resto del webhook sigue adelante.
         $ingestionService = Mockery::mock(MessagingIngestionService::class);
-        $ingestionService->shouldReceive('ingest')
+        $ingestionService->shouldReceive('acceptInbound')
             ->once()
             ->andThrow(new RuntimeException('First message failed.'));
-        $ingestionService->shouldReceive('ingest')
+        $acceptedMessage = IncomingMessage::create([
+            'organization_id' => $organization->id,
+            'branch_id' => $branch->id,
+            'provider' => 'whatsapp',
+            'channel_type' => 'whatsapp',
+            'from_identifier' => '50255510008',
+            'to_identifier' => (string) $branch->channel_identifier,
+            'raw_text' => '1 caja de vasos',
+            'external_message_id' => 'wamid.partial-2',
+            'status' => IncomingMessage::STATUS_RECEIVED,
+            'received_at' => now(),
+        ]);
+        $ingestionService->shouldReceive('acceptInbound')
             ->once()
             ->andReturn([
                 'duplicate' => false,
-                'incoming_message' => new IncomingMessage,
-                'order' => new Order,
+                'incoming_message' => $acceptedMessage,
                 'customer' => new Customer,
-                'status' => 'processed',
+                'status' => IncomingMessage::STATUS_RECEIVED,
             ]);
+        $ingestionService->shouldReceive('processInbound')->andReturn([
+            'duplicate' => false,
+            'incoming_message' => $acceptedMessage,
+            'order' => new Order,
+            'customer' => new Customer,
+            'status' => IncomingMessage::STATUS_PROCESSED,
+        ]);
 
         $this->app->instance(MessagingIngestionService::class, $ingestionService);
 

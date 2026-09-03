@@ -14,7 +14,6 @@ use App\Services\Messaging\Manager\ProviderLifecycleManager;
 use App\Services\Messaging\MessagingIngestionService;
 use App\Services\WhatsAppConfigurationService;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
-use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -30,6 +29,7 @@ class ScenarioGeneratorService
         private readonly ProviderLifecycleManager $providerLifecycleManager,
         private readonly WhatsAppConfigurationService $whatsAppConfigurationService,
         private readonly MessagingIngestionService $messagingIngestionService,
+        private readonly DemoCatalog $demoCatalog,
     ) {
     }
 
@@ -42,6 +42,7 @@ class ScenarioGeneratorService
         $runToken = now()->format('YmdHisv');
 
         $this->whatsAppConfigurationService->loadConfiguration($organization->id);
+        $this->demoCatalog->ensure($organization);
 
         $customerSpecs = $this->customerSpecs();
         $customers = [];
@@ -409,18 +410,7 @@ class ScenarioGeneratorService
             ],
         ];
 
-        $request = Request::create(
-            uri: '/webhooks/whatsapp',
-            method: 'POST',
-            parameters: [],
-            cookies: [],
-            files: [],
-            server: [
-                'CONTENT_TYPE' => 'application/json',
-                'HTTP_ACCEPT' => 'application/json',
-            ],
-            content: json_encode($rawPayload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
-        );
+        $request = SimulatedWhatsAppWebhook::request($rawPayload);
 
         $this->providerLifecycleManager->receiveWebhook('whatsapp', $request);
 

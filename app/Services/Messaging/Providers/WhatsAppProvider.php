@@ -2,6 +2,7 @@
 
 namespace App\Services\Messaging\Providers;
 
+use App\Jobs\ProcessInboundMessage;
 use App\Models\Branch;
 use App\Models\ChannelConnection;
 use App\Models\WebhookEvent;
@@ -327,7 +328,7 @@ class WhatsAppProvider implements MessagingProvider
                     }
 
                     try {
-                        $ingestionResult = app(MessagingIngestionService::class)->ingest(
+                        $ingestionResult = app(MessagingIngestionService::class)->acceptInbound(
                             organization: $connection->organization,
                             branch: $branch,
                             message: new IncomingMessageDTO(
@@ -351,21 +352,28 @@ class WhatsAppProvider implements MessagingProvider
 
                         $duplicate = (bool) ($ingestionResult['duplicate'] ?? false);
                         $status = (string) ($ingestionResult['status'] ?? '');
-
-                        if ($duplicate) {
-                            $ignoredCount++;
-                        } elseif ($status === 'failed') {
-                            $failedCount++;
-                        } else {
-                            $processedCount++;
-                        }
-
                         $incomingMessage = $ingestionResult['incoming_message'] ?? null;
                         $order = $ingestionResult['order'] ?? null;
 
+                        if ($duplicate) {
+                            $ignoredCount++;
+                        } else {
+                            $processedCount++;
+
+                            // El parser + creación de pedido se procesan fuera del
+                            // ciclo del webhook para devolver 200 de inmediato.
+                            if ($incomingMessage !== null) {
+                                $job = new ProcessInboundMessage($incomingMessage);
+
+                                config('messaging.inbound_queue', true)
+                                    ? dispatch($job)
+                                    : dispatch_sync($job);
+                            }
+                        }
+
                         $this->logWebhookEvent(
                             organizationId: $connection->organization_id,
-                            eventType: $status === 'failed' ? 'failed' : 'incoming_message',
+                            eventType: 'incoming_message',
                             status: 200,
                             request: $request,
                             payload: $baseMetadata + [

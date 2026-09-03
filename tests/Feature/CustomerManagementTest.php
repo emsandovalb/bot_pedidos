@@ -28,6 +28,31 @@ class CustomerManagementTest extends TestCase
             ->assertSeeText('Unifica clientes y canales para entender quién compra en tu negocio.');
     }
 
+    /**
+     * Regresión: el closure de orWhereExists en el filtro de búsqueda estaba
+     * tipado como Eloquent\Builder cuando recibe un Query\Builder, así que
+     * cualquier término de búsqueda lanzaba TypeError -> HTTP 500.
+     */
+    public function test_customers_index_search_does_not_error(): void
+    {
+        [$user, $customer] = $this->makeScopedData();
+
+        $this->actingAs($user)->get(route('customers.index', ['search' => 'Maria']))
+            ->assertOk()
+            ->assertSeeText($customer->name);
+
+        $this->actingAs($user)->get(route('customers.index', ['search' => '+50255550001']))
+            ->assertOk()
+            ->assertSeeText($customer->name);
+
+        $this->actingAs($user)->get(route('customers.index', ['search' => '@maria']))
+            ->assertOk()
+            ->assertSeeText($customer->name);
+
+        $this->actingAs($user)->get(route('customers.index', ['search' => 'zzz-sin-coincidencias-zzz']))
+            ->assertOk();
+    }
+
     public function test_customers_index_shows_customer_with_order_count(): void
     {
         [$user, $customer] = $this->makeScopedData();

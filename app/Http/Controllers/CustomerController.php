@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Services\CustomerInsightsService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -52,12 +53,12 @@ class CustomerController extends Controller
                         ->where('customers.name', 'like', $like)
                         ->orWhere('customers.phone', 'like', $like)
                         ->orWhere('customers.external_id', 'like', $like)
-                        ->orWhereExists(function ($identityQuery) use ($like): void {
+                        ->orWhereExists(function (QueryBuilder $identityQuery) use ($like): void {
                             $identityQuery
                                 ->selectRaw('1')
                                 ->from('customer_identities')
                                 ->whereColumn('customer_identities.customer_id', 'customers.id')
-                                ->where(function (Builder $identityFilters) use ($like): void {
+                                ->where(function (QueryBuilder $identityFilters) use ($like): void {
                                     $identityFilters
                                         ->where('provider_username', 'like', $like)
                                         ->orWhere('phone', 'like', $like)

@@ -231,7 +231,9 @@ class RandomMessageFactory
     private function paymentPhrase(string $paymentMethod): ?string
     {
         return match ($paymentMethod) {
-            'sinpe' => $this->pick(['Pago por SINPE', 'Pago por SINPE manana', 'Pago por SINPE transferido']),
+            // Sin palabras de fecha: "manana" aquí contaminaba la fecha del pedido
+            // (un "Pago por SINPE manana" hacía que el planner lo marcara para el día siguiente).
+            'sinpe' => $this->pick(['Pago por SINPE', 'Pago por transferencia', 'Pago por SINPE transferido']),
             'cash' => $this->pick(['Pago en efectivo', 'Pago en cash', 'Pago al recibir']),
             default => null,
         };

@@ -11,8 +11,7 @@ class ProductMatchingService
 {
     public function __construct(
         private readonly ProductTextNormalizer $normalizer,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array{product:?Product, matched_text:?string, confidence_score:float}
@@ -106,7 +105,8 @@ class ProductMatchingService
                     continue;
                 }
 
-                if (str_contains($candidate, $alias->normalized_alias) || str_contains($alias->normalized_alias, $candidate)) {
+                if ($this->containsWholePhrase($candidate, $alias->normalized_alias)
+                    || $this->containsWholePhrase($alias->normalized_alias, $candidate)) {
                     $matches->push([
                         'alias' => $alias,
                         'candidate' => $candidate,
@@ -167,5 +167,14 @@ class ProductMatchingService
             'matched_text' => null,
             'confidence_score' => 0.15,
         ];
+    }
+
+    private function containsWholePhrase(string $haystack, string $needle): bool
+    {
+        if ($needle === '') {
+            return false;
+        }
+
+        return preg_match('/(?<![\\p{L}\\p{N}])'.preg_quote($needle, '/').'(?![\\p{L}\\p{N}])/u', $haystack) === 1;
     }
 }

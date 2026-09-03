@@ -6,7 +6,18 @@ use Illuminate\Support\Str;
 
 class OrderParserService
 {
+    public const STATUS_PARSED = 'parsed';
+
+    public const STATUS_PENDING_REVIEW = 'pending_review';
+
+    public const STATUS_UNMATCHED = 'unmatched';
+
+    public const STATUS_NOT_ORDER = 'not_order';
+
+    public const STATUS_INVALID = 'invalid';
+
     private const UNIT_REGEX = '(?:unidad(?:es)?|paquete(?:s)?|caja(?:s)?|bolsa(?:s)?|docena(?:s)?|rollo(?:s)?|kilo(?:s)?|libra(?:s)?|litro(?:s)?)';
+
     private const NOTE_PATTERNS = [
         ['regex' => '/\bpara\s+manana\b/u', 'note' => 'para manana'],
         ['regex' => '/\bpara\s+hoy\b/u', 'note' => 'para hoy'],
@@ -14,8 +25,17 @@ class OrderParserService
         ['regex' => '/\burgente\b/u', 'note' => 'urgente'],
         ['regex' => '/\blo\s+paso\s+recogiendo\b/u', 'note' => 'lo paso recogiendo'],
         ['regex' => '/\bme\s+lo\s+env(?:ia|ias|ie|ien)\b/u', 'note' => 'me lo envia'],
+        ['regex' => '/\bme\s+lo\s+llev(?:an|a|e|en)\b/u', 'note' => 'me lo llevan'],
+        ['regex' => '/\bme\s+lo\s+tra(?:en|e)\b/u', 'note' => 'me lo traen'],
+        ['regex' => '/\byo\s+paso\s+por\s+ell(?:o|a|os|as)\b/u', 'note' => 'yo paso por ellos'],
+        ['regex' => '/\bpaso\s+por\s+ell(?:o|a|os|as)\b/u', 'note' => 'paso por ellos'],
+        ['regex' => '/\bpago\s+por\s+sinpe\b/u', 'note' => 'pago por sinpe'],
+        ['regex' => '/\bpago\s+en\s+efectivo\b/u', 'note' => 'pago en efectivo'],
+        ['regex' => '/\bpago\s+por\s+transferencia\b/u', 'note' => 'pago por transferencia'],
+        ['regex' => '/\btransferencia\b/u', 'note' => 'transferencia'],
         ['regex' => '/\benviar\s+a\s+domicilio\b/u', 'note' => 'enviar a domicilio'],
         ['regex' => '/\brecoger\s+en\s+tienda\b/u', 'note' => 'recoger en tienda'],
+        ['regex' => '/\bretiro\s+en\s+tienda\b/u', 'note' => 'retiro en tienda'],
         ['regex' => '/\bsin\s+falta\b/u', 'note' => 'sin falta'],
     ];
 
@@ -24,6 +44,12 @@ class OrderParserService
      *     raw_text:string,
      *     normalized_text:string,
      *     confidence:float,
+     *     text_confidence:float,
+     *     structure_confidence:float,
+     *     final_confidence:float,
+     *     status:string,
+     *     review_reason:?string,
+     *     warnings:array<int, string>,
      *     needs_review:bool,
      *     notes:array<int, string>,
      *     notes_text:?string,
@@ -41,6 +67,15 @@ class OrderParserService
     {
         $normalizedText = $this->normalize($rawText);
         $notes = $this->extractNotes($normalizedText);
+
+        if ($normalizedText === '') {
+            return $this->emptyResult($rawText, $normalizedText, $notes, self::STATUS_INVALID, 'The message is empty or contains no interpretable text.');
+        }
+
+        if ($this->isClearlyNotOrder($normalizedText)) {
+            return $this->emptyResult($rawText, $normalizedText, $notes, self::STATUS_NOT_ORDER, 'The message is a known greeting or command, not an order.');
+        }
+
         $candidates = $this->extractCandidatePhrases($rawText, $normalizedText);
         $items = [];
 
@@ -52,23 +87,67 @@ class OrderParserService
             }
         }
 
-        if ($items === []) {
+        if ($items === [] && ! $this->isIntentOnlyMessage($normalizedText)) {
             $items[] = $this->fallbackItem($rawText, $normalizedText);
         }
 
         $confidenceValues = array_map(static fn (array $item): float => (float) $item['confidence_score'], $items);
         $confidence = round(array_sum($confidenceValues) / max(count($confidenceValues), 1), 2);
         $needsReview = $confidence < 0.85 || count(array_filter($confidenceValues, static fn (float $value): bool => $value < 0.85)) > 0;
+        $status = $needsReview ? self::STATUS_PENDING_REVIEW : self::STATUS_PARSED;
+        $reviewReason = $needsReview ? 'The order structure is incomplete or ambiguous.' : null;
 
         return [
             'raw_text' => $rawText,
             'normalized_text' => $normalizedText,
             'confidence' => $confidence,
+            'text_confidence' => $confidence,
+            'structure_confidence' => $confidence,
+            'final_confidence' => $confidence,
+            'status' => $status,
             'needs_review' => $needsReview,
+            'review_reason' => $reviewReason,
+            'warnings' => $needsReview ? ['Manual review is required before this interpretation can be acted on.'] : [],
             'notes' => $notes,
             'notes_text' => $notes !== [] ? implode(', ', $notes) : null,
             'items' => $items,
         ];
+    }
+
+    /**
+     * @param  array<int, string>  $notes
+     * @return array<string, mixed>
+     */
+    private function emptyResult(string $rawText, string $normalizedText, array $notes, string $status, string $reason): array
+    {
+        return [
+            'raw_text' => $rawText,
+            'normalized_text' => $normalizedText,
+            'confidence' => 0.0,
+            'text_confidence' => 0.0,
+            'structure_confidence' => 0.0,
+            'final_confidence' => 0.0,
+            'status' => $status,
+            'needs_review' => false,
+            'review_reason' => $reason,
+            'warnings' => [$reason],
+            'notes' => $notes,
+            'notes_text' => $notes !== [] ? implode(', ', $notes) : null,
+            'items' => [],
+        ];
+    }
+
+    private function isClearlyNotOrder(string $normalizedText): bool
+    {
+        return in_array($normalizedText, [
+            'hola',
+            'buenos dias',
+            'buenas',
+            'hello',
+            'start',
+            'help',
+            'menu',
+        ], true);
     }
 
     private function normalize(string $rawText): string
@@ -204,7 +283,7 @@ class OrderParserService
         $unit = null;
         $productName = $rest;
 
-        if (preg_match('/^(?<unit>' . $this->unitRegex() . ')\b\s*(?:de\s+)?(?<rest>.*)$/u', $rest, $matches) === 1) {
+        if (preg_match('/^(?<unit>'.$this->unitRegex().')\b\s*(?:de\s+)?(?<rest>.*)$/u', $rest, $matches) === 1) {
             $unit = $this->normalizeUnit($matches['unit']);
             $productName = trim($matches['rest']);
             $matchedText = trim($matches[0]);
@@ -261,7 +340,7 @@ class OrderParserService
      */
     private function matchSuffixQuantityWithUnit(string $candidate): ?array
     {
-        $pattern = '/^(?<product>.+?)\s+(?<quantity>\d+(?:[.,]\d+)?)\s+(?<unit>' . $this->unitRegex() . ')\s*$/u';
+        $pattern = '/^(?<product>.+?)\s+(?<quantity>\d+(?:[.,]\d+)?)\s+(?<unit>'.$this->unitRegex().')\s*$/u';
 
         if (preg_match($pattern, $candidate, $matches) !== 1) {
             return null;
@@ -400,6 +479,10 @@ class OrderParserService
             return '';
         }
 
+        if ($this->isIntentOnlyMessage($candidate)) {
+            return '';
+        }
+
         $patterns = [
             '/(?:\s*(?:,|;|\.)\s*|\s+)\bpara\s+manana\b\s*$/u',
             '/(?:\s*(?:,|;|\.)\s*|\s+)\bpara\s+hoy\b\s*$/u',
@@ -407,8 +490,17 @@ class OrderParserService
             '/(?:\s*(?:,|;|\.)\s*|\s+)\burgente\b\s*$/u',
             '/(?:\s*(?:,|;|\.)\s*|\s+)\blo\s+paso\s+recogiendo\b\s*$/u',
             '/(?:\s*(?:,|;|\.)\s*|\s+)\bme\s+lo\s+env(?:ia|ias|ie|ien)\b\s*$/u',
+            '/(?:\s*(?:,|;|\.)\s*|\s+)\bme\s+lo\s+llev(?:an|a|e|en)\b\s*$/u',
+            '/(?:\s*(?:,|;|\.)\s*|\s+)\bme\s+lo\s+tra(?:en|e)\b\s*$/u',
+            '/(?:\s*(?:,|;|\.)\s*|\s+)\byo\s+paso\s+por\s+ell(?:o|a|os|as)\b\s*$/u',
+            '/(?:\s*(?:,|;|\.)\s*|\s+)\bpaso\s+por\s+ell(?:o|a|os|as)\b\s*$/u',
+            '/(?:\s*(?:,|;|\.)\s*|\s+)\bpago\s+por\s+sinpe\b\s*$/u',
+            '/(?:\s*(?:,|;|\.)\s*|\s+)\bpago\s+en\s+efectivo\b\s*$/u',
+            '/(?:\s*(?:,|;|\.)\s*|\s+)\bpago\s+por\s+transferencia\b\s*$/u',
+            '/(?:\s*(?:,|;|\.)\s*|\s+)\btransferencia\b\s*$/u',
             '/(?:\s*(?:,|;|\.)\s*|\s+)\benviar\s+a\s+domicilio\b\s*$/u',
             '/(?:\s*(?:,|;|\.)\s*|\s+)\brecoger\s+en\s+tienda\b\s*$/u',
+            '/(?:\s*(?:,|;|\.)\s*|\s+)\bretiro\s+en\s+tienda\b\s*$/u',
             '/(?:\s*(?:,|;|\.)\s*|\s+)\bsin\s+falta\b\s*$/u',
         ];
 
@@ -434,6 +526,38 @@ class OrderParserService
         }
 
         return $this->stripTrailingNotes($candidate) === '';
+    }
+
+    private function isIntentOnlyMessage(string $normalizedText): bool
+    {
+        $normalizedText = trim($normalizedText);
+
+        if ($normalizedText === '') {
+            return false;
+        }
+
+        $stripped = $this->stripIntentPhrases($normalizedText);
+
+        if ($stripped === $normalizedText) {
+            return false;
+        }
+
+        return preg_replace('/[^\p{L}\p{N}]+/u', '', $stripped) === '';
+    }
+
+    private function stripIntentPhrases(string $value): string
+    {
+        $patterns = array_map(static fn (array $definition): string => $definition['regex'], self::NOTE_PATTERNS);
+
+        foreach ($patterns as $pattern) {
+            $value = preg_replace($pattern, ' ', $value) ?? $value;
+        }
+
+        $value = preg_replace('/\s+\b(?:y|e)\b\s+/u', ' ', $value) ?? $value;
+        $value = preg_replace('/[,\.;:-]+/u', ' ', $value) ?? $value;
+        $value = preg_replace('/\s+/u', ' ', $value) ?? $value;
+
+        return trim($value);
     }
 
     private function normalizeNotePhrase(string $value): string
@@ -464,9 +588,6 @@ class OrderParserService
         return self::UNIT_REGEX;
     }
 
-    /**
-     * @return int|float
-     */
     private function parseQuantityValue(string $value): int|float
     {
         $normalized = str_replace(',', '.', trim($value));

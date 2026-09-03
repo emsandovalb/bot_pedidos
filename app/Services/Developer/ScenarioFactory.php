@@ -268,11 +268,11 @@ class ScenarioFactory
         for ($index = 0; $index < $count; $index++) {
             $provider = $providers[$index % count($providers)];
             $customers[] = [
-                'key' => $definition['slug'] . '-customer-' . ($index + 1),
+                'key' => $definition['slug'].'-customer-'.($index + 1),
                 'name' => $randomMessageFactory->customerName($index),
                 'phone' => $randomMessageFactory->customerPhone($provider, $index + 1),
                 'provider' => $provider,
-                'external_id' => 'business-scenario:customer:' . $organization->id . ':' . $definition['slug'] . ':' . ($index + 1),
+                'external_id' => 'business-scenario:customer:'.$organization->id.':'.$definition['slug'].':'.($index + 1),
             ];
         }
 
@@ -354,13 +354,19 @@ class ScenarioFactory
     {
         $themes = (array) ($definition['themes'] ?? ['hardware']);
         $theme = $this->pickTheme($themes, $randomMessageFactory);
+        $isConstructionCompany = $definition['slug'] === 'construction_company';
+
         $base = $randomMessageFactory->buildMessage([
             'family' => $theme,
             'item_count' => 1,
             'large' => false,
-            'delivery_method' => $this->chooseBias($definition['delivery_bias'] ?? ['delivery'], $randomMessageFactory),
+            'delivery_method' => $isConstructionCompany
+                ? 'delivery'
+                : $this->chooseBias($definition['delivery_bias'] ?? ['delivery'], $randomMessageFactory),
             'payment_method' => $this->chooseBias($definition['payment_bias'] ?? ['sinpe'], $randomMessageFactory),
-            'date_phrase' => $this->chooseBias($definition['date_bias'] ?? ['today'], $randomMessageFactory),
+            'date_phrase' => $isConstructionCompany
+                ? 'today'
+                : $this->chooseBias($definition['date_bias'] ?? ['today'], $randomMessageFactory),
             'urgency' => 'normal',
             'before_noon' => in_array($definition['slug'], ['morning_rush', 'construction_company'], true),
         ]);

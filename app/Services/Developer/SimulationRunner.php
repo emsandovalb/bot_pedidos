@@ -12,7 +12,6 @@ use App\Services\Messaging\DTO\IncomingMessageDTO;
 use App\Services\Messaging\Manager\ProviderLifecycleManager;
 use App\Services\Messaging\MessagingIngestionService;
 use App\Services\WhatsAppConfigurationService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -129,18 +128,7 @@ class SimulationRunner
     private function runWhatsAppMessage(Organization $organization, Customer $customer, array $message, Carbon $receivedAt, string $scenario): array
     {
         $rawPayload = $this->buildWhatsAppPayload($customer, (string) ($message['external_message_id'] ?? ''), (string) ($message['message_text'] ?? ''), $receivedAt, $scenario);
-        $request = Request::create(
-            uri: '/webhooks/whatsapp',
-            method: 'POST',
-            parameters: [],
-            cookies: [],
-            files: [],
-            server: [
-                'CONTENT_TYPE' => 'application/json',
-                'HTTP_ACCEPT' => 'application/json',
-            ],
-            content: json_encode($rawPayload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
-        );
+        $request = SimulatedWhatsAppWebhook::request($rawPayload);
 
         $result = $this->providerLifecycleManager->receiveWebhook('whatsapp', $request);
 

@@ -83,6 +83,7 @@ class OrderController extends Controller
     public function edit(Order $order): View
     {
         $this->ensureVisible($order);
+        $this->authorize('update', $order);
 
         return view('orders.edit', [
             'order' => $order->load([
@@ -98,6 +99,7 @@ class OrderController extends Controller
     public function update(Request $request, Order $order): RedirectResponse
     {
         $this->ensureVisible($order);
+        $this->authorize('update', $order);
 
         $order->load([
             'orderItems' => fn ($query) => $query->orderBy('sort_order'),
@@ -167,6 +169,7 @@ class OrderController extends Controller
     public function confirm(Order $order): RedirectResponse|JsonResponse
     {
         $this->ensureVisible($order);
+        $this->authorize('confirm', $order);
         $this->assertTransitionAllowed($order, [Order::STATUS_PENDING_REVIEW], 'confirm');
         abort_unless(
             $this->orderConfirmationReadinessService->canConfirm($order),
@@ -192,6 +195,7 @@ class OrderController extends Controller
     public function reject(Order $order): RedirectResponse|JsonResponse
     {
         $this->ensureVisible($order);
+        $this->authorize('reject', $order);
         $this->assertTransitionAllowed($order, [Order::STATUS_PENDING_REVIEW], 'reject');
 
         $this->transitionOrder(
@@ -212,6 +216,7 @@ class OrderController extends Controller
     public function cancel(Order $order): RedirectResponse|JsonResponse
     {
         $this->ensureVisible($order);
+        $this->authorize('cancel', $order);
         $this->assertTransitionAllowed(
             $order,
             [
@@ -243,6 +248,7 @@ class OrderController extends Controller
     public function prepare(Order $order): RedirectResponse|JsonResponse
     {
         $this->ensureVisible($order);
+        $this->authorize('advance', $order);
         $this->assertTransitionAllowed($order, [Order::STATUS_CONFIRMED], 'prepare');
 
         $this->transitionOrder(
@@ -262,6 +268,7 @@ class OrderController extends Controller
     public function readyForDispatch(Order $order): RedirectResponse|JsonResponse
     {
         $this->ensureVisible($order);
+        $this->authorize('advance', $order);
         $this->assertTransitionAllowed($order, [Order::STATUS_PREPARING], 'ready for dispatch');
 
         $this->transitionOrder(
@@ -280,6 +287,7 @@ class OrderController extends Controller
     public function dispatch(Order $order): RedirectResponse|JsonResponse
     {
         $this->ensureVisible($order);
+        $this->authorize('advance', $order);
         $this->assertTransitionAllowed($order, [Order::STATUS_READY_FOR_DISPATCH], 'dispatch');
 
         $this->transitionOrder(

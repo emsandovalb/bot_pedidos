@@ -13,6 +13,7 @@ use App\Models\Organization;
 use App\Services\Messaging\DTO\IncomingMessageDTO;
 use App\Services\Developer\BusinessScenarioService;
 use App\Services\Developer\ScenarioGeneratorService;
+use App\Services\Developer\SimulatedWhatsAppWebhook;
 use App\Services\Messaging\Manager\ProviderLifecycleManager;
 use App\Services\Messaging\MessagingIngestionService;
 use App\Services\WhatsAppConfigurationService;
@@ -235,6 +236,10 @@ class WebhookSimulatorController extends Controller
     private function ensureDeveloperEnvironment(): void
     {
         abort_unless(app()->environment('local') || config('app.debug'), 404);
+
+        // El toolkit necesita ver el resultado de la ingesta al momento, así que
+        // el mensaje entrante se procesa de forma síncrona en vez de encolarse.
+        config(['messaging.inbound_queue' => false]);
     }
 
     private function organizationFor(Request $request): Organization
@@ -513,18 +518,7 @@ class WebhookSimulatorController extends Controller
             ])->save();
         }
 
-        $simulatedRequest = Request::create(
-            uri: '/webhooks/whatsapp',
-            method: 'POST',
-            parameters: [],
-            cookies: [],
-            files: [],
-            server: [
-                'CONTENT_TYPE' => 'application/json',
-                'HTTP_ACCEPT' => 'application/json',
-            ],
-            content: json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
-        );
+        $simulatedRequest = SimulatedWhatsAppWebhook::request($payload);
 
         $result = $this->providerLifecycleManager->receiveWebhook('whatsapp', $simulatedRequest);
 
@@ -1044,18 +1038,7 @@ class WebhookSimulatorController extends Controller
         Customer $customer,
     ): array {
         $rawPayload = $this->buildWhatsAppGeneratedPayload($payload, $customer);
-        $request = Request::create(
-            uri: '/webhooks/whatsapp',
-            method: 'POST',
-            parameters: [],
-            cookies: [],
-            files: [],
-            server: [
-                'CONTENT_TYPE' => 'application/json',
-                'HTTP_ACCEPT' => 'application/json',
-            ],
-            content: json_encode($rawPayload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
-        );
+        $request = SimulatedWhatsAppWebhook::request($rawPayload);
 
         $result = $this->providerLifecycleManager->receiveWebhook('whatsapp', $request);
         $messageId = $this->stringValue($payload['external_message_id'] ?? null);
