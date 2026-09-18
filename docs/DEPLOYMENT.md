@@ -78,16 +78,47 @@ de inmediato. Requiere `botpedidos-queue` corriendo.
 ## Operación
 
 - **Backups**: Render Postgres hace backups automáticos en planes de pago (verificar retención).
-- **Healthcheck**: `botpedidos-web` ya apunta a `/up`. Idealmente enriquecerlo para que
-  además chequee DB y "último mensaje entrante < N min" (detecta poller caído).
-- **Errores**: integrar Sentry o Laravel Flare (en producción no hay `pail`).
+- **Healthcheck**: `botpedidos-web` apunta a `/health` (BD + métricas de ingesta; ver abajo).
+- **Errores**: Sentry ya integrado (ver sección siguiente).
 - **Roles**: crear los usuarios del negocio con el rol correcto
   (`owner`/`admin` todo, `seller` su sucursal, `viewer` solo lectura — ya lo gatea `OrderPolicy`).
 
+## Error tracking con Sentry (P1 — hecho)
+
+`sentry/sentry-laravel` instalado y cableado en [bootstrap/app.php](../bootstrap/app.php)
+(`Integration::handles($exceptions)`), cubre web, el worker de la cola
+(`ProcessInboundMessage`) y `telegram:poll` — los tres comparten el mismo bootstrap.
+
+- Sin `SENTRY_LARAVEL_DSN` (dev/tests) es un no-op: no manda nada, no rompe nada.
+- Para activarlo: crear proyecto en sentry.io → pegar el DSN en `SENTRY_LARAVEL_DSN`
+  (en la web **y** en el grupo `botpedidos-shared` de `render.yaml`).
+- `SENTRY_TRACES_SAMPLE_RATE=0.1` — 10% de las requests con tracing de performance;
+  súbelo o bájalo según volumen. `send_default_pii` queda en `false` (no manda datos
+  de clientes a Sentry).
+- Config completa en `config/sentry.php` (publicada desde el paquete, valores por defecto sensatos).
+
+## Precios y total del pedido (P1 — hecho)
+
+- El catálogo tiene campo `price` (opcional). La ingesta captura el precio unitario
+  del producto en cada línea (`order_items.unit_price` / `line_total`) y suma el
+  total en `orders.items_total`. Editar cantidades en la revisión recalcula el total.
+- Importación masiva: `nombre | sku | unidad | precio | alias` (5 campos = con precio;
+  4 campos sigue funcionando sin precio). Reimportar sin precio no borra el existente.
+- Cuando el catálogo ya tenga precios, poner `PILOT_ENFORCE_PRICING=true` para que
+  no se pueda confirmar un pedido con una línea de catálogo sin precio.
+
 ## Pendiente antes de abrir al negocio (ver PILOT_READINESS.md)
 
-- [ ] Catálogo real con precios y alias frecuentes
+- [ ] Catálogo real con **precios** y alias frecuentes (importación masiva)
+- [ ] `PILOT_ENFORCE_PRICING=true` una vez cargados los precios
 - [ ] Reglas de entrega / pago / pedido mínimo / horario límite
 - [ ] 20 mensajes reales anonimizados como set de aceptación
-- [ ] Precio en catálogo + total en el pedido (P1)
-- [ ] Sentry / Flare
+- [ ] Pegar el DSN real de Sentry en producción (`SENTRY_LARAVEL_DSN`)
+
+## Resolver ítem "sin producto" desde la revisión (P1 — hecho)
+
+En `/orders/{id}/edit` cada línea tiene un selector de producto del catálogo.
+Asignar un producto a un ítem no reconocido: setea `product_id`, re-deriva el
+precio unitario del producto y recalcula el total. Si el revisor resuelve **todos**
+los ítems de un pedido que estaba en `unmatched`, se quita el marcador de revisión
+y el pedido ya se puede confirmar (la edición manual cuenta como revisión).
