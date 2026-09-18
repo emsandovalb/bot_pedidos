@@ -78,8 +78,11 @@ test('operations focus mode guides one order through the full workflow', async (
     await expect(page.locator('[data-focus-inline-review]')).toContainText('Entrega');
     await expect(page.locator('[data-focus-inline-review]')).toContainText('SINPE');
     await expect(page.locator('[data-focus-inline-review]')).toContainText('Hoy a las 2:00 p. m.');
+    // "bloques" ahora resuelve contra el catálogo demo (config('pilot.demo_products')),
+    // así que el ítem revisado muestra el producto reconocido en vez del texto crudo.
     const reviewedItem = page.locator('[data-focus-inline-review] .space-y-3 > div.rounded-2xl.border.border-slate-100.bg-white').first();
-    await expect(reviewedItem).toContainText('20 bloques');
+    await expect(reviewedItem).toContainText('Bloques de concreto');
+    await expect(reviewedItem).toContainText('20');
     await expect(reviewedItem).not.toContainText('me lo llevan');
     await expect(reviewedItem).not.toContainText('pago por sinpe');
     await expect(page.locator('[data-focus-inline-review]')).toContainText('20 bloques');
