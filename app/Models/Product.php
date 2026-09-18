@@ -19,6 +19,7 @@ class Product extends Model
         'normalized_name',
         'sku',
         'unit_label',
+        'price',
         'is_active',
         'sort_order',
     ];
@@ -26,6 +27,7 @@ class Product extends Model
     protected function casts(): array
     {
         return [
+            'price' => 'decimal:2',
             'is_active' => 'boolean',
             'sort_order' => 'integer',
         ];

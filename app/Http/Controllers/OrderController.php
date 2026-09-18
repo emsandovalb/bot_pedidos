@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\ManualReview;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\OrderStatusHistory;
+use App\Models\Product;
 use App\Services\OrderConfirmationReadinessService;
 use App\Services\OrderNotificationDispatcher;
+use App\Services\OrderParserService;
 use App\Services\OrderWorkflowActionPresenter;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -93,6 +96,11 @@ class OrderController extends Controller
                 'orderItems' => fn ($query) => $query->orderBy('sort_order'),
                 'orderItems.product',
             ]),
+            'catalogProducts' => Product::query()
+                ->where('organization_id', $order->organization_id)
+                ->where('is_active', true)
+                ->orderBy('name')
+                ->get(['id', 'name', 'unit_label', 'price']),
         ]);
     }
 
@@ -113,6 +121,10 @@ class OrderController extends Controller
             'items.*.unit' => ['nullable', 'string', 'max:255'],
             'items.*.raw_text' => ['nullable', 'string', 'max:5000'],
             'items.*.notes' => ['nullable', 'string', 'max:5000'],
+            'items.*.product_id' => [
+                'nullable',
+                Rule::exists('products', 'id')->where('organization_id', $order->organization_id),
+            ],
             'items_json' => ['nullable', 'string'],
         ]);
 
@@ -141,9 +153,16 @@ class OrderController extends Controller
                         'raw_text' => $itemData['raw_text'] ?? null,
                         'notes' => $itemData['notes'] ?? null,
                     ]);
+
+                    if (array_key_exists('product_id', $itemData)) {
+                        $this->assignProduct($order, $item, $itemData['product_id']);
+                    }
                 }
             }
 
+            $order->refresh()->load('orderItems.product');
+            $this->clearResolvedReviewFlags($order);
+            $order->recalculateTotals();
             $order->refresh()->load('orderItems');
             $afterSnapshot = $this->reviewSnapshot($order);
 
@@ -351,6 +370,66 @@ class OrderController extends Controller
     /**
      * @return array<string, mixed>
      */
+    /**
+     * Asigna (o quita) el producto de catálogo de una línea durante la revisión.
+     * Re-deriva el precio unitario y la coincidencia del producto elegido.
+     */
+    private function assignProduct(Order $order, OrderItem $item, mixed $productId): void
+    {
+        $productId = ($productId === '' || $productId === null) ? null : (int) $productId;
+
+        if ($productId === $item->product_id) {
+            return;
+        }
+
+        $product = $productId === null
+            ? null
+            : Product::query()
+                ->where('organization_id', $order->organization_id)
+                ->find($productId);
+
+        if ($productId !== null && $product === null) {
+            return;
+        }
+
+        $item->product_id = $product?->id;
+        $item->unit_price = $product?->price;
+        $item->matched_text = $product?->name ?? $item->matched_text;
+        $item->recalculateLineTotal();
+        $item->save();
+    }
+
+    /**
+     * Si el pedido estaba marcado para revisión SOLO porque había productos sin
+     * resolver y el revisor ya los resolvió todos, se quita el marcador para
+     * que se pueda confirmar (la edición manual cuenta como revisión).
+     */
+    private function clearResolvedReviewFlags(Order $order): void
+    {
+        $order->loadMissing('orderItems');
+
+        $allResolved = $order->orderItems->isNotEmpty()
+            && $order->orderItems->every(static fn ($item): bool => $item->product_id !== null);
+
+        if (! $allResolved) {
+            return;
+        }
+
+        $parserResult = is_array($order->parsed_payload_json) ? $order->parsed_payload_json : [];
+
+        if (($parserResult['status'] ?? null) !== OrderParserService::STATUS_UNMATCHED) {
+            return;
+        }
+
+        $parserResult['status'] = OrderParserService::STATUS_PARSED;
+        $parserResult['needs_review'] = false;
+        $parserResult['review_reason'] = 'Productos resueltos manualmente durante la revisión.';
+        $parserResult['warnings'] = [];
+
+        $order->parsed_payload_json = $parserResult;
+        $order->save();
+    }
+
     private function reviewSnapshot(Order $order): array
     {
         return [
@@ -363,6 +442,7 @@ class OrderController extends Controller
                         'id' => $item->id,
                         'quantity' => (float) $item->quantity,
                         'unit' => $item->unit,
+                        'product_id' => $item->product_id,
                         'raw_text' => $item->raw_text,
                         'notes' => $item->notes,
                     ];
@@ -404,6 +484,10 @@ class OrderController extends Controller
                     'notes' => $itemData['notes'] ?? null,
                     'sort_order' => $index,
                 ]);
+
+                if ($item !== null && array_key_exists('product_id', $itemData)) {
+                    $this->assignProduct($order, $item, $itemData['product_id']);
+                }
 
                 $keptItemIds[] = $itemId;
 

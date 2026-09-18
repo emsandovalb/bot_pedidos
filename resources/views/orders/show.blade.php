@@ -180,7 +180,7 @@
                                                 {{ $item->raw_text ?? 'Sin texto detectado' }}
                                             </span>
                                         </div>
-                                        <div class="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                                        <div class="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                                             <div class="rounded-xl border border-slate-100 bg-white p-3">
                                                 <div class="text-xs text-slate-500">Cantidad</div>
                                                 <div class="mt-1 text-sm font-semibold text-slate-900">{{ $item->quantity }}</div>
@@ -192,6 +192,14 @@
                                             <div class="rounded-xl border border-slate-100 bg-white p-3">
                                                 <div class="text-xs text-slate-500">Coincidencia</div>
                                                 <div class="mt-1 text-sm font-semibold text-slate-900">{{ $item->matched_text ?? '—' }}</div>
+                                            </div>
+                                            <div class="rounded-xl border border-slate-100 bg-white p-3">
+                                                <div class="text-xs text-slate-500">Precio unit.</div>
+                                                <div class="mt-1 text-sm font-semibold text-slate-900">{{ $item->unit_price !== null ? number_format((float) $item->unit_price, 2) : '—' }}</div>
+                                            </div>
+                                            <div class="rounded-xl border border-slate-100 bg-white p-3">
+                                                <div class="text-xs text-slate-500">Subtotal</div>
+                                                <div class="mt-1 text-sm font-semibold text-slate-900">{{ $item->line_total !== null ? number_format((float) $item->line_total, 2) : '—' }}</div>
                                             </div>
                                             <div class="rounded-xl border border-slate-100 bg-white p-3">
                                                 <div class="text-xs text-slate-500">Confianza</div>
@@ -212,6 +220,20 @@
                                 No se detectaron items.
                             </div>
                         @endforelse
+                    </div>
+
+                    <div class="mt-4 flex items-center justify-between rounded-2xl border border-slate-200/80 bg-slate-50 px-4 py-3">
+                        <span class="text-sm font-medium text-slate-600">Total del pedido</span>
+                        <span class="text-base font-semibold text-brand-navy">
+                            @if ($order->items_total !== null)
+                                {{ number_format((float) $order->items_total, 2) }}
+                                @if ($order->orderItems->whereNotNull('product_id')->whereNull('unit_price')->isNotEmpty())
+                                    <span class="ml-2 text-xs font-medium text-amber-600">(parcial: falta precio en algún producto)</span>
+                                @endif
+                            @else
+                                <span class="text-slate-400">Sin precio en el catálogo</span>
+                            @endif
+                        </span>
                     </div>
                 </section>
 

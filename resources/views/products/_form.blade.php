@@ -33,6 +33,13 @@
             </div>
 
             <div>
+                <label for="price" class="block text-sm font-medium text-slate-700">Precio</label>
+                <input id="price" name="price" type="number" min="0" step="0.01" value="{{ old('price', $product->price) }}" class="brand-input mt-1 block w-full rounded-xl" placeholder="0.00">
+                <p class="mt-1 text-xs text-slate-500">Opcional. Se usa para calcular el total del pedido.</p>
+                @error('price')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
+            </div>
+
+            <div>
                 <label for="branch_id" class="block text-sm font-medium text-slate-700">Sucursal</label>
                 <select id="branch_id" name="branch_id" class="brand-input mt-1 block w-full rounded-xl">
                     <option value="">Todas las sucursales</option>

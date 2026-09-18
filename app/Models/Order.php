@@ -14,11 +14,17 @@ class Order extends Model
     use HasFactory;
 
     public const STATUS_PENDING_REVIEW = 'pending_review';
+
     public const STATUS_CONFIRMED = 'confirmed';
+
     public const STATUS_PREPARING = 'preparing';
+
     public const STATUS_READY_FOR_DISPATCH = 'ready_for_dispatch';
+
     public const STATUS_DISPATCHED = 'dispatched';
+
     public const STATUS_CANCELLED = 'cancelled';
+
     public const STATUS_REJECTED = 'rejected';
 
     protected $fillable = [
@@ -33,6 +39,7 @@ class Order extends Model
         'parser_confidence',
         'raw_message_text',
         'parsed_payload_json',
+        'items_total',
         'duplicate_score',
         'duplicate_reason',
         'duplicate_checked_at',
@@ -65,6 +72,7 @@ class Order extends Model
     {
         return [
             'parser_confidence' => 'decimal:2',
+            'items_total' => 'decimal:2',
             'duplicate_score' => 'decimal:2',
             'duplicate_checked_at' => 'datetime',
             'parsed_payload_json' => 'array',
@@ -111,6 +119,43 @@ class Order extends Model
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    /**
+     * Recalcula line_total de cada ítem y items_total del pedido.
+     * items_total es null si ninguna línea tiene precio.
+     */
+    public function recalculateTotals(): void
+    {
+        $this->loadMissing('orderItems');
+
+        $total = null;
+
+        foreach ($this->orderItems as $item) {
+            $item->recalculateLineTotal();
+
+            if ($item->isDirty('line_total')) {
+                $item->save();
+            }
+
+            if ($item->line_total !== null) {
+                $total = round(($total ?? 0) + (float) $item->line_total, 2);
+            }
+        }
+
+        $this->items_total = $total;
+        $this->save();
+    }
+
+    /**
+     * true si el pedido tiene al menos un ítem resuelto en catálogo sin precio.
+     */
+    public function hasUnpricedCatalogItems(): bool
+    {
+        return $this->orderItems()
+            ->whereNotNull('product_id')
+            ->whereNull('unit_price')
+            ->exists();
     }
 
     public function orderStatusHistories(): HasMany

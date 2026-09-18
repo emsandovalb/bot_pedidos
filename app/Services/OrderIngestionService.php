@@ -127,11 +127,18 @@ class OrderIngestionService
                 $item = $resolved['item'];
                 $match = $resolved['match'];
 
+                $unitPrice = $match['product']?->price;
+                $lineTotal = $unitPrice === null
+                    ? null
+                    : round((float) $item['quantity'] * (float) $unitPrice, 2);
+
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $match['product']?->id,
                     'quantity' => $item['quantity'],
                     'unit' => $item['unit'],
+                    'unit_price' => $unitPrice,
+                    'line_total' => $lineTotal,
                     'raw_text' => $item['raw_text'],
                     'matched_text' => $match['matched_text'] ?? $item['matched_text'],
                     'confidence_score' => $parserResult['items'][$index]['final_confidence_score'],
@@ -139,6 +146,9 @@ class OrderIngestionService
                     'sort_order' => $index,
                 ]);
             }
+
+            $order->load('orderItems');
+            $order->recalculateTotals();
 
             OrderStatusHistory::create([
                 'order_id' => $order->id,

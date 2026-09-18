@@ -55,13 +55,14 @@
                     <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Formato</h2>
                     <p class="mt-3 text-sm text-slate-600">Una linea por producto con campos separados por pipe.</p>
                     <pre class="mt-4 overflow-x-auto rounded-2xl bg-slate-900 p-4 text-xs leading-6 text-slate-100">Name | SKU | Unit | Aliases
-Tomate | TOM-001 | kilo | tomate, tomates, kilos de tomate
-Carne | CAR-001 | kilo | carne, kilos de carne
-Tortillas | TOR-001 | paquete | tortillas, paquetes de tortillas
-Bolsas negras | BN-001 | bolsa | bolsas negras, bolsa negra</pre>
+Name | SKU | Unit | Precio | Aliases
+Tomate | TOM-001 | kilo | tomate, tomates
+Cemento | CEM-001 | saco | 8.90 | cemento, saco cemento
+Bolsas negras | BN-001 | bolsa | 2.25 | bolsas negras, bolsa negra</pre>
                     <ul class="mt-4 space-y-2 text-sm text-slate-600">
                         <li>Name es obligatorio.</li>
-                        <li>SKU, Unit y Aliases son opcionales.</li>
+                        <li>SKU, Unit, Precio y Aliases son opcionales.</li>
+                        <li>El precio es el 4º campo <strong>solo si hay 5 campos</strong>; con 4 campos el 4º son los alias.</li>
                         <li>Los alias se separan con coma.</li>
                         <li>Las lineas vacias se ignoran.</li>
                         <li>Las lineas invalidas se saltan sin detener el import.</li>

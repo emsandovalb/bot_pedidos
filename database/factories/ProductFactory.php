@@ -35,6 +35,7 @@ class ProductFactory extends Factory
             'normalized_name' => Str::of($name)->lower()->ascii()->replaceMatches('/[^a-z0-9]+/', ' ')->squish()->toString(),
             'sku' => fake()->optional()->bothify('SKU-####'),
             'unit_label' => fake()->optional()->randomElement(['pieza', 'bolsa', 'caja', 'paquete']),
+            'price' => fake()->optional()->randomFloat(2, 1, 50),
             'is_active' => true,
             'sort_order' => fake()->numberBetween(0, 100),
         ];

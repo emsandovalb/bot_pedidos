@@ -51,6 +51,61 @@ class ProductBulkImportTest extends TestCase
         ]);
     }
 
+    public function test_import_accepts_optional_price_field(): void
+    {
+        [$user] = $this->makeOwner();
+
+        // Con precio: 5 campos -> nombre | sku | unidad | precio | alias.
+        // Sin precio: 4 campos (compatibilidad hacia atrás).
+        $this->actingAs($user)->post(route('products.import.store'), [
+            'content' => "Cemento | CEM-01 | saco | 8.90 | cemento, saco cemento\nArena | ARE-01 | saco | arena",
+        ])->assertRedirect(route('products.import'));
+
+        $this->assertDatabaseHas('products', [
+            'organization_id' => $user->organization_id,
+            'name' => 'Cemento',
+            'price' => '8.90',
+        ]);
+        $this->assertDatabaseHas('products', [
+            'organization_id' => $user->organization_id,
+            'name' => 'Arena',
+            'price' => null,
+        ]);
+    }
+
+    public function test_import_rejects_non_numeric_price(): void
+    {
+        [$user] = $this->makeOwner();
+
+        $this->actingAs($user)->post(route('products.import.store'), [
+            'content' => 'Cemento | CEM-01 | saco | carísimo | cemento',
+        ])->assertRedirect(route('products.import'));
+
+        $this->assertDatabaseMissing('products', [
+            'organization_id' => $user->organization_id,
+            'name' => 'Cemento',
+        ]);
+        $this->assertSame(1, session('import_summary')['skipped_lines']);
+    }
+
+    public function test_reimport_without_price_keeps_existing_price(): void
+    {
+        [$user] = $this->makeOwner();
+
+        $this->actingAs($user)->post(route('products.import.store'), [
+            'content' => 'Cemento | CEM-01 | saco | 8.90 | cemento',
+        ]);
+        $this->actingAs($user)->post(route('products.import.store'), [
+            'content' => 'Cemento | CEM-01 | saco | cemento, saco cemento',
+        ]);
+
+        $this->assertDatabaseHas('products', [
+            'organization_id' => $user->organization_id,
+            'name' => 'Cemento',
+            'price' => '8.90',
+        ]);
+    }
+
     public function test_import_creates_aliases(): void
     {
         [$user] = $this->makeOwner();

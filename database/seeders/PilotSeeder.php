@@ -72,6 +72,7 @@ class PilotSeeder extends Seeder
                     'name' => $productData['name'],
                     'normalized_name' => app(ProductTextNormalizer::class)->normalize($productData['name']),
                     'unit_label' => $productData['unit_label'],
+                    'price' => $productData['price'] ?? null,
                     'is_active' => true,
                     'sort_order' => 0,
                 ],

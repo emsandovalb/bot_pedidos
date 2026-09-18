@@ -33,6 +33,7 @@ class DemoCatalog
                     'name' => $productData['name'],
                     'normalized_name' => $this->normalizer->normalize($productData['name']),
                     'unit_label' => $productData['unit_label'],
+                    'price' => $productData['price'] ?? null,
                     'is_active' => true,
                     'sort_order' => 0,
                 ],

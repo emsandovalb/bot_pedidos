@@ -15,6 +15,8 @@ class OrderItem extends Model
         'product_id',
         'quantity',
         'unit',
+        'unit_price',
+        'line_total',
         'raw_text',
         'matched_text',
         'confidence_score',
@@ -26,9 +28,21 @@ class OrderItem extends Model
     {
         return [
             'quantity' => 'decimal:2',
+            'unit_price' => 'decimal:2',
+            'line_total' => 'decimal:2',
             'confidence_score' => 'decimal:2',
             'sort_order' => 'integer',
         ];
+    }
+
+    /**
+     * Recalcula line_total = quantity * unit_price. Null si no hay precio unitario.
+     */
+    public function recalculateLineTotal(): void
+    {
+        $this->line_total = $this->unit_price === null
+            ? null
+            : round((float) $this->quantity * (float) $this->unit_price, 2);
     }
 
     public function order(): BelongsTo

@@ -64,7 +64,7 @@ class ProductBulkImportService
                 continue;
             }
 
-            $product = $this->upsertProduct($organization, $parsed['name'], $parsed['sku'], $parsed['unit_label']);
+            $product = $this->upsertProduct($organization, $parsed['name'], $parsed['sku'], $parsed['unit_label'], $parsed['price']);
             $summary[$product['created'] ? 'products_created' : 'products_updated']++;
 
             foreach ($parsed['aliases'] as $aliasText) {
@@ -77,41 +77,50 @@ class ProductBulkImportService
     }
 
     /**
-     * @return array{name:string,sku:?string,unit_label:?string,aliases:array<int, string>,error:?string}
+     * Formato por línea: `nombre | sku | unidad | alias1, alias2`
+     * o, con precio: `nombre | sku | unidad | precio | alias1, alias2`.
+     *
+     * @return array{name:string,sku:?string,unit_label:?string,price:?float,aliases:array<int, string>,error:?string}
      */
     private function parseLine(string $line): array
     {
+        $error = static fn (string $message): array => [
+            'name' => '', 'sku' => null, 'unit_label' => null, 'price' => null, 'aliases' => [], 'error' => $message,
+        ];
+
         $parts = array_map(
             fn (string $part): string => $this->normalizeDisplayText($part),
-            explode('|', $line, 4)
+            explode('|', $line, 6)
         );
 
         $name = $parts[0] ?? '';
 
         if ($name === '') {
-            return [
-                'name' => '',
-                'sku' => null,
-                'unit_label' => null,
-                'aliases' => [],
-                'error' => 'Product name is required.',
-            ];
+            return $error('Product name is required.');
         }
 
-        if (count($parts) > 4) {
-            return [
-                'name' => '',
-                'sku' => null,
-                'unit_label' => null,
-                'aliases' => [],
-                'error' => 'Too many fields in line.',
-            ];
+        if (count($parts) > 5) {
+            return $error('Too many fields in line.');
+        }
+
+        // Con 5 campos el 4º es el precio y el 5º los alias; con 4 o menos no hay precio.
+        $hasPrice = count($parts) === 5;
+        $priceRaw = $hasPrice ? ($parts[3] ?? '') : '';
+        $aliasesRaw = $hasPrice ? ($parts[4] ?? '') : ($parts[3] ?? '');
+
+        $price = null;
+        if ($priceRaw !== '') {
+            $normalizedPrice = str_replace(',', '.', $priceRaw);
+            if (! is_numeric($normalizedPrice) || (float) $normalizedPrice < 0) {
+                return $error('Price must be a non-negative number.');
+            }
+            $price = round((float) $normalizedPrice, 2);
         }
 
         $aliases = [];
 
-        if (isset($parts[3]) && $parts[3] !== '') {
-            $aliases = collect(explode(',', $parts[3]))
+        if ($aliasesRaw !== '') {
+            $aliases = collect(explode(',', $aliasesRaw))
                 ->map(fn (string $alias): string => $this->normalizeDisplayText($alias))
                 ->filter()
                 ->unique(fn (string $alias): string => $this->normalizer->normalize($alias))
@@ -123,6 +132,7 @@ class ProductBulkImportService
             'name' => $name,
             'sku' => isset($parts[1]) && $parts[1] !== '' ? $parts[1] : null,
             'unit_label' => isset($parts[2]) && $parts[2] !== '' ? $parts[2] : null,
+            'price' => $price,
             'aliases' => $aliases,
             'error' => null,
         ];
@@ -131,7 +141,7 @@ class ProductBulkImportService
     /**
      * @return array{model: Product, created: bool}
      */
-    private function upsertProduct(Organization $organization, string $name, ?string $sku, ?string $unitLabel): array
+    private function upsertProduct(Organization $organization, string $name, ?string $sku, ?string $unitLabel, ?float $price): array
     {
         $normalizedName = $this->normalizer->normalize($name);
 
@@ -142,24 +152,27 @@ class ProductBulkImportService
 
         $created = $product === null;
 
+        $attributes = [
+            'name' => $name,
+            'sku' => $sku,
+            'unit_label' => $unitLabel,
+            'branch_id' => null,
+            'is_active' => true,
+        ];
+
+        // Solo se pisa el precio si la línea trae uno; así una reimportación sin
+        // precio no borra el que ya estaba.
+        if ($price !== null) {
+            $attributes['price'] = $price;
+        }
+
         if ($created) {
-            $product = new Product([
+            $product = new Product($attributes + [
                 'organization_id' => $organization->id,
-                'branch_id' => null,
-                'name' => $name,
-                'sku' => $sku,
-                'unit_label' => $unitLabel,
-                'is_active' => true,
                 'sort_order' => 0,
             ]);
         } else {
-            $product->fill([
-                'name' => $name,
-                'sku' => $sku,
-                'unit_label' => $unitLabel,
-                'branch_id' => null,
-                'is_active' => true,
-            ]);
+            $product->fill($attributes);
         }
 
         $product->save();

@@ -123,6 +123,24 @@
                                 </div>
 
                                 <div class="mt-5 grid gap-4 md:grid-cols-2">
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium text-slate-700" for="item-{{ $item->id }}-product">Producto del catálogo</label>
+                                        @php $selectedProductId = (int) old('items.' . $item->id . '.product_id', $item->product_id); @endphp
+                                        <select id="item-{{ $item->id }}-product" name="items[{{ $item->id }}][product_id]" class="brand-input mt-1 block w-full rounded-2xl border-slate-200 bg-slate-50 focus:border-brand-primary focus:ring-brand-primary">
+                                            <option value="">Sin asignar</option>
+                                            @foreach ($catalogProducts as $catalogProduct)
+                                                <option value="{{ $catalogProduct->id }}" {{ $selectedProductId === (int) $catalogProduct->id ? 'selected' : '' }}>
+                                                    {{ $catalogProduct->name }}{{ $catalogProduct->unit_label ? ' (' . $catalogProduct->unit_label . ')' : '' }}{{ $catalogProduct->price !== null ? ' - ' . number_format((float) $catalogProduct->price, 2) : '' }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @if ($item->product_id === null)
+                                            <p class="mt-1 text-xs text-amber-600">Este item no se reconocio automaticamente. Asignale un producto para poder confirmar el pedido.</p>
+                                        @endif
+                                        @error('items.' . $item->id . '.product_id')
+                                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
                                     <div>
                                         <label class="block text-sm font-medium text-slate-700" for="item-{{ $item->id }}-quantity">Cantidad</label>
                                         <input id="item-{{ $item->id }}-quantity" name="items[{{ $item->id }}][quantity]" type="number" step="0.01" min="0" value="{{ old('items.' . $item->id . '.quantity', $item->quantity) }}" class="brand-input mt-1 block w-full rounded-2xl border-slate-200 bg-slate-50 focus:border-brand-primary focus:ring-brand-primary">

@@ -125,6 +125,9 @@
                                         <span class="inline-flex rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-brand-primary ring-1 ring-inset ring-blue-100">
                                             Unidad: {{ $product->unit_label ?? 'Sin unidad' }}
                                         </span>
+                                        <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium {{ $product->price !== null ? 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-100' : 'bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-100' }}">
+                                            {{ $product->price !== null ? 'Precio: '.number_format((float) $product->price, 2) : 'Sin precio' }}
+                                        </span>
                                     </div>
                                 </div>
                                 <span class="inline-flex shrink-0 rounded-full px-3 py-1 text-xs font-semibold {{ $product->is_active ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100' : 'bg-slate-100 text-slate-600 ring-1 ring-slate-200' }}">

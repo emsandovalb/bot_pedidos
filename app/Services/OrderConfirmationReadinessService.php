@@ -31,6 +31,13 @@ class OrderConfirmationReadinessService
             $reasons[] = 'unresolved_catalog_product';
         }
 
+        // Cuando el negocio ya cargó precios y activó el control, un ítem del
+        // catálogo sin precio impide confirmar (no se puede calcular el total).
+        if (config('pilot.enforce_pricing', false)
+            && $order->orderItems->contains(static fn ($item): bool => $item->product_id !== null && $item->unit_price === null)) {
+            $reasons[] = 'unpriced_catalog_item';
+        }
+
         $parserResult = is_array($order->parsed_payload_json) ? $order->parsed_payload_json : [];
         $parserStatus = $parserResult['status'] ?? null;
 
