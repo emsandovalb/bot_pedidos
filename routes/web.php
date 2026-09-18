@@ -36,6 +36,9 @@ Route::get('/', function () {
 Route::get('/webhooks/{provider}', [WebhookController::class, 'show'])->name('webhooks.show');
 Route::post('/webhooks/{provider}', [WebhookController::class, 'store'])->name('webhooks.store');
 
+// Readiness: BD + métricas de ingesta. /up sigue siendo el liveness simple.
+Route::get('/health', \App\Http\Controllers\HealthController::class)->name('health');
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
