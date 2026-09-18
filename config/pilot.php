@@ -2,6 +2,10 @@
 
 return [
     'enabled' => (bool) env('PILOT_ENABLED', true),
+
+    // Cuando el catálogo ya tiene precios cargados, activar esto para que no se
+    // pueda confirmar un pedido cuya línea de catálogo no tenga precio.
+    'enforce_pricing' => (bool) env('PILOT_ENFORCE_PRICING', false),
     'database_path' => env('PILOT_DB_PATH', database_path('pilot.sqlite')),
     'application_url' => env('PILOT_APP_URL', env('APP_URL', 'http://127.0.0.1:8010')),
     'application_port' => (int) env('PILOT_APP_PORT', 8010),
@@ -28,36 +32,42 @@ return [
         'bolsas_de_jardin' => [
             'name' => 'Bolsas de jardin',
             'sku' => 'PILOT-JARDIN',
+            'price' => 3.50,
             'unit_label' => 'bolsa',
             'aliases' => ['bolsa jardin', 'bolsas jardin', 'jardin'],
         ],
         'tubos_pvc' => [
             'name' => 'Tubos PVC',
             'sku' => 'PILOT-PVC',
+            'price' => 4.75,
             'unit_label' => 'tubo',
             'aliases' => ['pvc', 'tubo pvc', 'tubos pvc'],
         ],
         'sacos_cemento' => [
             'name' => 'Sacos de cemento',
             'sku' => 'PILOT-CEMENTO',
+            'price' => 8.90,
             'unit_label' => 'saco',
             'aliases' => ['cemento', 'saco cemento', 'cemento gris'],
         ],
         'pintura_blanca' => [
             'name' => 'Pintura blanca',
             'sku' => 'PILOT-PINTURA',
+            'price' => 12.00,
             'unit_label' => 'galon',
             'aliases' => ['pintura', 'pintura blanca', 'galon pintura'],
         ],
         'clavos' => [
             'name' => 'Clavos 2in',
             'sku' => 'PILOT-CLAVOS',
+            'price' => 2.25,
             'unit_label' => 'caja',
             'aliases' => ['clavos', 'caja de clavos', 'clavos 2in'],
         ],
         'bloques' => [
             'name' => 'Bloques de concreto',
             'sku' => 'PILOT-BLOQUE',
+            'price' => 0.65,
             'unit_label' => 'unidad',
             'aliases' => ['bloque', 'bloques', 'bloque de concreto', 'bloques de concreto', 'block'],
         ],
