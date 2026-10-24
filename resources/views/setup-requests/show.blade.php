@@ -118,6 +118,7 @@
             </div>
 
             <aside class="space-y-6">
+                @can('manage-settings')
                 <form method="POST" action="{{ route('setup-requests.update', $setupRequest) }}" class="space-y-6">
                     @csrf
                     @method('PATCH')
@@ -175,6 +176,7 @@
                         </div>
                     </article>
                 </form>
+                @endcan
 
                 <article class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-amber-500 bg-[linear-gradient(180deg,rgba(245,158,11,0.08),rgba(255,255,255,1)_72%)] p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">

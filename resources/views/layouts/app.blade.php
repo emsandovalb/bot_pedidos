@@ -117,6 +117,7 @@
                             </div>
                         </div>
 
+                        @can('manage-settings')
                         <div class="px-2 pt-6">
                             <div class="px-2 text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-slate-400">
                                 Configuracion
@@ -140,6 +141,7 @@
                                 </a>
                             </div>
                         </div>
+                        @endcan
 
                         <div class="px-2 pt-6">
                             <div class="px-2 text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-slate-400">

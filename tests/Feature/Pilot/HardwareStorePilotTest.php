@@ -10,8 +10,8 @@ use App\Models\Product;
 use App\Models\ProductAlias;
 use App\Models\User;
 use App\Services\Messaging\Contracts\MessagingProvider;
-use App\Services\Messaging\DTO\MessagingSendResult;
 use App\Services\Messaging\DTO\IncomingMessageDTO;
+use App\Services\Messaging\DTO\MessagingSendResult;
 use App\Services\Messaging\DTO\OutgoingMessageDTO;
 use App\Services\Messaging\DTO\ProviderCapabilities;
 use App\Services\Messaging\DTO\ProviderHealth;
@@ -35,7 +35,7 @@ class HardwareStorePilotTest extends TestCase
 
         Carbon::setTestNow(Carbon::parse('2026-07-31 10:30:00'));
         config([
-            'app.debug' => true,
+            'features.developer_toolkit_enabled' => true,
             'messaging.notifications_sending_enabled' => false,
             'messaging.telegram_notifications_enabled' => false,
             'messaging.whatsapp_notifications_enabled' => false,
@@ -106,8 +106,8 @@ class HardwareStorePilotTest extends TestCase
             $this->generateBusinessCustomMessage(
                 user: $user,
                 provider: 'whatsapp',
-                customerName: 'Preload Customer ' . $i,
-                customerPhone: '50255571' . str_pad((string) $i, 2, '0', STR_PAD_LEFT),
+                customerName: 'Preload Customer '.$i,
+                customerPhone: '50255571'.str_pad((string) $i, 2, '0', STR_PAD_LEFT),
                 message: 'Ocupo 5 bloques para hoy a las 2 pm, me lo llevan y pago por SINPE',
             );
         }
@@ -336,7 +336,7 @@ class HardwareStorePilotTest extends TestCase
             'organization_id' => $organization->id,
             'name' => 'Pilot WhatsApp Branch',
             'channel_type' => Branch::CHANNEL_TYPE_WHATSAPP,
-            'channel_identifier' => 'pilot-whatsapp-' . $organization->id,
+            'channel_identifier' => 'pilot-whatsapp-'.$organization->id,
             'status' => Branch::STATUS_ACTIVE,
         ]);
 
@@ -344,7 +344,7 @@ class HardwareStorePilotTest extends TestCase
             'organization_id' => $organization->id,
             'name' => 'Pilot Telegram Branch',
             'channel_type' => Branch::CHANNEL_TYPE_TELEGRAM,
-            'channel_identifier' => '@pilot-telegram-' . $organization->id,
+            'channel_identifier' => '@pilot-telegram-'.$organization->id,
             'status' => Branch::STATUS_ACTIVE,
         ]);
 
@@ -444,7 +444,7 @@ class HardwareStorePilotTest extends TestCase
     /**
      * @param  object|null  $provider
      */
-    private function fakeMessagingManager(& $provider): MessagingManager
+    private function fakeMessagingManager(&$provider): MessagingManager
     {
         $provider = new class implements MessagingProvider
         {
@@ -559,9 +559,7 @@ class HardwareStorePilotTest extends TestCase
 
         return new class($provider) extends MessagingManager
         {
-            public function __construct(private readonly MessagingProvider $provider)
-            {
-            }
+            public function __construct(private readonly MessagingProvider $provider) {}
 
             public function driver(?string $provider = null): MessagingProvider
             {

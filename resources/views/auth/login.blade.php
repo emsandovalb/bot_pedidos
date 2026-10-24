@@ -145,17 +145,6 @@
                             <button type="submit" style="height:44px;width:100%;border:0;border-radius:10px;background:linear-gradient(90deg,#1270df 0%,#3ccd68 100%);color:#fff;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 14px 28px -16px rgba(18,112,223,.8);">Entrar</button>
                         </form>
 
-                        <div style="display:flex;align-items:center;gap:14px;margin:22px 0;">
-                            <span style="height:1px;flex:1;background:#e2e8f0;"></span>
-                            <span style="font-size:12px;color:#94a3b8;">o continúa con</span>
-                            <span style="height:1px;flex:1;background:#e2e8f0;"></span>
-                        </div>
-
-                        <a href="#" style="height:44px;width:100%;display:flex;align-items:center;justify-content:center;gap:10px;border:1px solid #e2e8f0;border-radius:10px;background:#fff;color:#334155;font-size:14px;font-weight:600;text-decoration:none;box-sizing:border-box;">
-                            <svg viewBox="0 0 24 24" width="18" height="18"><path fill="#4285F4" d="M22.5 12.2c0-.7-.1-1.4-.2-2H12v3.9h5.9a5 5 0 0 1-2.2 3.3v2.7h3.6c2.1-1.9 3.2-4.8 3.2-7.9Z"/><path fill="#34A853" d="M12 23c2.9 0 5.4-1 7.2-2.6l-3.6-2.7c-1 .7-2.3 1.1-3.6 1.1-2.8 0-5.1-1.9-6-4.4H2.3v2.8A11 11 0 0 0 12 23Z"/><path fill="#FBBC05" d="M6 14.4a6.6 6.6 0 0 1 0-4.2V7.4H2.3a11 11 0 0 0 0 9.8L6 14.4Z"/><path fill="#EA4335" d="M12 5.4c1.6 0 3 .5 4.1 1.6l3.1-3.1A11 11 0 0 0 12 1 11 11 0 0 0 2.3 7.4L6 10.2C6.9 7.7 9.2 5.4 12 5.4Z"/></svg>
-                            <span>Google</span>
-                        </a>
-
                         <p style="margin:22px 0 0;text-align:center;font-size:12.5px;color:#64748b;">¿No tienes una cuenta? <a href="mailto:soporte@benditio.com" style="font-weight:600;color:#1270df;text-decoration:none;">Contacta a tu administrador</a></p>
                     </div>
                 </section>

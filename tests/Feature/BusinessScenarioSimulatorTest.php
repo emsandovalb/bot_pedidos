@@ -253,7 +253,7 @@ class BusinessScenarioSimulatorTest extends TestCase
      */
     private function prepareBusinessContext(string $organizationName = 'Business Scenario Org'): array
     {
-        config(['app.debug' => true]);
+        config(['features.developer_toolkit_enabled' => true]);
 
         $organization = Organization::query()->create([
             'name' => $organizationName,
@@ -278,7 +278,7 @@ class BusinessScenarioSimulatorTest extends TestCase
             'organization_id' => $organization->id,
             'name' => 'Toolkit Branch',
             'channel_type' => Branch::CHANNEL_TYPE_WHATSAPP,
-            'channel_identifier' => 'toolkit-whatsapp-branch-' . $organization->id,
+            'channel_identifier' => 'toolkit-whatsapp-branch-'.$organization->id,
             'status' => Branch::STATUS_ACTIVE,
         ]);
 

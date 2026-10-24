@@ -20,8 +20,11 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     public const ROLE_OWNER = 'owner';
+
     public const ROLE_ADMIN = 'admin';
+
     public const ROLE_SELLER = 'seller';
+
     public const ROLE_VIEWER = 'viewer';
 
     /**
@@ -70,6 +73,14 @@ class User extends Authenticatable
     public function canViewAllBranches(): bool
     {
         return $this->isOwner() || $this->isAdmin();
+    }
+
+    /**
+     * Canales, credenciales del proveedor y notificaciones: solo dueños y administradores.
+     */
+    public function canManageSettings(): bool
+    {
+        return $this->organization_id !== null && ($this->isOwner() || $this->isAdmin());
     }
 
     public function canViewAllBranchesForRead(): bool

@@ -4,10 +4,11 @@ namespace Tests\Feature;
 
 use App\Models\Branch;
 use App\Models\ChannelConnection;
+use App\Models\Customer;
+use App\Models\CustomerIdentity;
 use App\Models\IncomingMessage;
 use App\Models\Order;
 use App\Models\Organization;
-use App\Models\Customer;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -16,9 +17,9 @@ class DeveloperToolkitTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_toolkit_page_is_only_accessible_in_local_or_debug(): void
+    public function test_toolkit_page_is_hidden_when_the_toolkit_flag_is_off(): void
     {
-        config(['app.debug' => false]);
+        config(['features.developer_toolkit_enabled' => false]);
 
         $user = $this->makeToolkitUser();
 
@@ -29,7 +30,7 @@ class DeveloperToolkitTest extends TestCase
 
     public function test_toolkit_page_renders_the_new_label(): void
     {
-        config(['app.debug' => true]);
+        config(['features.developer_toolkit_enabled' => true]);
 
         $user = $this->makeToolkitUser();
 
@@ -174,7 +175,7 @@ class DeveloperToolkitTest extends TestCase
 
         $this->assertSame(
             15,
-            \App\Models\CustomerIdentity::query()
+            CustomerIdentity::query()
                 ->where('organization_id', $user->organization_id)
                 ->get()
                 ->filter(static fn ($identity): bool => data_get($identity->metadata_json, 'demo_generated') === true)
@@ -324,7 +325,7 @@ class DeveloperToolkitTest extends TestCase
 
         $this->assertSame(
             0,
-            \App\Models\CustomerIdentity::query()
+            CustomerIdentity::query()
                 ->where('organization_id', $user->organization_id)
                 ->get()
                 ->filter(static fn ($identity): bool => data_get($identity->metadata_json, 'demo_generated') === true)
@@ -364,7 +365,7 @@ class DeveloperToolkitTest extends TestCase
      */
     private function prepareToolkitContext(): array
     {
-        config(['app.debug' => true]);
+        config(['features.developer_toolkit_enabled' => true]);
 
         $user = $this->makeToolkitUser();
 

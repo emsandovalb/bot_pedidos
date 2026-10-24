@@ -10,15 +10,14 @@ use App\Models\IncomingMessage;
 use App\Models\Order;
 use App\Models\OrderStatusHistory;
 use App\Models\Organization;
-use App\Services\Messaging\DTO\IncomingMessageDTO;
 use App\Services\Developer\BusinessScenarioService;
 use App\Services\Developer\ScenarioGeneratorService;
 use App\Services\Developer\SimulatedWhatsAppWebhook;
+use App\Services\Messaging\DTO\IncomingMessageDTO;
 use App\Services\Messaging\Manager\ProviderLifecycleManager;
 use App\Services\Messaging\MessagingIngestionService;
 use App\Services\WhatsAppConfigurationService;
 use Illuminate\Contracts\View\View;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -39,8 +38,7 @@ class WebhookSimulatorController extends Controller
         private readonly MessagingIngestionService $messagingIngestionService,
         private readonly ScenarioGeneratorService $scenarioGeneratorService,
         private readonly BusinessScenarioService $businessScenarioService,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request): View
     {
@@ -235,7 +233,7 @@ class WebhookSimulatorController extends Controller
 
     private function ensureDeveloperEnvironment(): void
     {
-        abort_unless(app()->environment('local') || config('app.debug'), 404);
+        abort_unless(config('features.developer_toolkit_enabled'), 404);
 
         // El toolkit necesita ver el resultado de la ingesta al momento, así que
         // el mensaje entrante se procesa de forma síncrona en vez de encolarse.
@@ -548,7 +546,7 @@ class WebhookSimulatorController extends Controller
             'message' => $result->message ?? 'Webhook processed locally.',
             'order_url' => $latestOrder !== null ? route('orders.show', $latestOrder) : null,
             'incoming_message_url' => $latestIncomingMessage !== null
-                ? route('incoming-messages.index') . '#incoming-message-' . $latestIncomingMessage->id
+                ? route('incoming-messages.index').'#incoming-message-'.$latestIncomingMessage->id
                 : null,
         ];
     }
@@ -612,7 +610,7 @@ class WebhookSimulatorController extends Controller
                 : 'Telegram webhook processed locally.',
             'order_url' => $order !== null ? route('orders.show', $order) : null,
             'incoming_message_url' => $incomingMessage !== null
-                ? route('incoming-messages.index') . '#incoming-message-' . $incomingMessage->id
+                ? route('incoming-messages.index').'#incoming-message-'.$incomingMessage->id
                 : null,
         ];
     }
@@ -629,7 +627,7 @@ class WebhookSimulatorController extends Controller
         $messages = $this->buildScenarioMessages($definition, $customers, $providerMix, $start);
 
         return $this->runGeneratedMessages($organization, $messages, $definition, [
-            'message' => 'Scenario generated: ' . $definition['label'] . '.',
+            'message' => 'Scenario generated: '.$definition['label'].'.',
         ]);
     }
 
@@ -703,7 +701,7 @@ class WebhookSimulatorController extends Controller
             'vip_count' => 0,
             'duplicate_count' => 0,
             'execution_ms' => 0,
-            'message' => 'Generated ' . count($customers) . ' demo customers.',
+            'message' => 'Generated '.count($customers).' demo customers.',
             'order_url' => null,
             'incoming_message_url' => null,
         ];
@@ -977,7 +975,7 @@ class WebhookSimulatorController extends Controller
             if ($i < $duplicateTarget) {
                 $customer = $customers[min(1, $customerPoolCount - 1)];
                 $baseText = $this->randomOrderText($definition['category'] ?? 'ferreteria', false);
-                $messageText = $i % 2 === 0 ? $baseText : $baseText . ' para hoy';
+                $messageText = $i % 2 === 0 ? $baseText : $baseText.' para hoy';
                 $variant = 'duplicate';
             }
 
@@ -1028,7 +1026,6 @@ class WebhookSimulatorController extends Controller
 
     /**
      * @param  array<string, mixed>  $payload
-     * @param  \App\Models\Customer  $customer
      * @return array<string, mixed>
      */
     private function ingestWhatsAppGeneratedPayload(
@@ -1071,7 +1068,6 @@ class WebhookSimulatorController extends Controller
 
     /**
      * @param  array<string, mixed>  $payload
-     * @param  \App\Models\Customer  $customer
      * @return array<string, mixed>
      */
     private function ingestTelegramGeneratedPayload(
@@ -1117,16 +1113,13 @@ class WebhookSimulatorController extends Controller
         ];
     }
 
-    /**
-     * @param  \App\Models\Customer  $customer
-     */
     private function buildWhatsAppGeneratedPayload(array $payload, Customer $customer): array
     {
         return [
             'object' => 'whatsapp_business_account',
             'entry' => [
                 [
-                    'id' => 'entry-toolkit-' . substr(md5((string) ($payload['external_message_id'] ?? '')), 0, 8),
+                    'id' => 'entry-toolkit-'.substr(md5((string) ($payload['external_message_id'] ?? '')), 0, 8),
                     'changes' => [
                         [
                             'field' => 'messages',
@@ -1171,7 +1164,7 @@ class WebhookSimulatorController extends Controller
     {
         $name = trim((string) ($customerData['name'] ?? 'Cliente Demo'));
         $phone = trim((string) ($customerData['phone'] ?? $this->generatedCustomerPhone()));
-        $externalId = (string) ($customerData['external_id'] ?? self::CUSTOMER_PREFIX . md5($organization->id . '|' . $phone));
+        $externalId = (string) ($customerData['external_id'] ?? self::CUSTOMER_PREFIX.md5($organization->id.'|'.$phone));
 
         $customer = Customer::query()->firstOrNew([
             'organization_id' => $organization->id,
@@ -1201,12 +1194,12 @@ class WebhookSimulatorController extends Controller
         for ($i = 0; $i < $count; $i++) {
             $first = self::firstNames()[$i % count(self::firstNames())];
             $last = self::lastNames()[(int) floor($i / count(self::firstNames())) % count(self::lastNames())];
-            $name = $first . ' ' . $last;
-            $phone = $provider === 'telegram' ? $this->telegramChatId('4' . str_pad((string) ($i + 1), 4, '0', STR_PAD_LEFT)) : $this->generatedCustomerPhone($i);
+            $name = $first.' '.$last;
+            $phone = $provider === 'telegram' ? $this->telegramChatId('4'.str_pad((string) ($i + 1), 4, '0', STR_PAD_LEFT)) : $this->generatedCustomerPhone($i);
             $customers[] = [
                 'name' => $name,
                 'phone' => $phone,
-                'external_id' => self::CUSTOMER_PREFIX . $organization->id . ':' . $provider . ':' . ($i + 1),
+                'external_id' => self::CUSTOMER_PREFIX.$organization->id.':'.$provider.':'.($i + 1),
                 'customers_only' => $customersOnly,
             ];
         }
@@ -1222,8 +1215,8 @@ class WebhookSimulatorController extends Controller
         $provider = strtolower(trim($provider));
         $channelType = $provider === 'telegram' ? Branch::CHANNEL_TYPE_TELEGRAM : Branch::CHANNEL_TYPE_WHATSAPP;
         $identifier = $provider === 'telegram'
-            ? '@developer-toolkit-' . $organization->id
-            : 'developer-toolkit-whatsapp-' . $organization->id;
+            ? '@developer-toolkit-'.$organization->id
+            : 'developer-toolkit-whatsapp-'.$organization->id;
 
         return Branch::query()->firstOrCreate(
             [
@@ -1242,7 +1235,7 @@ class WebhookSimulatorController extends Controller
     {
         $offset = $offset ?? random_int(1000, 9999);
 
-        return '506' . str_pad((string) ((55510000 + $offset) % 99999999), 8, '0', STR_PAD_LEFT);
+        return '506'.str_pad((string) ((55510000 + $offset) % 99999999), 8, '0', STR_PAD_LEFT);
     }
 
     private function telegramChatId(string $seed): string
@@ -1282,7 +1275,7 @@ class WebhookSimulatorController extends Controller
     {
         $username = strtolower(preg_replace('/[^a-z0-9]+/i', '', $name) ?? '');
 
-        return $username !== '' ? $username . '_cr' : null;
+        return $username !== '' ? $username.'_cr' : null;
     }
 
     /**
@@ -1394,7 +1387,7 @@ class WebhookSimulatorController extends Controller
 
         $items = $catalog[$provider] ?? $catalog['whatsapp'];
 
-        return $items[$index % count($items)] . ' urgente';
+        return $items[$index % count($items)].' urgente';
     }
 
     private function randomFeriaText(int $index): string
@@ -1740,28 +1733,28 @@ class WebhookSimulatorController extends Controller
         return [
             'generated_customers' => Customer::query()
                 ->where('organization_id', $organizationId)
-                ->where('external_id', 'like', self::CUSTOMER_PREFIX . '%')
+                ->where('external_id', 'like', self::CUSTOMER_PREFIX.'%')
                 ->count(),
             'generated_orders' => Order::query()
                 ->where('organization_id', $organizationId)
-                ->where('notes', 'like', self::TOOLKIT_MARKER . '%')
+                ->where('notes', 'like', self::TOOLKIT_MARKER.'%')
                 ->count(),
             'whatsapp' => Order::query()
                 ->where('organization_id', $organizationId)
-                ->where('notes', 'like', self::TOOLKIT_MARKER . '%')
+                ->where('notes', 'like', self::TOOLKIT_MARKER.'%')
                 ->where('source_channel', 'whatsapp')
                 ->count(),
             'telegram' => Order::query()
                 ->where('organization_id', $organizationId)
-                ->where('notes', 'like', self::TOOLKIT_MARKER . '%')
+                ->where('notes', 'like', self::TOOLKIT_MARKER.'%')
                 ->where('source_channel', 'telegram')
                 ->count(),
             'vip' => Customer::query()
                 ->where('organization_id', $organizationId)
-                ->where('external_id', 'like', self::CUSTOMER_PREFIX . '%')
+                ->where('external_id', 'like', self::CUSTOMER_PREFIX.'%')
                 ->withCount([
                     'orders as toolkit_orders_count' => function ($query): void {
-                        $query->where('notes', 'like', self::TOOLKIT_MARKER . '%');
+                        $query->where('notes', 'like', self::TOOLKIT_MARKER.'%');
                     },
                 ])
                 ->get()
@@ -1769,7 +1762,7 @@ class WebhookSimulatorController extends Controller
                 ->count(),
             'duplicates' => Order::query()
                 ->where('organization_id', $organizationId)
-                ->where('notes', 'like', self::TOOLKIT_MARKER . '%')
+                ->where('notes', 'like', self::TOOLKIT_MARKER.'%')
                 ->whereNotNull('possible_duplicate_of_order_id')
                 ->count(),
         ];
@@ -1779,7 +1772,7 @@ class WebhookSimulatorController extends Controller
     {
         return Order::query()
             ->where('organization_id', $organizationId)
-            ->where('notes', 'like', self::TOOLKIT_MARKER . '%')
+            ->where('notes', 'like', self::TOOLKIT_MARKER.'%')
             ->whereNotNull('possible_duplicate_of_order_id')
             ->count();
     }
@@ -1788,10 +1781,10 @@ class WebhookSimulatorController extends Controller
     {
         return Customer::query()
             ->where('organization_id', $organizationId)
-            ->where('external_id', 'like', self::CUSTOMER_PREFIX . '%')
+            ->where('external_id', 'like', self::CUSTOMER_PREFIX.'%')
             ->withCount([
                 'orders as toolkit_orders_count' => function ($query): void {
-                    $query->where('notes', 'like', self::TOOLKIT_MARKER . '%');
+                    $query->where('notes', 'like', self::TOOLKIT_MARKER.'%');
                 },
             ])
             ->get()
@@ -1811,14 +1804,14 @@ class WebhookSimulatorController extends Controller
             if (in_array($scope, ['orders', 'environment'], true)) {
                 $deletedOrders = Order::query()
                     ->where('organization_id', $organization->id)
-                    ->where('notes', 'like', self::TOOLKIT_MARKER . '%')
+                    ->where('notes', 'like', self::TOOLKIT_MARKER.'%')
                     ->delete();
             }
 
             if (in_array($scope, ['customers', 'environment'], true)) {
                 $customerIds = Customer::query()
                     ->where('organization_id', $organization->id)
-                    ->where('external_id', 'like', self::CUSTOMER_PREFIX . '%')
+                    ->where('external_id', 'like', self::CUSTOMER_PREFIX.'%')
                     ->pluck('id');
 
                 if ($customerIds->isNotEmpty()) {
@@ -1869,7 +1862,7 @@ class WebhookSimulatorController extends Controller
         }
 
         $customer->forceFill([
-            'external_id' => self::CUSTOMER_PREFIX . $customer->organization_id . ':' . $provider . ':' . $customer->phone,
+            'external_id' => self::CUSTOMER_PREFIX.$customer->organization_id.':'.$provider.':'.$customer->phone,
         ])->save();
 
         OrderStatusHistory::query()->create([
