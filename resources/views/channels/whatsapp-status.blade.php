@@ -16,9 +16,11 @@
                     </div>
 
                     <div class="flex flex-col gap-3 sm:flex-row">
+                        @can('manage-settings')
                         <a href="{{ route('channels.whatsapp.configuration') }}" class="brand-btn-primary justify-center">
                             Abrir configuracion
                         </a>
+                        @endcan
                         <a href="{{ route('channels.index') }}" class="brand-btn-secondary justify-center border-emerald-200 text-emerald-800 hover:border-emerald-300 hover:text-emerald-900">
                             Ir al hub
                         </a>

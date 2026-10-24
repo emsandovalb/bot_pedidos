@@ -22,11 +22,13 @@
                 </div>
 
                 <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                    @can('manage-settings')
                     <a href="{{ route('channels.whatsapp') }}" class="rounded-2xl border border-amber-200 bg-white/95 p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-amber-300">
                         <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Accion rapida</div>
                         <div class="mt-2 text-2xl font-semibold tracking-tight text-brand-navy">Abrir wizard de WhatsApp</div>
                         <p class="mt-2 text-sm leading-6 text-slate-600">Regresa al flujo de onboarding para solicitar ayuda o completar datos.</p>
                     </a>
+                    @endcan
                     <a href="{{ route('channels.whatsapp.status') }}" class="rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-brand-primary/30">
                         <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Estado del canal</div>
                         <div class="mt-2 text-2xl font-semibold tracking-tight text-brand-navy">WhatsApp</div>
@@ -61,9 +63,11 @@
                     <h2 class="text-lg font-semibold text-brand-navy">Solicitudes</h2>
                     <p class="mt-1 text-sm text-slate-500">Listado operativo con estado, empresa, contacto y responsable.</p>
                 </div>
+                @can('manage-settings')
                 <a href="{{ route('channels.whatsapp') }}" class="brand-btn-secondary justify-center">
                     Nueva solicitud
                 </a>
+                @endcan
             </div>
 
             <div class="mt-6 overflow-hidden rounded-[1.75rem] border border-slate-200/70">

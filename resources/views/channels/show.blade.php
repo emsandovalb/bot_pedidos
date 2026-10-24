@@ -56,6 +56,7 @@
                                 Health Check
                             </button>
                         </form>
+                        @can('manage-settings')
                         <form method="POST" action="{{ route('channels.disconnect', $provider) }}">
                             @csrf
                             <button type="submit" class="brand-btn-secondary w-full justify-center sm:w-auto">
@@ -71,6 +72,7 @@
                         <a href="{{ $provider === 'whatsapp' ? route('channels.whatsapp.configuration') : route('channels.show', $provider) . '#connection' }}" class="brand-btn-secondary justify-center">
                             Configure
                         </a>
+                        @endcan
                     </div>
                 </div>
 

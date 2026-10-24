@@ -229,6 +229,7 @@
                         </div>
                     </div>
 
+                    @can('manage-settings')
                     <div class="mt-5 space-y-3">
                         <a href="{{ route('channels.whatsapp') }}" class="brand-btn-primary w-full justify-center">
                             Open WhatsApp setup
@@ -237,6 +238,7 @@
                             Open WhatsApp configuration
                         </a>
                     </div>
+                    @endcan
                 </div>
             </div>
         </section>

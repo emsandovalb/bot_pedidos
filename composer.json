@@ -1,10 +1,10 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "benditio/bot-pedidos",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
-    "license": "MIT",
+    "description": "BotPedidos: captura de pedidos por Telegram y WhatsApp con revisión, catálogo y despacho.",
+    "keywords": ["laravel", "orders", "telegram", "whatsapp"],
+    "license": "proprietary",
     "require": {
         "php": "^8.3",
         "laravel/framework": "^13.7",

@@ -74,6 +74,8 @@ services:
         sync: false             # vacío hasta activar WhatsApp
       - key: LEGACY_LOTTERY_ROUTES_ENABLED
         value: "false"
+      - key: DEVELOPER_TOOLKIT_ENABLED
+        value: "false"
       - key: SENTRY_LARAVEL_DSN
         sync: false              # DSN del proyecto en sentry.io
       - key: SENTRY_TRACES_SAMPLE_RATE
