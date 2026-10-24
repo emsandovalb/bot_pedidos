@@ -12,10 +12,13 @@ class Branch extends Model
     use HasFactory;
 
     public const STATUS_ACTIVE = 'active';
+
     public const STATUS_INACTIVE = 'inactive';
 
     public const CHANNEL_TYPE_SIMULATED = 'simulated';
+
     public const CHANNEL_TYPE_TELEGRAM = 'telegram';
+
     public const CHANNEL_TYPE_WHATSAPP = 'whatsapp';
 
     protected $fillable = [
@@ -39,20 +42,5 @@ class Branch extends Model
     public function incomingMessages(): HasMany
     {
         return $this->hasMany(IncomingMessage::class);
-    }
-
-    public function requests(): HasMany
-    {
-        return $this->hasMany(IntakeRequest::class);
-    }
-
-    public function numberLimits(): HasMany
-    {
-        return $this->hasMany(NumberLimit::class);
-    }
-
-    public function dailyClosures(): HasMany
-    {
-        return $this->hasMany(BranchDailyClosure::class);
     }
 }

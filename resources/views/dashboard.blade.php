@@ -248,7 +248,7 @@
         <section class="grid gap-4 md:grid-cols-3">
             <a href="{{ route('order-reviews.index') }}" class="rounded-xl border border-amber-200/70 border-l-4 border-l-amber-500 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
                 <div class="text-sm font-medium text-slate-500">Revisión pendiente</div>
-                <div class="mt-2 text-3xl font-semibold tracking-tight text-brand-navy">{{ $totalNeedsReviewRequests }}</div>
+                <div class="mt-2 text-3xl font-semibold tracking-tight text-brand-navy">{{ $orderPendingReviewCount }}</div>
                 <div class="mt-1 text-sm text-slate-600">Pedidos listos para validar manualmente.</div>
             </a>
 

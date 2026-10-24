@@ -9,15 +9,10 @@ use App\Models\Order;
 use App\Models\Organization;
 use App\Models\Product;
 use App\Models\ProductAlias;
-use App\Models\User;
 use App\Services\Fulfillment\FulfillmentPlannerService;
 use App\Services\OrderDuplicateDetectionService;
 use App\Services\OrderIngestionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Hash;
 use Mockery;
 use RuntimeException;
 use Tests\TestCase;
@@ -312,31 +307,6 @@ class OrderIngestionTest extends TestCase
         ]);
     }
 
-    public function test_legacy_flow_is_not_affected_when_order_ingestion_is_disabled(): void
-    {
-        [$user, $branch] = $this->makeOrgWithTelegramBranchAndOwner();
-        $update = $this->telegramUpdate(9100, 4100, '1000 al 28 2pm', 'maria', 'Maria');
-
-        Config::set('services.telegram.enabled', true);
-        Config::set('services.telegram.bot_token', 'test-token');
-        Config::set('services.telegram.default_branch_id', $branch->id);
-        Config::set('services.order_ingestion.enabled', false);
-        Http::fake($this->telegramResponses([$update]));
-
-        $exitCode = Artisan::call('telegram:poll');
-
-        $this->assertSame(0, $exitCode);
-        $this->assertDatabaseCount('orders', 0);
-        $this->assertDatabaseCount('requests', 1);
-        $this->assertDatabaseHas('incoming_messages', [
-            'organization_id' => $branch->organization_id,
-            'branch_id' => $branch->id,
-            'channel_type' => Branch::CHANNEL_TYPE_TELEGRAM,
-            'from_identifier' => '4100',
-            'external_message_id' => '9100',
-        ]);
-    }
-
     /**
      * @return array{0: Organization, 1: Branch, 2: Customer}
      */
@@ -381,104 +351,5 @@ class OrderIngestionTest extends TestCase
             'status' => IncomingMessage::STATUS_RECEIVED,
             'received_at' => now(),
         ]);
-    }
-
-    /**
-     * @return array{0: User, 1: Branch}
-     */
-    private function makeOrgWithTelegramBranchAndOwner(): array
-    {
-        $organization = Organization::create([
-            'name' => 'Telegram Order Org',
-            'status' => Organization::STATUS_ACTIVE,
-        ]);
-
-        $branch = Branch::create([
-            'organization_id' => $organization->id,
-            'name' => 'Telegram Branch',
-            'channel_type' => Branch::CHANNEL_TYPE_TELEGRAM,
-            'channel_identifier' => '@loteriabot',
-            'status' => Branch::STATUS_ACTIVE,
-        ]);
-
-        $user = User::create([
-            'organization_id' => $organization->id,
-            'branch_id' => null,
-            'role' => User::ROLE_OWNER,
-            'name' => 'Owner',
-            'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => Hash::make('password'),
-        ]);
-
-        $organization->update(['owner_user_id' => $user->id]);
-
-        collect([
-            ['name' => '12:00 md', 'draw_time' => '12:00:00'],
-            ['name' => '2:00 pm', 'draw_time' => '14:00:00'],
-            ['name' => '5:00 pm', 'draw_time' => '17:00:00'],
-            ['name' => '7:00 pm', 'draw_time' => '19:00:00'],
-        ])->each(function (array $drawData) use ($organization): void {
-            \App\Models\Draw::create([
-                'organization_id' => $organization->id,
-                'name' => $drawData['name'],
-                'draw_time' => $drawData['draw_time'],
-                'status' => \App\Models\Draw::STATUS_ACTIVE,
-            ]);
-        });
-
-        return [$user->fresh(), $branch->fresh()];
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function telegramUpdate(int $updateId, int $chatId, string $text, ?string $username = null, ?string $firstName = null): array
-    {
-        return [
-            'update_id' => $updateId,
-            'message' => [
-                'message_id' => $updateId + 100,
-                'date' => now()->timestamp,
-                'chat' => [
-                    'id' => $chatId,
-                    'type' => 'private',
-                ],
-                'from' => array_filter([
-                    'id' => $chatId,
-                    'username' => $username,
-                    'first_name' => $firstName,
-                ], static fn ($value) => $value !== null),
-                'text' => $text,
-            ],
-        ];
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function telegramResponses(array $updates): array
-    {
-        return [
-            'https://api.telegram.org/bot*/getMe' => Http::response([
-                'ok' => true,
-                'result' => [
-                    'id' => 123456789,
-                    'is_bot' => true,
-                    'first_name' => 'Loteria Bot',
-                    'username' => 'loteriabot',
-                ],
-            ], 200),
-            'https://api.telegram.org/bot*/getUpdates' => Http::response([
-                'ok' => true,
-                'result' => $updates,
-            ], 200),
-            'https://api.telegram.org/bot*/sendMessage' => Http::response([
-                'ok' => true,
-                'result' => [
-                    'message_id' => 777,
-                ],
-            ], 200),
-        ];
     }
 }

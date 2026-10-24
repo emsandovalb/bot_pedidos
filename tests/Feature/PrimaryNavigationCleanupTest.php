@@ -4,8 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Routing\RouteCollection;
-use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
 
 class PrimaryNavigationCleanupTest extends TestCase
@@ -33,7 +31,7 @@ class PrimaryNavigationCleanupTest extends TestCase
         $response->assertDontSee('loteria');
     }
 
-    public function test_primary_routes_remain_available_when_legacy_routes_are_disabled(): void
+    public function test_primary_routes_are_available(): void
     {
         $user = User::factory()->state(['role' => User::ROLE_OWNER])->create();
 
@@ -44,7 +42,7 @@ class PrimaryNavigationCleanupTest extends TestCase
         $this->actingAs($user)->get(route('profile.edit'))->assertOk();
     }
 
-    public function test_legacy_lottery_routes_are_not_registered_by_default(): void
+    public function test_legacy_lottery_routes_no_longer_exist(): void
     {
         $user = User::factory()->state(['role' => User::ROLE_OWNER])->create();
 
@@ -58,31 +56,9 @@ class PrimaryNavigationCleanupTest extends TestCase
             '/pilot-checklist',
             '/pilot-script',
             '/operator-guide',
+            '/closures',
         ] as $path) {
             $this->get($path)->assertNotFound();
         }
-    }
-
-    public function test_legacy_lottery_routes_can_be_temporarily_enabled(): void
-    {
-        // Por config y recargando rutas: con env vars el .env de CI
-        // (LEGACY_LOTTERY_ROUTES_ENABLED=false) las pisa al refrescar la app.
-        config(['features.legacy_lottery_routes_enabled' => true]);
-        $this->reloadWebRoutes();
-
-        $this->assertTrue(Route::has('intake-requests.index'));
-        $this->assertTrue(Route::has('numbers.index'));
-        $this->assertTrue(Route::has('limits.index'));
-        $this->assertTrue(Route::has('simulator.index'));
-        $this->assertTrue(Route::has('pilot.checklist'));
-        $this->assertTrue(Route::has('pilot.script'));
-        $this->assertTrue(Route::has('pilot.guide'));
-    }
-
-    private function reloadWebRoutes(): void
-    {
-        Route::setRoutes(new RouteCollection);
-        Route::middleware('web')->group(base_path('routes/web.php'));
-        Route::getRoutes()->refreshNameLookups();
     }
 }

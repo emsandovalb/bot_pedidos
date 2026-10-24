@@ -2,14 +2,8 @@
 
 namespace App\Providers;
 
-use App\Models\BranchDailyClosure;
-use App\Models\IntakeRequest;
-use App\Models\NumberLimit;
 use App\Models\Order;
 use App\Models\User;
-use App\Policies\BranchDailyClosurePolicy;
-use App\Policies\IntakeRequestPolicy;
-use App\Policies\NumberLimitPolicy;
 use App\Policies\OrderPolicy;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -32,9 +26,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Gate::policy(IntakeRequest::class, IntakeRequestPolicy::class);
-        Gate::policy(BranchDailyClosure::class, BranchDailyClosurePolicy::class);
-        Gate::policy(NumberLimit::class, NumberLimitPolicy::class);
         Gate::policy(Order::class, OrderPolicy::class);
 
         Gate::define('manage-settings', fn (User $user): bool => $user->canManageSettings());

@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class IncomingMessage extends Model
@@ -13,11 +12,17 @@ class IncomingMessage extends Model
     use HasFactory;
 
     public const STATUS_RECEIVED = 'received';
+
     public const STATUS_PROCESSING = 'processing';
+
     public const STATUS_PROCESSED = 'processed';
+
     public const STATUS_FAILED = 'failed';
+
     public const STATUS_DUPLICATE = 'duplicate';
+
     public const STATUS_IGNORED = 'ignored';
+
     public const STATUS_ERROR = self::STATUS_FAILED;
 
     protected $fillable = [
@@ -75,24 +80,9 @@ class IncomingMessage extends Model
         return $this->belongsTo(Order::class);
     }
 
-    public function request(): HasOne
-    {
-        return $this->hasOne(IntakeRequest::class);
-    }
-
-    public function requests(): HasMany
-    {
-        return $this->hasMany(IntakeRequest::class);
-    }
-
-    public function response(): HasOne
-    {
-        return $this->hasOne(MessageResponse::class);
-    }
-
     /**
      * Mensaje del módulo de conversaciones que este entrante originó, si lo hubo.
-     * El pipeline de pedidos (incoming_messages -> intake_requests -> orders) no
+     * El pipeline de pedidos (incoming_messages -> orders) no
      * depende de esta relación; es sólo un puente opcional hacia la bandeja.
      */
     public function conversationMessage(): HasOne
