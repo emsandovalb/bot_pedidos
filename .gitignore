@@ -26,3 +26,8 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Salidas generadas por las corridas de piloto y Playwright
+/artifacts/pilot/runs/
+/playwright-report/
+/test-results/
