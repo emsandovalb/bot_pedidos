@@ -8,9 +8,8 @@ use App\Models\User;
 use App\Services\Messaging\DTO\ProviderCapabilities;
 use App\Services\Messaging\DTO\ProviderHealth;
 use App\Services\Messaging\DTO\ProviderValidationResult;
-use App\Services\Messaging\DTO\WebhookVerificationResult;
-use App\Services\Messaging\Manager\ProviderLifecycleManager;
 use App\Services\Messaging\Manager\MessagingManager;
+use App\Services\Messaging\Manager\ProviderLifecycleManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -20,7 +19,7 @@ class ProviderLifecycleTest extends TestCase
 
     public function test_telegram_capabilities_are_exposed(): void
     {
-        $manager = new MessagingManager();
+        $manager = new MessagingManager;
 
         $capabilities = $manager->capabilities('telegram');
 
@@ -38,7 +37,7 @@ class ProviderLifecycleTest extends TestCase
 
     public function test_whatsapp_capabilities_are_exposed(): void
     {
-        $manager = new MessagingManager();
+        $manager = new MessagingManager;
 
         $capabilities = $manager->capabilities('whatsapp');
 
@@ -51,7 +50,7 @@ class ProviderLifecycleTest extends TestCase
 
     public function test_instagram_capabilities_are_placeholder(): void
     {
-        $manager = new MessagingManager();
+        $manager = new MessagingManager;
 
         $capabilities = $manager->capabilities('instagram');
 
@@ -66,7 +65,7 @@ class ProviderLifecycleTest extends TestCase
     {
         config()->set('services.telegram.bot_token', 'telegram-test-token');
 
-        $manager = new MessagingManager();
+        $manager = new MessagingManager;
 
         $health = $manager->health('telegram');
 
@@ -86,7 +85,7 @@ class ProviderLifecycleTest extends TestCase
     {
         config()->set('services.telegram.bot_token', 'telegram-test-token');
 
-        $manager = new MessagingManager();
+        $manager = new MessagingManager;
 
         $validation = $manager->validate('telegram');
 
@@ -116,7 +115,7 @@ class ProviderLifecycleTest extends TestCase
             'metadata_json' => ['seed' => true],
         ]);
 
-        $manager = new ProviderLifecycleManager();
+        $manager = new ProviderLifecycleManager;
         $health = $manager->refreshHealth('telegram', $organization->id);
 
         $this->assertSame($organization->id, $health->organization_id);
@@ -150,7 +149,7 @@ class ProviderLifecycleTest extends TestCase
             'provider_version' => 'v1',
         ]);
 
-        $manager = new ProviderLifecycleManager();
+        $manager = new ProviderLifecycleManager;
         $health = $manager->disconnect('telegram', $organization->id);
 
         $this->assertSame('disconnected', $health->status);
@@ -197,7 +196,7 @@ class ProviderLifecycleTest extends TestCase
             'provider_version' => 'v1',
         ]);
 
-        $manager = new ProviderLifecycleManager();
+        $manager = new ProviderLifecycleManager;
         $manager->refreshHealth('telegram', $organizationA->id);
 
         $this->assertNotNull($connectionA->fresh()->last_health_check_at);
@@ -240,6 +239,16 @@ class ProviderLifecycleTest extends TestCase
             ->assertSeeText('Telegram')
             ->assertSeeText('Capabilities')
             ->assertSeeText('Health');
+    }
+
+    public function test_channel_hub_lists_every_provider(): void
+    {
+        $this->actingAs($this->createOrganizationUser())
+            ->get(route('channels.index'))
+            ->assertOk()
+            ->assertSeeText('Telegram')
+            ->assertSeeText('WhatsApp')
+            ->assertSeeText('Instagram');
     }
 
     public function test_unknown_provider_is_handled_safely(): void

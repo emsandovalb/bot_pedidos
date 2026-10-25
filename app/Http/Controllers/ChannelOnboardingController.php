@@ -2,16 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ChannelConnection;
+use App\Services\Channels\WhatsAppOnboardingPresenter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class ChannelOnboardingController extends ChannelController
+class ChannelOnboardingController extends Controller
 {
+    public function __construct(
+        private readonly WhatsAppOnboardingPresenter $whatsAppOnboarding,
+    ) {}
+
     public function update(Request $request): RedirectResponse
     {
-        $connection = $this->channelConnection(true);
+        $connection = $this->whatsAppOnboarding->channelConnection($request->user()?->organization_id, true);
 
         if ($connection === null) {
             abort(403);
@@ -30,7 +34,7 @@ class ChannelOnboardingController extends ChannelController
             'notes' => ['nullable', 'string', 'max:5000'],
         ]);
 
-        $metadata = $this->normalizedMetadata($connection->metadata_json);
+        $metadata = $this->whatsAppOnboarding->normalizedMetadata($connection->metadata_json);
         $metadata = array_merge($metadata, [
             'has_whatsapp_business' => $request->boolean('has_whatsapp_business'),
             'has_dedicated_number' => $request->boolean('has_dedicated_number'),
@@ -42,7 +46,7 @@ class ChannelOnboardingController extends ChannelController
             'notes' => $this->nullableValue($validated['notes'] ?? null),
         ]);
 
-        $status = $this->statusFromMetadata($metadata);
+        $status = $this->whatsAppOnboarding->readinessState($metadata)['status'];
 
         DB::transaction(function () use ($connection, $validated, $metadata, $status): void {
             $connection->fill([
@@ -58,26 +62,6 @@ class ChannelOnboardingController extends ChannelController
         return redirect()
             ->route('channels.whatsapp')
             ->with('status', 'Configuracion de WhatsApp guardada.');
-    }
-
-    private function statusFromMetadata(array $metadata): string
-    {
-        $requiredKeys = [
-            'has_whatsapp_business',
-            'has_dedicated_number',
-            'has_facebook_access',
-            'has_meta_business',
-        ];
-
-        $completedRequired = collect($requiredKeys)->filter(
-            fn (string $key): bool => (bool) ($metadata[$key] ?? false)
-        )->count();
-
-        return match ($completedRequired) {
-            0 => ChannelConnection::STATUS_DRAFT,
-            count($requiredKeys) => ChannelConnection::STATUS_READY_FOR_SETUP,
-            default => ChannelConnection::STATUS_PENDING,
-        };
     }
 
     private function nullableValue(mixed $value): mixed
