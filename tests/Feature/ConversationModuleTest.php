@@ -10,6 +10,7 @@ use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class ConversationModuleTest extends TestCase
@@ -105,9 +106,8 @@ class ConversationModuleTest extends TestCase
     public function test_conversation_module_does_not_touch_the_order_intake_pipeline(): void
     {
         // Las tablas del pipeline de pedidos siguen existiendo e intactas.
-        $this->assertTrue(\Illuminate\Support\Facades\Schema::hasTable('incoming_messages'));
-        $this->assertTrue(\Illuminate\Support\Facades\Schema::hasTable('requests'));
-        $this->assertTrue(\Illuminate\Support\Facades\Schema::hasTable('orders'));
-        $this->assertTrue(\Illuminate\Support\Facades\Schema::hasColumn('messages', 'incoming_message_id'));
+        $this->assertTrue(Schema::hasTable('incoming_messages'));
+        $this->assertTrue(Schema::hasTable('orders'));
+        $this->assertTrue(Schema::hasColumn('messages', 'incoming_message_id'));
     }
 }

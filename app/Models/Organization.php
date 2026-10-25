@@ -12,6 +12,7 @@ class Organization extends Model
     use HasFactory;
 
     public const STATUS_ACTIVE = 'active';
+
     public const STATUS_INACTIVE = 'inactive';
 
     protected $fillable = [
@@ -43,26 +44,6 @@ class Organization extends Model
     public function incomingMessages(): HasMany
     {
         return $this->hasMany(IncomingMessage::class);
-    }
-
-    public function requests(): HasMany
-    {
-        return $this->hasMany(IntakeRequest::class);
-    }
-
-    public function draws(): HasMany
-    {
-        return $this->hasMany(Draw::class);
-    }
-
-    public function numberLimits(): HasMany
-    {
-        return $this->hasMany(NumberLimit::class);
-    }
-
-    public function dailyClosures(): HasMany
-    {
-        return $this->hasMany(BranchDailyClosure::class);
     }
 
     public function channelConnections(): HasMany

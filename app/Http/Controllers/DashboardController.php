@@ -2,14 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Branch;
 use App\Models\DailyOrderClosure;
-use App\Models\IntakeRequest;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\SetupRequest;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 
 class DashboardController extends Controller
 {
@@ -18,14 +16,6 @@ class DashboardController extends Controller
         $user = auth()->user();
         $organizationId = $user?->organization_id;
         $branchIds = $user?->visibleBranchIds() ?? [];
-
-        $requestScope = function (Builder $query) use ($user, $organizationId, $branchIds): Builder {
-            if ($user?->canViewAllBranchesForRead()) {
-                return $organizationId ? $query->where('organization_id', $organizationId) : $query->whereRaw('1 = 0');
-            }
-
-            return $branchIds ? $query->whereIn('branch_id', $branchIds) : $query->whereRaw('1 = 0');
-        };
 
         $closureScope = function (Builder $query) use ($user, $organizationId, $branchIds): Builder {
             if ($user?->canViewAllBranchesForRead()) {
@@ -43,16 +33,6 @@ class DashboardController extends Controller
             return $branchIds ? $query->whereIn('branch_id', $branchIds) : $query->whereRaw('1 = 0');
         };
 
-        $branchesQuery = Branch::query()
-            ->whereIn('id', $branchIds)
-            ->withCount([
-                'requests as requests_today_count' => fn (Builder $query) => $query->whereDate('created_at', today()),
-                'requests as pending_requests_count' => fn (Builder $query) => $query->where('status', IntakeRequest::STATUS_PENDING),
-                'requests as needs_review_requests_count' => fn (Builder $query) => $query->where('status', IntakeRequest::STATUS_NEEDS_REVIEW),
-                'requests as confirmed_requests_count' => fn (Builder $query) => $query->where('status', IntakeRequest::STATUS_CONFIRMED),
-            ])
-            ->orderBy('name');
-
         return view('dashboard', [
             'openSetupRequestsCount' => SetupRequest::query()
                 ->when($organizationId, fn (Builder $query) => $query->where('organization_id', $organizationId), fn (Builder $query) => $query->whereRaw('1 = 0'))
@@ -65,19 +45,6 @@ class DashboardController extends Controller
             'completedSetupRequestsCount' => SetupRequest::query()
                 ->when($organizationId, fn (Builder $query) => $query->where('organization_id', $organizationId), fn (Builder $query) => $query->whereRaw('1 = 0'))
                 ->where('status', SetupRequest::STATUS_COMPLETED)
-                ->count(),
-            'totalPendingRequests' => IntakeRequest::query()
-                ->tap($requestScope)
-                ->where('status', IntakeRequest::STATUS_PENDING)
-                ->count(),
-            'totalNeedsReviewRequests' => IntakeRequest::query()
-                ->tap($requestScope)
-                ->where('status', IntakeRequest::STATUS_NEEDS_REVIEW)
-                ->count(),
-            'totalConfirmedRequestsToday' => IntakeRequest::query()
-                ->tap($requestScope)
-                ->where('status', IntakeRequest::STATUS_CONFIRMED)
-                ->whereDate('confirmed_at', today())
                 ->count(),
             'activeProductCount' => Product::query()
                 ->when($organizationId, fn ($query) => $query->where('organization_id', $organizationId), fn ($query) => $query->whereRaw('1 = 0'))
@@ -117,27 +84,6 @@ class DashboardController extends Controller
                 ->orderByDesc('created_at')
                 ->limit(5)
                 ->get(),
-            'statusCounts' => [
-                'pending' => IntakeRequest::query()->tap($requestScope)->where('status', IntakeRequest::STATUS_PENDING)->count(),
-                'needs_review' => IntakeRequest::query()->tap($requestScope)->where('status', IntakeRequest::STATUS_NEEDS_REVIEW)->count(),
-                'confirmed' => IntakeRequest::query()->tap($requestScope)->where('status', IntakeRequest::STATUS_CONFIRMED)->count(),
-                'rejected' => IntakeRequest::query()->tap($requestScope)->where('status', IntakeRequest::STATUS_REJECTED)->count(),
-            ],
-            'branchTotals' => $branchesQuery->get(),
-            'topBranchesToday' => Branch::query()
-                ->whereIn('id', $branchIds)
-                ->withCount(['requests as requests_today_count' => fn (Builder $query) => $query->whereDate('created_at', today())])
-                ->orderByDesc('requests_today_count')
-                ->orderBy('name')
-                ->limit(3)
-                ->get(),
-            'needsReviewRequests' => IntakeRequest::query()
-                ->tap($requestScope)
-                ->with(['branch', 'customer'])
-                ->where('status', IntakeRequest::STATUS_NEEDS_REVIEW)
-                ->orderByDesc('created_at')
-                ->limit(5)
-                ->get(),
             'dailyOrderClosuresTodayCount' => DailyOrderClosure::query()
                 ->tap($closureScope)
                 ->whereDate('closure_date', today())
@@ -150,16 +96,6 @@ class DashboardController extends Controller
                 ->get(),
             'totalClosuresCount' => DailyOrderClosure::query()
                 ->tap($closureScope)
-                ->count(),
-            'stalePendingRequestCount' => IntakeRequest::query()
-                ->tap($requestScope)
-                ->where('status', IntakeRequest::STATUS_PENDING)
-                ->where('created_at', '<=', now()->subHours(24))
-                ->count(),
-            'previousDayPendingCount' => IntakeRequest::query()
-                ->tap($requestScope)
-                ->where('status', IntakeRequest::STATUS_PENDING)
-                ->whereDate('created_at', '<', today())
                 ->count(),
         ]);
     }

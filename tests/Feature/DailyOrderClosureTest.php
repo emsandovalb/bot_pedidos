@@ -179,13 +179,13 @@ class DailyOrderClosureTest extends TestCase
             ->get(route('dashboard'))
             ->assertOk()
             ->assertSee(route('daily-order-closures.index'))
-            ->assertDontSee(route('closures.index'));
+            ->assertDontSee(url('/closures').'"', false);
 
         $this->actingAs($user)
             ->get(route('branches.index'))
             ->assertOk()
             ->assertSee(route('daily-order-closures.index'))
-            ->assertDontSee(route('closures.index'));
+            ->assertDontSee(url('/closures').'"', false);
     }
 
     /**

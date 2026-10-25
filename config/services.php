@@ -49,8 +49,4 @@ return [
         'api_version' => env('WHATSAPP_API_VERSION', 'v21.0'),
     ],
 
-    'order_ingestion' => [
-        'enabled' => (bool) env('ORDER_INGESTION_ENABLED', true),
-    ],
-
 ];

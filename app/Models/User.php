@@ -101,19 +101,4 @@ class User extends Authenticatable
     {
         return $this->hasMany(Organization::class, 'owner_user_id');
     }
-
-    public function confirmedRequests(): HasMany
-    {
-        return $this->hasMany(IntakeRequest::class, 'confirmed_by');
-    }
-
-    public function rejectedRequests(): HasMany
-    {
-        return $this->hasMany(IntakeRequest::class, 'rejected_by');
-    }
-
-    public function closedDailyClosures(): HasMany
-    {
-        return $this->hasMany(BranchDailyClosure::class, 'closed_by');
-    }
 }

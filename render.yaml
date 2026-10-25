@@ -62,8 +62,6 @@ services:
         fromDatabase: { name: botpedidos-db, property: password }
       - key: TELEGRAM_ENABLED
         value: "true"
-      - key: ORDER_INGESTION_ENABLED
-        value: "true"
       - key: TELEGRAM_VERIFY_SSL
         value: "true"
       - key: TELEGRAM_BOT_TOKEN
@@ -72,8 +70,6 @@ services:
         sync: false
       - key: WHATSAPP_APP_SECRET
         sync: false             # vacío hasta activar WhatsApp
-      - key: LEGACY_LOTTERY_ROUTES_ENABLED
-        value: "false"
       - key: DEVELOPER_TOOLKIT_ENABLED
         value: "false"
       - key: SENTRY_LARAVEL_DSN
@@ -152,8 +148,6 @@ envVarGroups:
       - key: DB_PASSWORD
         fromDatabase: { name: botpedidos-db, property: password }
       - key: TELEGRAM_ENABLED
-        value: "true"
-      - key: ORDER_INGESTION_ENABLED
         value: "true"
       - key: TELEGRAM_BOT_TOKEN
         sync: false
