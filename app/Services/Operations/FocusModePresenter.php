@@ -8,7 +8,6 @@ use App\Models\OrderItem;
 use App\Models\OrderNotificationLog;
 use App\Services\OrderWorkflowActionPresenter;
 use Carbon\CarbonInterface;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -19,6 +18,8 @@ class FocusModePresenter
     public function __construct(
         private readonly NextActionQueue $nextActionQueue,
         private readonly OrderWorkflowActionPresenter $orderWorkflowActionPresenter,
+        private readonly OrderDisplayLabels $labels,
+        private readonly OperationsOrderScope $orderScope,
     ) {}
 
     /**
@@ -64,7 +65,7 @@ class FocusModePresenter
 
     private function visibleOrders(): Collection
     {
-        return $this->scopedQuery()
+        return $this->orderScope->scopedQuery()
             ->with([
                 'branch:id,name',
                 'customer:id,name,phone',
@@ -605,7 +606,7 @@ class FocusModePresenter
             ->map(function ($item): string {
                 if ($item instanceof OrderItem) {
                     $quantity = (float) $item->quantity;
-                    $name = $this->resolveItemLabel($item->product_id, $item->raw_text, $item->product?->name);
+                    $name = $this->labels->resolveItemLabel($item->product_id, $item->raw_text, $item->product?->name);
                     $unit = $item->unit;
                     $notes = $item->notes;
                 } else {
@@ -691,7 +692,7 @@ class FocusModePresenter
         return [
             'id' => $order->id,
             'status' => $order->status,
-            'status_label' => $this->statusLabel($order->status),
+            'status_label' => $this->labels->statusLabel($order->status),
             'source_channel' => $order->source_channel,
             'channel_key' => $order->source_channel,
             'channel' => $this->channelLabel($order->source_channel),
@@ -700,7 +701,7 @@ class FocusModePresenter
             'branch_name' => $order->branch?->name ?? 'Sin sucursal',
             'created_at_iso' => $order->created_at?->toIso8601String(),
             'created_at_label' => $order->created_at?->format('d/m/Y H:i') ?? 'Sin fecha',
-            'elapsed_label' => $this->elapsedLabel($order->created_at),
+            'elapsed_label' => $this->labels->elapsedLabel($order->created_at),
             'preview' => Str::limit($order->raw_message_text ?? 'Sin mensaje original', 120),
             'original_message' => $order->raw_message_text ?? 'Sin mensaje original',
             'summary' => $this->productSummary($order),
@@ -739,7 +740,7 @@ class FocusModePresenter
                         'product_name' => $item->product?->name,
                         'quantity' => (float) $item->quantity,
                         'unit' => $item->unit,
-                        'name' => $this->resolveItemLabel($item->product_id, $item->raw_text, $item->product?->name),
+                        'name' => $this->labels->resolveItemLabel($item->product_id, $item->raw_text, $item->product?->name),
                         'raw_text' => $item->raw_text,
                         'notes' => $item->notes,
                     ];
@@ -810,89 +811,10 @@ class FocusModePresenter
         );
     }
 
-    private function statusLabel(string $status): string
-    {
-        return match ($status) {
-            Order::STATUS_PENDING_REVIEW => 'Nuevos',
-            Order::STATUS_CONFIRMED => 'Confirmado',
-            Order::STATUS_PREPARING => 'Preparando',
-            Order::STATUS_READY_FOR_DISPATCH => 'Listo',
-            Order::STATUS_DISPATCHED => 'Despachado',
-            Order::STATUS_CANCELLED => 'Cancelado',
-            Order::STATUS_REJECTED => 'Rechazado',
-            default => Str::headline(str_replace('_', ' ', $status)),
-        };
-    }
-
-    private function elapsedLabel(mixed $date): string
-    {
-        if (! $date instanceof CarbonInterface) {
-            return 'Sin fecha';
-        }
-
-        $minutes = $date->diffInMinutes(now());
-
-        if ($minutes < 60) {
-            return 'Hace '.max(1, (int) $minutes).' min';
-        }
-
-        $hours = intdiv((int) $minutes, 60);
-
-        if ($hours < 24) {
-            return 'Hace '.$hours.' h';
-        }
-
-        return 'Hace '.intdiv($hours, 24).' d';
-    }
-
-    private function resolveItemLabel(?int $productId, ?string $rawText, ?string $productName): string
-    {
-        if ($productName !== null && $productName !== '') {
-            return $productName;
-        }
-
-        if ($productId !== null) {
-            return 'Producto #'.$productId;
-        }
-
-        $label = Str::of((string) $rawText)->squish()->toString();
-
-        return $label !== '' ? $label : 'Sin texto';
-    }
-
     private function productSummary(Order $order): string
     {
         $parts = $this->itemSummary($order);
 
         return $parts !== [] ? implode(', ', array_slice($parts, 0, 3)) : 'Sin resumen';
-    }
-
-    private function scopedQuery(): Builder
-    {
-        $user = auth()->user();
-
-        return Order::query()->where(function (Builder $query) use ($user): void {
-            if ($user?->canViewAllBranchesForRead()) {
-                if ($user?->organization_id) {
-                    $query->where('organization_id', $user->organization_id);
-
-                    return;
-                }
-
-                $query->whereRaw('1 = 0');
-
-                return;
-            }
-
-            $branchIds = $user?->visibleBranchIds() ?? [];
-
-            if ($branchIds === []) {
-                $query->whereRaw('1 = 0');
-
-                return;
-            }
-
-            $query->whereIn('branch_id', $branchIds);
-        });
     }
 }
