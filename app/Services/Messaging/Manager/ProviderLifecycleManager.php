@@ -12,7 +12,7 @@ use App\Services\Messaging\DTO\WebhookReceiveResult;
 use App\Services\Messaging\DTO\WebhookVerificationResult;
 use App\Services\Messaging\Providers\InstagramProvider;
 use App\Services\Messaging\Providers\TelegramProvider;
-use App\Services\Messaging\Providers\WhatsAppCloudProvider;
+use App\Services\Messaging\Providers\WhatsAppProvider;
 use App\Services\WhatsAppConfigurationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -22,17 +22,16 @@ class ProviderLifecycleManager
 {
     public function __construct(
         private readonly ?WhatsAppConfigurationService $whatsappConfigurationService = null,
-    ) {
-    }
+    ) {}
 
     public function driver(?string $provider = null): MessagingProvider
     {
         $provider = strtolower(trim($provider ?: (string) config('messaging.default', 'telegram')));
 
         return match ($provider) {
-            'telegram' => new TelegramProvider(),
-            'whatsapp' => new WhatsAppCloudProvider(),
-            'instagram' => new InstagramProvider(),
+            'telegram' => new TelegramProvider,
+            'whatsapp' => new WhatsAppProvider,
+            'instagram' => new InstagramProvider,
             default => throw new InvalidArgumentException("Unsupported messaging provider [{$provider}]."),
         };
     }
@@ -237,7 +236,7 @@ class ProviderLifecycleManager
             connected: false,
             webhook_status: 'unknown',
             credentials_status: 'unknown',
-            last_error: 'Unsupported messaging provider [' . $providerName . '].',
+            last_error: 'Unsupported messaging provider ['.$providerName.'].',
             latency_ms: null,
             capabilities: $this->unknownCapabilities($providerName)->toArray(),
             metadata: [],
@@ -255,7 +254,7 @@ class ProviderLifecycleManager
 
         return new ProviderValidationResult(
             valid: false,
-            errors: ['Unsupported messaging provider [' . $providerName . '].'],
+            errors: ['Unsupported messaging provider ['.$providerName.'].'],
             warnings: [],
             configuration_checked_at: now(),
         );
@@ -383,7 +382,7 @@ class ProviderLifecycleManager
             status: 404,
             challenge: null,
             provider: $providerName,
-            message: 'Unsupported messaging provider [' . $providerName . '].',
+            message: 'Unsupported messaging provider ['.$providerName.'].',
         );
     }
 
@@ -396,7 +395,7 @@ class ProviderLifecycleManager
             status: 404,
             challenge: null,
             provider: $providerName,
-            message: 'Unsupported messaging provider [' . $providerName . '].',
+            message: 'Unsupported messaging provider ['.$providerName.'].',
         );
     }
 

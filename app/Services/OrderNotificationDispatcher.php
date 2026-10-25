@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\NotificationSetting;
 use App\Models\Order;
 use App\Models\OrderNotificationLog;
 use App\Services\Messaging\DTO\OutgoingMessageDTO;
@@ -11,16 +12,15 @@ use Throwable;
 class OrderNotificationDispatcher
 {
     public function __construct(
-        private readonly OrderNotificationService $orderNotificationService,
+        private readonly NotificationPolicyService $notificationPolicyService,
         private readonly NotificationTemplateRenderer $notificationTemplateRenderer,
         private readonly MessagingManager $messagingManager,
-    ) {
-    }
+    ) {}
 
     public function dispatch(Order $order, string $event): OrderNotificationLog
     {
         try {
-            $evaluation = $this->orderNotificationService->evaluate($order, $event);
+            $evaluation = $this->evaluate($order, $event);
             $setting = $evaluation['setting'];
             $channel = strtolower(trim((string) $setting->channel));
             $renderedMessage = $this->renderMessage($order, $setting->message_body);
@@ -58,7 +58,7 @@ class OrderNotificationDispatcher
                         $status = OrderNotificationLog::STATUS_SENT;
                         $providerMessageId = $result->provider_message_id;
                         $sentAt = now();
-                        $reason = 'Notification sent through ' . $channel . '.';
+                        $reason = 'Notification sent through '.$channel.'.';
                     } else {
                         $status = OrderNotificationLog::STATUS_FAILED;
                         $errorMessage = $result->error;
@@ -119,6 +119,34 @@ class OrderNotificationDispatcher
                 'evaluated_at' => now(),
             ]);
         }
+    }
+
+    /**
+     * @return array{
+     *     should_send: bool,
+     *     reason: string,
+     *     requires_template: bool,
+     *     setting: NotificationSetting
+     * }
+     */
+    private function evaluate(Order $order, string $event): array
+    {
+        $order->loadMissing(['organization', 'customer.customerIdentities', 'incomingMessage']);
+
+        $channel = strtolower(trim((string) ($order->source_channel ?: $order->incomingMessage?->provider ?: 'telegram')));
+        $customerIdentity = $order->customer === null
+            ? null
+            : $order->customer->customerIdentities()
+                ->where('provider', $channel)
+                ->latest('last_seen_at')
+                ->first();
+
+        return $this->notificationPolicyService->evaluate(
+            organization: $order->organization,
+            channel: $channel,
+            event: $event,
+            customerIdentity: $customerIdentity,
+        );
     }
 
     private function renderMessage(Order $order, ?string $template): string
