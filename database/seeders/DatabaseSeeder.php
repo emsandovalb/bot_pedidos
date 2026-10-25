@@ -113,7 +113,7 @@ class DatabaseSeeder extends Seeder
 
         $products = collect([
             [
-                'name' => 'Bolsas de jardÃ­n',
+                'name' => 'Bolsas de jardín',
                 'sku' => 'JARDIN-01',
                 'unit_label' => 'bolsa',
                 'price' => 3.50,
@@ -129,7 +129,7 @@ class DatabaseSeeder extends Seeder
                 'aliases' => ['bolsas de apretados', 'apretados'],
             ],
             [
-                'name' => 'Vasos plÃ¡sticos',
+                'name' => 'Vasos plásticos',
                 'sku' => 'VASOS-01',
                 'unit_label' => 'caja',
                 'price' => 5.20,

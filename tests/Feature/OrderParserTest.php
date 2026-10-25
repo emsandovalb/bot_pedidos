@@ -96,12 +96,22 @@ class OrderParserTest extends TestCase
 
     public function test_parser_parses_intent_words(): void
     {
-        $result = app(OrderParserService::class)->parse('MÃ¡ndeme 3 kilos de tomate');
+        $result = app(OrderParserService::class)->parse('Mándeme 3 kilos de tomate');
 
         $this->assertCount(1, $result['items']);
         $this->assertSame(3, $result['items'][0]['quantity']);
         $this->assertSame('kilo', $result['items'][0]['unit']);
         $this->assertSame('tomate', $result['items'][0]['product_name']);
+    }
+
+    public function test_parser_splits_items_on_bullets(): void
+    {
+        $result = app(OrderParserService::class)->parse('2 tomates • 3 cebollas');
+
+        $this->assertCount(2, $result['items']);
+        $this->assertSame('tomates', $result['items'][0]['product_name']);
+        $this->assertSame(3, $result['items'][1]['quantity']);
+        $this->assertSame('cebollas', $result['items'][1]['product_name']);
     }
 
     public function test_parser_defaults_quantity_to_one_for_multi_item_message_without_quantity(): void

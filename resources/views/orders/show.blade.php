@@ -71,7 +71,7 @@
                             Este pedido se parece al pedido #{{ $order->possibleDuplicateOf->id }} recibido recientemente.
                         </p>
                         <p class="mt-2 text-sm leading-6 text-amber-800">
-                            Score: {{ $order->duplicate_score !== null ? number_format((float) $order->duplicate_score, 0) : 'â€”' }}
+                            Score: {{ $order->duplicate_score !== null ? number_format((float) $order->duplicate_score, 0) : '—' }}
                         </p>
                         @if ($order->duplicate_reason)
                             <p class="mt-1 text-sm leading-6 text-amber-800">
@@ -401,7 +401,7 @@
                                         </div>
                                     </div>
                                     <div class="text-xs text-slate-500">
-                                        {{ $log->evaluated_at?->format('d/m/Y H:i') ?? 'â€”' }}
+                                        {{ $log->evaluated_at?->format('d/m/Y H:i') ?? '—' }}
                                     </div>
                                 </div>
 
