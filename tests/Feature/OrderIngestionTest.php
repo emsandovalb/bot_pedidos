@@ -206,7 +206,7 @@ class OrderIngestionTest extends TestCase
             organization: $organization,
             branch: $branch,
             customer: $customer,
-            rawMessageText: '2 bolsas de jardÃ­n',
+            rawMessageText: '2 bolsas de jardín',
         );
 
         $this->assertNotNull($order->duplicate_checked_at);
@@ -228,12 +228,12 @@ class OrderIngestionTest extends TestCase
             organization: $organization,
             branch: $branch,
             customer: $customer,
-            rawMessageText: '2 bolsas de jardÃ­n',
+            rawMessageText: '2 bolsas de jardín',
         );
 
         $this->assertDatabaseHas('orders', [
             'id' => $order->id,
-            'raw_message_text' => '2 bolsas de jardÃ­n',
+            'raw_message_text' => '2 bolsas de jardín',
         ]);
         $this->assertNotNull($order->id);
     }

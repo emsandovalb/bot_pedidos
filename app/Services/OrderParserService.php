@@ -152,9 +152,11 @@ class OrderParserService
 
     private function normalize(string $rawText): string
     {
-        $normalized = Str::ascii(mb_strtolower(trim($rawText)));
+        // Las viñetas se cambian antes de Str::ascii, que las borra.
+        $normalized = str_replace('•', ',', mb_strtolower(trim($rawText)));
+        $normalized = Str::ascii($normalized);
         $normalized = str_replace(["\r\n", "\r", "\n"], ' , ', $normalized);
-        $normalized = str_replace([';', '|', 'â€¢'], ',', $normalized);
+        $normalized = str_replace([';', '|'], ',', $normalized);
         $normalized = preg_replace('/[^\p{L}\p{N}\s,.-]+/u', ' ', $normalized) ?? $normalized;
         $normalized = preg_replace('/\s+/u', ' ', $normalized) ?? $normalized;
 
@@ -200,6 +202,7 @@ class OrderParserService
         $text = preg_replace('/\s*(?:\r\n|\r|\n)\s*/u', ',', $text) ?? $text;
         $text = preg_replace('/\s*;\s*/u', ',', $text) ?? $text;
         $text = preg_replace('/\s*\|\s*/u', ',', $text) ?? $text;
+        $text = preg_replace('/\s*•\s*/u', ',', $text) ?? $text;
         $text = preg_replace('/\s+\b(?:y|e)\b\s+/u', ',', $text) ?? $text;
 
         $segments = array_values(array_filter(array_map('trim', preg_split('/\s*,\s*/u', $text) ?: [])));
