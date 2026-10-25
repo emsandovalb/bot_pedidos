@@ -11,6 +11,7 @@ use App\Models\Order;
 use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class DeveloperToolkitTest extends TestCase
@@ -235,6 +236,72 @@ class DeveloperToolkitTest extends TestCase
                 ->where('notes', 'like', '%variant=vip%')
                 ->count(),
         );
+    }
+
+    public function test_quick_generation_and_reset_round_trip(): void
+    {
+        [$user] = $this->prepareToolkitContext();
+
+        $this->actingAs($user)
+            ->post(route('developer.webhook-simulator.generate'), [
+                'action' => 'quick',
+                'provider' => 'telegram',
+                'count' => 3,
+            ])
+            ->assertOk();
+
+        $this->assertSame(3, Order::query()
+            ->where('organization_id', $user->organization_id)
+            ->where('notes', 'like', '[developer-toolkit]%')
+            ->count());
+
+        $this->actingAs($user)
+            ->post(route('developer.webhook-simulator.generate'), [
+                'action' => 'customers',
+                'customer_count' => 4,
+            ])
+            ->assertOk();
+
+        $this->actingAs($user)
+            ->post(route('developer.webhook-simulator.reset'), [
+                'scope' => 'environment',
+                'confirm' => '1',
+            ])
+            ->assertOk()
+            ->assertSee('Reset completed');
+
+        $this->assertSame(0, Order::query()
+            ->where('organization_id', $user->organization_id)
+            ->where('notes', 'like', '[developer-toolkit]%')
+            ->count());
+        $this->assertSame(0, Customer::query()
+            ->where('organization_id', $user->organization_id)
+            ->where('external_id', 'like', 'developer-toolkit:customer:%')
+            ->count());
+    }
+
+    /**
+     * @return array<string, array{0: array<string, string>}>
+     */
+    public static function generatorActionProvider(): array
+    {
+        return [
+            'restaurant scenario' => [['action' => 'scenario', 'scenario' => 'restaurant']],
+            'parser failures' => [['action' => 'qa', 'qa_case' => 'parser_failures']],
+            'unknown products' => [['action' => 'qa', 'qa_case' => 'unknown_products']],
+            'busy day' => [['action' => 'qa', 'qa_case' => 'busy_day']],
+            'empty inbox' => [['action' => 'qa', 'qa_case' => 'empty_inbox']],
+        ];
+    }
+
+    #[DataProvider('generatorActionProvider')]
+    public function test_generator_actions_render_the_toolkit(array $input): void
+    {
+        [$user] = $this->prepareToolkitContext();
+
+        $this->actingAs($user)
+            ->post(route('developer.webhook-simulator.generate'), $input + ['provider' => 'whatsapp'])
+            ->assertOk();
     }
 
     public function test_generated_orders_are_visible_in_operations_center_dataset(): void
