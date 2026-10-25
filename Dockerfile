@@ -13,7 +13,7 @@ RUN npm run build
 # serversideup/php trae nginx + php-fpm + supervisor listos para producción.
 FROM serversideup/php:8.3-fpm-nginx AS app
 
-# pdo_pgsql para PostgreSQL (Render Postgres).
+# pdo_pgsql para PostgreSQL.
 USER root
 RUN install-php-extensions pdo_pgsql pgsql
 USER www-data
@@ -35,5 +35,5 @@ ENV PHP_OPCACHE_ENABLE=1 \
     SSL_MODE=off \
     AUTORUN_ENABLED=false
 
-# serversideup/php escucha en 8080. Render enruta al puerto expuesto.
+# serversideup/php escucha en 8080.
 EXPOSE 8080

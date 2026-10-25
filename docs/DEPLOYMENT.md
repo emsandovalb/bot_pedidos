@@ -1,51 +1,47 @@
-# Despliegue del piloto (BotPedidos) — Render
+# Despliegue del piloto (BotPedidos)
 
 Piloto de captura de pedidos por **Telegram** + revisión humana.
 WhatsApp e IA están fuera del piloto.
 
-## Arquitectura en Render
+## Procesos
 
-| Servicio Render | Qué es | Comando |
+| Proceso | Qué es | Comando |
 |---|---|---|
-| `botpedidos-db` | PostgreSQL 16 gestionado | — |
-| `botpedidos-web` | App (Docker: nginx + php-fpm) | (imagen) |
-| `botpedidos-queue` | Worker de la cola — procesa los mensajes entrantes (parser + pedido) | `php artisan queue:work` |
-| `botpedidos-telegram` | Poller del bot de Telegram | `php artisan telegram:poll --loop` |
-| `botpedidos-scheduler` | Scheduler (sin tareas aún, dejado listo) | `php artisan schedule:work` |
+| Base de datos | PostgreSQL 16 | — |
+| Web | App (Docker: nginx + php-fpm) | (imagen del `Dockerfile`) |
+| Cola | Procesa los mensajes entrantes (parser + pedido) | `php artisan queue:work` |
+| Poller de Telegram | Lee los mensajes del bot | `php artisan telegram:poll --loop` |
+| Scheduler | Sin tareas aún, dejado listo | `php artisan schedule:work` |
 
-Todo está declarado en [`render.yaml`](../render.yaml) (Blueprint). SQLite **no** se usa
-en producción: el worker + el poller + la web escriben a la vez.
+SQLite **no** se usa en producción: el worker, el poller y la web escriben a la vez.
+Cada deploy debe correr `php artisan migrate --force` y `config/route/view:cache`.
 
-## Pasos
+## Primer despliegue
 
-1. **Push** de la rama con `Dockerfile`, `render.yaml`, `.dockerignore`.
-2. En Render: **New + → Blueprint**, seleccionar el repo. Crea la BD y los 4 servicios.
-3. Rellenar los secretos (marcados `sync: false` en el blueprint), **los mismos en la web
-   y en el env-var-group `botpedidos-shared`**:
+1. Rellenar los secretos, **los mismos en la web, la cola y el poller**:
    - `APP_KEY` → generar en local con `php artisan key:generate --show` y pegar
-   - `APP_URL` → `https://botpedidos-web.onrender.com` (o tu dominio)
+   - `APP_URL` → la URL pública de la web
    - `TELEGRAM_BOT_TOKEN` → de @BotFather
-   - `TELEGRAM_DEFAULT_BRANCH_ID` → id de la sucursal por defecto (se sabe tras el paso 5)
+   - `TELEGRAM_DEFAULT_BRANCH_ID` → id de la sucursal por defecto (se sabe tras el paso 2)
    - `WHATSAPP_APP_SECRET` → vacío por ahora
-4. El primer deploy corre `preDeployCommand`: `migrate --force` + `config/route/view:cache`.
-5. **Sembrar datos** (una vez, desde el Shell del servicio `botpedidos-web`):
+2. **Sembrar datos** (una vez, desde una shell del servicio web):
    ```bash
    php artisan db:seed --class=PilotSeeder     # org + sucursales + catálogo demo
    ```
    Anotar el `id` de la sucursal de Telegram → ponerlo en `TELEGRAM_DEFAULT_BRANCH_ID`
-   (web + grupo compartido) y redeploy.
+   y redeploy.
    Luego cargar el **catálogo real** del negocio por la importación masiva de la UI
    (`nombre | SKU | unidad | alias 1, alias 2`).
 
 ## Variables de entorno clave
 
-Definidas en `render.yaml`; las de producción que difieren de `.env.example`:
+Las de producción que difieren de `.env.example`:
 
 ```
 APP_ENV=production
 APP_DEBUG=false
 SESSION_SECURE_COOKIE=true
-DB_CONNECTION=pgsql            # host/credenciales inyectados desde la BD de Render
+DB_CONNECTION=pgsql            # más DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD
 QUEUE_CONNECTION=database
 MESSAGING_INBOUND_QUEUE=true   # webhook encola el procesamiento; requiere el worker
 ```
@@ -59,7 +55,7 @@ grep -rn "env(" app/ routes/ | grep -v "config/"
 
 El webhook entrante (`/webhooks/whatsapp`) ahora **persiste el mensaje y encola** el
 parser + creación de pedido en el job `App\Jobs\ProcessInboundMessage`, devolviendo 200
-de inmediato. Requiere `botpedidos-queue` corriendo.
+de inmediato. Requiere el worker de la cola corriendo.
 
 - `MESSAGING_INBOUND_QUEUE=false` → procesamiento síncrono (si no quieres worker).
 - El **poller de Telegram** procesa síncrono a propósito (necesita el resultado para
@@ -73,12 +69,12 @@ de inmediato. Requiere `botpedidos-queue` corriendo.
 3. Mandar un mensaje real al bot de Telegram → en unos segundos aparece en
    `/order-reviews` como `pending_review`
 4. Confirmar → el estado avanza; revisar el historial
-5. Logs de los 4 servicios sin errores
+5. Logs de la web, la cola y el poller sin errores
 
 ## Operación
 
-- **Backups**: Render Postgres hace backups automáticos en planes de pago (verificar retención).
-- **Healthcheck**: `botpedidos-web` apunta a `/health` (BD + métricas de ingesta; ver abajo).
+- **Backups**: configurar backups automáticos de la base (verificar retención).
+- **Healthcheck**: apuntar el de la web a `/health` (BD + métricas de ingesta; ver abajo).
 - **Errores**: Sentry ya integrado (ver sección siguiente).
 - **Roles**: crear los usuarios del negocio con el rol correcto
   (`owner`/`admin` todo, `seller` su sucursal, `viewer` solo lectura — ya lo gatea `OrderPolicy`).
@@ -91,7 +87,7 @@ de inmediato. Requiere `botpedidos-queue` corriendo.
 
 - Sin `SENTRY_LARAVEL_DSN` (dev/tests) es un no-op: no manda nada, no rompe nada.
 - Para activarlo: crear proyecto en sentry.io → pegar el DSN en `SENTRY_LARAVEL_DSN`
-  (en la web **y** en el grupo `botpedidos-shared` de `render.yaml`).
+  (en la web, la cola y el poller).
 - `SENTRY_TRACES_SAMPLE_RATE=0.1` — 10% de las requests con tracing de performance;
   súbelo o bájalo según volumen. `send_default_pii` queda en `false` (no manda datos
   de clientes a Sentry).
