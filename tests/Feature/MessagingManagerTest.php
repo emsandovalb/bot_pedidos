@@ -7,7 +7,7 @@ use App\Services\Messaging\DTO\OutgoingMessageDTO;
 use App\Services\Messaging\Manager\MessagingManager;
 use App\Services\Messaging\Providers\InstagramProvider;
 use App\Services\Messaging\Providers\TelegramProvider;
-use App\Services\Messaging\Providers\WhatsAppCloudProvider;
+use App\Services\Messaging\Providers\WhatsAppProvider;
 use DateTimeImmutable;
 use Tests\TestCase;
 
@@ -15,7 +15,7 @@ class MessagingManagerTest extends TestCase
 {
     public function test_telegram_returns_telegram_provider(): void
     {
-        $manager = new MessagingManager();
+        $manager = new MessagingManager;
 
         $provider = $manager->driver('telegram');
 
@@ -25,17 +25,17 @@ class MessagingManagerTest extends TestCase
 
     public function test_whatsapp_returns_whatsapp_cloud_provider(): void
     {
-        $manager = new MessagingManager();
+        $manager = new MessagingManager;
 
         $provider = $manager->driver('whatsapp');
 
-        $this->assertInstanceOf(WhatsAppCloudProvider::class, $provider);
+        $this->assertInstanceOf(WhatsAppProvider::class, $provider);
         $this->assertSame('whatsapp', $provider->providerName());
     }
 
     public function test_instagram_returns_instagram_provider_placeholder(): void
     {
-        $manager = new MessagingManager();
+        $manager = new MessagingManager;
 
         $provider = $manager->driver('instagram');
 

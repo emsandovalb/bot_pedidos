@@ -25,7 +25,7 @@ This sprint adds the abstraction layer only.
 
 ## How WhatsApp will plug in
 
-When WhatsApp Cloud API is ready, the `WhatsAppCloudProvider` will implement the same contract as Telegram.
+`WhatsAppProvider` implements the same contract as Telegram.
 
 That means WhatsApp can plug into the same manager, DTOs, and webhook flow without changing the downstream order pipeline.
 
