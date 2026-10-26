@@ -46,6 +46,16 @@ QUEUE_CONNECTION=database
 MESSAGING_INBOUND_QUEUE=true   # webhook encola el procesamiento; requiere el worker
 ```
 
+Oria (pago de servicios, plan Plus), opcional:
+
+```
+ORIA_API_URL=https://<api de oria>/api
+ORIA_PARTNER_KEY=               # de `php artisan oria:partner-key bot_pedidos` en Oria
+```
+
+En Oria, `PARTNER_BOT_PEDIDOS_RETURN_URLS` tiene que incluir `{APP_URL}/settings/oria/callback`. Sin estas
+variables, Configuración → Oria dice que no está configurada y el resto de la app funciona igual.
+
 Regla: **ningún `env()` fuera de `config/`** (rompe con `config:cache`). Auditar:
 ```bash
 grep -rn "env(" app/ routes/ | grep -v "config/"

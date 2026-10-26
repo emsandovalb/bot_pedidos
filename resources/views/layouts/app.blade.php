@@ -139,6 +139,34 @@
                                         <span class="absolute inset-y-0 right-0 w-1 rounded-l-full bg-brand-primary"></span>
                                     @endif
                                 </a>
+                                <a
+                                    href="{{ route('settings.oria.index') }}"
+                                    @class([
+                                        'group relative flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-medium transition' => true,
+                                        'border-brand-primary bg-[linear-gradient(90deg,rgba(20,110,219,0.10),rgba(22,163,74,0.08))] text-brand-navy shadow-sm' => request()->routeIs('settings.oria.*'),
+                                        'border-transparent text-slate-600 hover:bg-slate-50 hover:text-brand-navy' => ! request()->routeIs('settings.oria.*'),
+                                    ])
+                                >
+                                    <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5 shrink-0 transition-colors {{ request()->routeIs('settings.oria.*') ? 'text-brand-primary' : 'text-slate-400 group-hover:text-brand-primary' }}" aria-hidden="true">
+                                        <path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <span class="flex-1">Oria</span>
+                                    @if (request()->routeIs('settings.oria.*'))
+                                        <span class="absolute inset-y-0 right-0 w-1 rounded-l-full bg-brand-primary"></span>
+                                    @endif
+                                </a>
+                                @if ($oriaPlus ?? false)
+                                    <a
+                                        href="{{ route('settings.oria.pay-services') }}"
+                                        class="group relative flex items-center gap-3 rounded-2xl border border-transparent px-4 py-3 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-brand-navy"
+                                    >
+                                        <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5 shrink-0 text-slate-400 transition-colors group-hover:text-emerald-600" aria-hidden="true">
+                                            <path d="M3 7h18M3 7v11a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V7M3 7l2-3h14l2 3M8 14h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                        <span class="flex-1">Pagar servicios</span>
+                                        <span class="rounded-full bg-white/80 px-2 py-0.5 text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-emerald-700 ring-1 ring-inset ring-emerald-200">Plus</span>
+                                    </a>
+                                @endif
                             </div>
                         </div>
                         @endcan

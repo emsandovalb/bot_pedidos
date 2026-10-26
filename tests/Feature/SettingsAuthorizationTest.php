@@ -29,6 +29,11 @@ class SettingsAuthorizationTest extends TestCase
             'create setup request' => ['post', '/setup-requests'],
             'notification settings' => ['get', '/settings/notifications'],
             'save notification settings' => ['post', '/settings/notifications'],
+            'oria settings' => ['get', '/settings/oria'],
+            'connect oria' => ['post', '/settings/oria/connect'],
+            'oria callback' => ['get', '/settings/oria/callback'],
+            'disconnect oria' => ['delete', '/settings/oria'],
+            'pay services' => ['get', '/settings/oria/pay-services'],
         ];
     }
 

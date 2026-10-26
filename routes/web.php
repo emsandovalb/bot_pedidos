@@ -14,6 +14,7 @@ use App\Http\Controllers\NotificationSettingsController;
 use App\Http\Controllers\OperationsController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderReviewController;
+use App\Http\Controllers\OriaSettingsController;
 use App\Http\Controllers\ProductAliasController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductImportController;
@@ -60,6 +61,15 @@ Route::middleware(['auth'])->group(function () {
         Route::prefix('/settings/notifications')->name('settings.notifications.')->group(function () {
             Route::get('/', [NotificationSettingsController::class, 'index'])->name('index');
             Route::post('/', [NotificationSettingsController::class, 'update'])->name('update');
+        });
+
+        // Oria: conectar el negocio y, con plan Plus, abrir "Pagar servicios".
+        Route::prefix('/settings/oria')->name('settings.oria.')->group(function () {
+            Route::get('/', [OriaSettingsController::class, 'index'])->name('index');
+            Route::post('/connect', [OriaSettingsController::class, 'connect'])->name('connect');
+            Route::get('/callback', [OriaSettingsController::class, 'callback'])->name('callback');
+            Route::delete('/', [OriaSettingsController::class, 'disconnect'])->name('disconnect');
+            Route::get('/pay-services', [OriaSettingsController::class, 'payServices'])->name('pay-services');
         });
     });
 
