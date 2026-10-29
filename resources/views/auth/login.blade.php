@@ -33,13 +33,32 @@
         .bl-divider::before,.bl-divider::after{content:"";flex:1;height:1px;background:#e2e8f0;}
         .bl-google{margin-top:16px;height:45px;width:100%;border:1px solid #d7dde6;border-radius:6px;background:#fff;display:flex;align-items:center;justify-content:center;gap:12px;font-size:15px;font-weight:500;color:#1e293b;text-decoration:none;box-sizing:border-box;}
         .bl-google:hover{background:#f8fafc;}
-        @media (max-width:1300px){.bl-wrap{padding:30px 40px;}.bl-deco{display:none;}.bl-left{min-height:0;}}
-        @media (max-width:900px){
-            .bl-wrap{grid-template-columns:1fr;gap:28px;padding:24px 16px;}
-            .bl-left{padding:0;}
-            .bl-title{margin-top:28px;font-size:36px;}
+        .bl-form{margin-top:34px;display:flex;flex-direction:column;gap:24px;}
+        @media (max-width:1300px){
+            .bl-wrap{grid-template-columns:minmax(0,1fr) minmax(0,460px);gap:48px;padding:30px 40px;}
+            .bl-deco{display:none;}
+            .bl-left{min-height:0;}
+            .bl-secure{min-width:0;white-space:nowrap;}
+            .bl-card{padding:40px 36px 32px;}
+        }
+        @media (max-width:960px){
+            .bl-wrap{grid-template-columns:minmax(0,460px);justify-content:center;align-content:center;gap:32px;padding:40px 24px;}
+            .bl-left{align-items:center;text-align:center;padding:0;}
+            .bl-title{margin-top:28px;font-size:34px;line-height:1.15;}
+            .bl-title br{display:none;}
+            .bl-sub{margin-top:12px;font-size:16px;}
             .bl-features,.bl-secure{display:none;}
-            .bl-card{padding:32px 22px;}
+            .bl-card{align-self:auto;}
+        }
+        @media (max-width:520px){
+            .bl-wrap{align-content:start;gap:22px;padding:24px 16px;}
+            .bl-brand{font-size:24px;}
+            .bl-brand img{width:28px;height:34px;}
+            .bl-title{margin-top:18px;font-size:27px;}
+            .bl-sub{display:none;}
+            .bl-card{padding:28px 20px 24px;border-radius:16px;}
+            .bl-card h2{font-size:26px;}
+            .bl-form{margin-top:24px;gap:18px;}
         }
     </style>
 
@@ -53,7 +72,7 @@
                     <span>Benditio</span>
                 </a>
 
-                <h1 class="bl-title">Convierte<br><span>mensajes</span> en<br>ventas.</h1>
+                <h1 class="bl-title">Convierte <br><span>mensajes</span> en <br>ventas.</h1>
                 <p class="bl-sub">Gestiona pedidos, clientes y operaciones desde una sola plataforma.</p>
 
                 <div class="bl-features">
@@ -124,7 +143,7 @@
                     <div style="margin-top:16px;font-size:13px;font-weight:600;color:#16a34a;text-align:center;">{{ session('status') }}</div>
                 @endif
 
-                <form method="POST" action="{{ route('login') }}" style="margin-top:34px;display:flex;flex-direction:column;gap:24px;">
+                <form method="POST" action="{{ route('login') }}" class="bl-form">
                     @csrf
 
                     <div>
