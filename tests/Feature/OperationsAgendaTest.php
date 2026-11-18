@@ -31,11 +31,11 @@ class OperationsAgendaTest extends TestCase
         $this->actingAs($user)
             ->get(route('operations.index'))
             ->assertOk()
-            ->assertSeeText('Benditio Operations Center')
-            ->assertSeeText('DO NOW')
-            ->assertSeeText('NEXT')
-            ->assertSeeText('COMPLETED')
-            ->assertSeeText('Today');
+            ->assertSeeText('Centro de operaciones')
+            ->assertSeeText('AHORA')
+            ->assertSeeText('DESPUÉS')
+            ->assertSeeText('LISTOS')
+            ->assertSeeText('Hoy');
     }
 
     public function test_feed_groups_orders_into_the_expected_agenda_sections(): void
@@ -54,7 +54,7 @@ class OperationsAgendaTest extends TestCase
         $this->assertCount(2, $criticalCards);
         $this->assertSame(-20, (int) data_get($criticalCards->get(0), 'remaining_sla_minutes'));
         $this->assertSame(-5, (int) data_get($criticalCards->get(1), 'remaining_sla_minutes'));
-        $this->assertSame(['Morning', 'Afternoon'], array_values($todayGroups));
+        $this->assertSame(['Temprano', 'Tarde'], array_values($todayGroups));
         $this->assertNotNull($sections->get('tomorrow'));
         $this->assertNotNull($sections->get('completed'));
     }
@@ -103,7 +103,7 @@ class OperationsAgendaTest extends TestCase
             ->assertSee('snapshotUrlBase', false)
             ->assertSee('operations-select-order')
             ->assertSee('drawerLoading', false)
-            ->assertSeeText('Loading order details...');
+            ->assertSeeText('Cargando el pedido…');
     }
 
     /**

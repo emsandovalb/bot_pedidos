@@ -7,6 +7,15 @@ use Illuminate\Support\Str;
 
 class AgendaCard
 {
+    /** How a requested time window reads on a card. */
+    private const TIME_WINDOWS = [
+        'morning' => 'Temprano',
+        'before_noon' => 'Antes del mediodía',
+        'afternoon' => 'Tarde',
+        'evening' => 'Noche',
+        'anytime' => 'Cualquier hora',
+    ];
+
     /**
      * @param  array<string, mixed>  $order
      */
@@ -137,11 +146,11 @@ class AgendaCard
     private function deliveryLabel(string $deliveryMethod): string
     {
         return match ($deliveryMethod) {
-            'pickup' => 'Pickup',
-            'delivery' => 'Delivery',
+            'pickup' => 'Retiro',
+            'delivery' => 'Entrega',
             'express' => 'Express',
             'third_party' => 'Terceros',
-            default => Str::headline($deliveryMethod),
+            default => 'Entrega por confirmar',
         };
     }
 
@@ -149,10 +158,10 @@ class AgendaCard
     {
         return match ($paymentMethod) {
             'sinpe' => 'SINPE',
-            'cash' => 'Cash',
-            'card' => 'Card',
+            'cash' => 'Efectivo',
+            'card' => 'Tarjeta',
             'transfer' => 'Transferencia',
-            default => Str::headline($paymentMethod),
+            default => 'Pago por confirmar',
         };
     }
 
@@ -189,15 +198,15 @@ class AgendaCard
     {
         return match ($riskLevel) {
             'critical' => [
-                'label' => 'SLA Expired',
+                'label' => 'Atrasado',
                 'tone' => 'bg-rose-50 text-rose-800 ring-1 ring-rose-100',
             ],
             'high' => [
-                'label' => $remainingSlaMinutes !== null ? 'Due in ' . $remainingSlaMinutes . ' min' : 'High risk',
+                'label' => $remainingSlaMinutes !== null ? 'Vence en ' . $remainingSlaMinutes . ' min' : 'Riesgo alto',
                 'tone' => 'bg-orange-50 text-orange-800 ring-1 ring-orange-100',
             ],
             'medium' => [
-                'label' => 'Medium',
+                'label' => 'Medio',
                 'tone' => 'bg-amber-50 text-amber-800 ring-1 ring-amber-100',
             ],
             default => [
@@ -214,14 +223,14 @@ class AgendaCard
         }
 
         if ($remainingSlaMinutes < 0) {
-            return 'SLA Expired';
+            return 'Atrasado';
         }
 
         if ($remainingSlaMinutes < 60) {
-            return 'Due in ' . $remainingSlaMinutes . ' min';
+            return 'Vence en ' . $remainingSlaMinutes . ' min';
         }
 
-        return 'Due in ' . (int) round($remainingSlaMinutes / 60) . ' h';
+        return 'Vence en ' . (int) round($remainingSlaMinutes / 60) . ' h';
     }
 
     private function channelIcon(): string
@@ -277,33 +286,33 @@ class AgendaCard
         $explicitWindow = $this->stringValue($this->order['requested_time_window'] ?? null);
 
         if ($explicitWindow !== null) {
-            return Str::headline(str_replace('_', ' ', $explicitWindow));
+            return self::TIME_WINDOWS[$explicitWindow] ?? Str::headline(str_replace('_', ' ', $explicitWindow));
         }
 
         $commitmentTime = $this->stringValue($this->order['commitment_time'] ?? null);
 
         if ($commitmentTime === null) {
-            return 'Anytime';
+            return 'Cualquier hora';
         }
 
         $hour = (int) substr($commitmentTime, 0, 2);
 
         return match (true) {
-            $hour < 10 => 'Morning',
-            $hour < 12 => 'Before Noon',
-            $hour < 17 => 'Afternoon',
-            $hour < 20 => 'Evening',
-            default => 'Anytime',
+            $hour < 10 => 'Temprano',
+            $hour < 12 => 'Antes del mediodía',
+            $hour < 17 => 'Tarde',
+            $hour < 20 => 'Noche',
+            default => 'Cualquier hora',
         };
     }
 
     private function timeWindowRank(): int
     {
         return match ($this->timeWindowLabel()) {
-            'Morning' => 0,
-            'Before Noon' => 1,
-            'Afternoon' => 2,
-            'Evening' => 3,
+            'Temprano' => 0,
+            'Antes del mediodía' => 1,
+            'Tarde' => 2,
+            'Noche' => 3,
             default => 4,
         };
     }

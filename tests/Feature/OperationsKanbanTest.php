@@ -24,11 +24,11 @@ class OperationsKanbanTest extends TestCase
         $this->actingAs($user)
             ->get(route('operations.index', ['order' => $fixture['preparingOrder']->id]))
             ->assertOk()
-            ->assertSeeText('Benditio Operations Center')
-            ->assertSeeText('DO NOW')
-            ->assertSeeText('NEXT')
-            ->assertSeeText('COMPLETED')
-            ->assertSeeText('Detail drawer')
+            ->assertSeeText('Centro de operaciones')
+            ->assertSeeText('AHORA')
+            ->assertSeeText('DESPUÉS')
+            ->assertSeeText('LISTOS')
+            ->assertSeeText('Detalle del pedido')
             ->assertSeeText($fixture['preparingOrder']->customer->name);
     }
 

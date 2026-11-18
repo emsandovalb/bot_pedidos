@@ -31,11 +31,11 @@ class OperationsNextActionTest extends TestCase
         $this->actingAs($user)
             ->get(route('operations.index'))
             ->assertOk()
-            ->assertSeeText('Benditio Operations Center')
-            ->assertSeeText('Today')
-            ->assertSeeText('DO NOW')
-            ->assertSeeText('NEXT')
-            ->assertSeeText('COMPLETED')
+            ->assertSeeText('Centro de operaciones')
+            ->assertSeeText('Hoy')
+            ->assertSeeText('AHORA')
+            ->assertSeeText('DESPUÉS')
+            ->assertSeeText('LISTOS')
             ->assertSee('snapshotUrlBase', false);
     }
 
@@ -56,7 +56,7 @@ class OperationsNextActionTest extends TestCase
         $this->assertCount(5, $doNowCards);
         $this->assertSame(-20, (int) data_get($doNowCards->first(), 'remaining_sla_minutes'));
         $this->assertNotEmpty($nextGroups);
-        $this->assertTrue($nextGroups->pluck('label')->contains('Tomorrow'));
+        $this->assertTrue($nextGroups->pluck('label')->contains('Mañana y después'));
         $this->assertNotNull($sections->get('completed'));
     }
 

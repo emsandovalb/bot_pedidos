@@ -149,12 +149,12 @@ test('pilot documentation package captures the Benditio flow end to end', async 
     });
 
     await operationsPage.goto('/operations', { waitUntil: 'domcontentloaded' });
-    await expect(operationsPage.getByText('DO NOW', { exact: true })).toBeVisible();
-    await expect(operationsPage.getByText('NEXT', { exact: true })).toBeVisible();
-    await expect(operationsPage.getByText('COMPLETED', { exact: true })).toBeVisible();
+    await expect(operationsPage.getByText('AHORA', { exact: true })).toBeVisible();
+    await expect(operationsPage.getByText('DESPUÉS', { exact: true })).toBeVisible();
+    await expect(operationsPage.getByText('LISTOS', { exact: true })).toBeVisible();
     await operationsPage.screenshot({ path: path.resolve(screenshotDir, '03-operations-home.png'), fullPage: true });
 
-    const doNowSection = operationsPage.locator('section').filter({ hasText: 'DO NOW' });
+    const doNowSection = operationsPage.locator('section').filter({ hasText: 'AHORA' });
     const doNowCard = doNowSection.locator('article').filter({ hasText: 'Maria Lopez' }).first();
     await expect(doNowCard).toBeVisible();
     await doNowCard.screenshot({ path: path.resolve(screenshotDir, '04-do-now-order.png') });
@@ -164,9 +164,9 @@ test('pilot documentation package captures the Benditio flow end to end', async 
         doNowCard.click(),
     ]);
 
-    const drawer = operationsPage.locator('aside').filter({ hasText: 'Detail drawer' });
+    const drawer = operationsPage.locator('aside').filter({ hasText: 'Detalle del pedido' });
     await expect(drawer).toBeVisible();
-    await expect(drawer.getByText('Items', { exact: true })).toBeVisible();
+    await expect(drawer.getByText('Productos', { exact: true })).toBeVisible();
     await expect(drawer).toContainText('Confirmar');
     await operationsPage.screenshot({ path: path.resolve(screenshotDir, '05-order-drawer.png'), fullPage: true });
 
@@ -182,11 +182,11 @@ test('pilot documentation package captures the Benditio flow end to end', async 
     await expect(drawer).toContainText('Ver historial');
     await operationsPage.screenshot({ path: path.resolve(screenshotDir, '08-order-dispatched.png'), fullPage: true });
 
-    await drawer.getByRole('button', { name: 'Close' }).click();
+    await drawer.getByRole('button', { name: 'Cerrar' }).click();
     await operationsPage.reload();
-    await expect(operationsPage.getByText('DO NOW', { exact: true })).toBeVisible();
-    await operationsPage.locator('details').filter({ hasText: 'COMPLETED' }).locator('summary').click();
-    await expect(operationsPage.locator('details').filter({ hasText: 'COMPLETED' })).toContainText('Maria Lopez');
+    await expect(operationsPage.getByText('AHORA', { exact: true })).toBeVisible();
+    await operationsPage.locator('details').filter({ hasText: 'LISTOS' }).locator('summary').click();
+    await expect(operationsPage.locator('details').filter({ hasText: 'LISTOS' })).toContainText('Maria Lopez');
     await operationsPage.screenshot({ path: path.resolve(screenshotDir, '09-completed-after-refresh.png'), fullPage: true });
 
     const customersPage = await page.context().newPage();

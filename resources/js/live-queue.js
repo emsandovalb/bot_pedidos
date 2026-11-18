@@ -663,7 +663,7 @@ export class LiveQueue {
         const variants = {
             live: {
                 state: 'live',
-                label: 'Live',
+                label: 'En vivo',
                 tone: 'green',
                 description: 'Conectado',
             },

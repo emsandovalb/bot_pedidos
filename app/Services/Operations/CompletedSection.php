@@ -20,8 +20,8 @@ class CompletedSection
     {
         return [
             'key' => 'completed',
-            'label' => 'COMPLETED',
-            'empty_message' => 'Completed today',
+            'label' => 'LISTOS',
+            'empty_message' => 'Nada despachado hoy.',
             'collapsed' => true,
             'cards' => $this->cards
                 ->sortBy(fn (AgendaCard $card): array => $card->sortKey())

@@ -74,9 +74,9 @@ class OperationsSnapshotTest extends TestCase
             ->get(route('operations.index', ['order' => $fixture['selectedOrder']->id]))
             ->assertOk()
             ->assertSee('snapshotUrlBase', false)
-            ->assertSeeText('Loading order details...')
+            ->assertSeeText('Cargando el pedido…')
             ->assertSee('drawerLoading', false)
-            ->assertSeeText('Parser details');
+            ->assertSeeText('Lectura del mensaje');
     }
 
     /**

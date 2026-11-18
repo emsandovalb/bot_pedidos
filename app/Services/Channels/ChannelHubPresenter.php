@@ -148,22 +148,22 @@ class ChannelHubPresenter
     {
         return [
             [
-                'title' => 'Connected',
+                'title' => 'Conectado',
                 'detail' => $connection?->connected_at ? 'Conexion registrada en la base de datos.' : 'Sin conexion persistida.',
                 'time' => $connection?->connected_at?->format('d/m H:i') ?? 'Sin dato',
             ],
             [
-                'title' => 'Webhook Verified',
-                'detail' => 'Current webhook state: '.Str::headline($health->webhook_status),
+                'title' => 'Webhook verificado',
+                'detail' => 'Estado del webhook: '.Str::headline($health->webhook_status),
                 'time' => 'Ahora',
             ],
             [
-                'title' => 'Health Checked',
+                'title' => 'Conexión revisada',
                 'detail' => 'Estado actual: '.$this->labels->healthLabel($health->status),
                 'time' => $connection?->last_health_check_at?->format('d/m H:i') ?? $connection?->health_checked_at?->format('d/m H:i') ?? 'Hace poco',
             ],
             [
-                'title' => 'Provider Error',
+                'title' => 'Error del proveedor',
                 'detail' => $connection?->last_error ?? $health->last_error ?? 'Sin errores registrados.',
                 'time' => $connection?->last_ping?->format('d/m H:i') ?? $health->last_ping?->format('d/m H:i') ?? 'Sin dato',
             ],
@@ -178,17 +178,17 @@ class ChannelHubPresenter
     {
         $items = [
             [
-                'label' => 'Reconnect',
+                'label' => 'Reconectar',
                 'description' => 'Preparado para reactivar el canal desde el mismo lifecycle.',
                 'enabled' => (bool) ($capabilities['send_messages'] ?? false),
             ],
             [
-                'label' => 'Disconnect',
+                'label' => 'Desconectar',
                 'description' => 'Desconexion segura sin tocar parser ni ordenes.',
                 'enabled' => true,
             ],
             [
-                'label' => 'Webhook flow',
+                'label' => 'Webhook',
                 'description' => 'Listo para la integracion del adaptador cuando llegue Meta o cualquier otro proveedor.',
                 'enabled' => (bool) ($capabilities['receive_messages'] ?? false),
             ],
@@ -212,19 +212,19 @@ class ChannelHubPresenter
     {
         return [
             [
-                'label' => 'Last received',
+                'label' => 'Último recibido',
                 'value' => $connection?->last_received_message_at?->format('d/m/Y H:i') ?? $connection?->last_message_received_at?->format('d/m/Y H:i') ?? 'Sin dato',
-                'detail' => 'Most recent incoming lifecycle event.',
+                'detail' => 'El último mensaje que llegó.',
             ],
             [
-                'label' => 'Last sent',
+                'label' => 'Último enviado',
                 'value' => $connection?->last_sent_message_at?->format('d/m/Y H:i') ?? $connection?->last_message_sent_at?->format('d/m/Y H:i') ?? 'Sin dato',
-                'detail' => 'Most recent outbound lifecycle event.',
+                'detail' => 'El último mensaje enviado.',
             ],
             [
-                'label' => 'Last health check',
+                'label' => 'Última revisión',
                 'value' => $connection?->last_health_check_at?->format('d/m/Y H:i') ?? $connection?->health_checked_at?->format('d/m/Y H:i') ?? $health->last_health_check_at?->format('d/m/Y H:i') ?? 'Sin dato',
-                'detail' => 'Latest provider health refresh.',
+                'detail' => 'La última vez que se revisó la conexión.',
             ],
         ];
     }
@@ -274,23 +274,23 @@ class ChannelHubPresenter
     {
         return [
             [
-                'label' => 'Provider',
+                'label' => 'Canal',
                 'value' => $this->labels->providerLabel($provider),
             ],
             [
-                'label' => 'Health',
+                'label' => 'Estado',
                 'value' => $this->labels->healthLabel($health->status),
             ],
             [
-                'label' => 'Version',
+                'label' => 'Versión',
                 'value' => $connection?->provider_version ?? $connection?->version ?? $health->version ?? 'v1',
             ],
             [
-                'label' => 'Last ping',
+                'label' => 'Última señal',
                 'value' => $connection?->last_ping?->format('d/m/Y H:i') ?? ($health->last_ping?->format('d/m/Y H:i') ?? 'Sin dato'),
             ],
             [
-                'label' => 'Credentials',
+                'label' => 'Credenciales',
                 'value' => $connection?->credentials_status ?? $health->credentials_status ?? 'unknown',
             ],
             [

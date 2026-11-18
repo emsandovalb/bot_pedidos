@@ -31,14 +31,11 @@ Los pagos con tarjeta y SINPE usan el modo de prueba de ONVO, así que necesitan
 
 ## Pendientes conocidos
 
-Algunos casos verifican reglas que la app todavía no cumple. Están marcados con `pending(...)` o
-`test.fail(...)`: el reporte los cuenta como "esperado que falle" y se vuelven rojos el día que empiezan a
-pasar. Cuando se arregla algo en la app, se quita la marca en el mismo cambio.
+Hoy no hay ninguno: todos los casos verifican reglas que la app cumple.
 
-| Caso | Regla |
-| --- | --- |
-| BOT-14 | Operaciones en español y sin tarjetas "Sin productos visibles". |
-| ALL-02 | Sin textos en inglés en Operaciones, Canales y Perfil. |
+Si un caso nuevo verifica una regla que la app todavía no cumple, se marca con `pending(...)` (en
+`1-bot.spec.js`) o `test.fail(...)`: el reporte lo cuenta como "esperado que falle" y se vuelve rojo el día que
+empieza a pasar. Cuando se arregla la app, se quita la marca en el mismo cambio y se anota aquí mientras tanto.
 
 ## Cómo está armada
 

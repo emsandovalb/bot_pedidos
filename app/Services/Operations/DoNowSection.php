@@ -31,8 +31,8 @@ class DoNowSection
 
         return [
             'key' => 'do_now',
-            'label' => 'DO NOW',
-            'empty_message' => 'No urgent work. Great job! You are on schedule.',
+            'label' => 'AHORA',
+            'empty_message' => 'Nada urgente. ¡Vas al día!',
             'limit' => $this->limit,
             'cards' => $sorted,
         ];

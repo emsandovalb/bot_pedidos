@@ -219,7 +219,6 @@ test('BOT-13 Filtros de Pedidos', async ({ page }) => {
 // --- Operaciones ---
 
 test('BOT-14 Vista de hoy', async ({ page }) => {
-    pending('Operaciones tiene textos en inglés y tarjetas con "Sin productos visibles"');
     await botLogin(page);
     await page.goto(`${BOT}/operations`);
     const text = await page.locator('main').innerText();

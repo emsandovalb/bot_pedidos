@@ -24,10 +24,10 @@ class OperationsCenterTest extends TestCase
         $this->actingAs($user)
             ->get(route('operations.index'))
             ->assertOk()
-            ->assertSeeText('Benditio Operations Center')
-            ->assertSeeText('DO NOW')
-            ->assertSeeText('NEXT')
-            ->assertSeeText('COMPLETED');
+            ->assertSeeText('Centro de operaciones')
+            ->assertSeeText('AHORA')
+            ->assertSeeText('DESPUÉS')
+            ->assertSeeText('LISTOS');
     }
 
     public function test_inbox_renders_orders_and_selection_is_preselected_by_query(): void
@@ -39,7 +39,7 @@ class OperationsCenterTest extends TestCase
             ->assertOk()
             ->assertSeeText($selectedOrder->customer->name)
             ->assertSeeText($selectedOrder->raw_message_text)
-            ->assertSeeText('Customer context');
+            ->assertSeeText('Sobre el cliente');
     }
 
     public function test_customer_panel_shows_context_for_selected_order(): void
@@ -49,11 +49,11 @@ class OperationsCenterTest extends TestCase
         $this->actingAs($user)
             ->get(route('operations.index', ['order' => $selectedOrder->id]))
             ->assertOk()
-            ->assertSeeText('Customer context')
-            ->assertSeeText('Total orders')
-            ->assertSeeText('Favorite products')
-            ->assertSeeText('Open notifications')
-            ->assertSeeText('Recent activity');
+            ->assertSeeText('Sobre el cliente')
+            ->assertSeeText('Pedidos')
+            ->assertSeeText('Productos favoritos')
+            ->assertSeeText('Notificaciones abiertas')
+            ->assertSeeText('Actividad reciente');
     }
 
     public function test_filters_render_the_agenda_controls_and_js_hooks(): void
@@ -65,8 +65,8 @@ class OperationsCenterTest extends TestCase
             ->assertOk()
             ->assertSee('applyFilter', false)
             ->assertSee('toggleFilter', false)
-            ->assertSeeText('Secondary toolbar')
-            ->assertSeeText('Filters')
+            ->assertSeeText('Filtros')
+            ->assertSeeText('Filtrar')
             ->assertSeeText($selectedOrder->raw_message_text);
 
         $this->actingAs($user)
