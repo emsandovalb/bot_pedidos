@@ -21,8 +21,7 @@ class UpcomingSection
     public function __construct(
         private readonly Collection $cards,
         private readonly ?CarbonInterface $referenceTime = null,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array{key:string,label:string,empty_message:string,groups:array<int, array{key:string,label:string,cards:array<int, array<string, mixed>>}>}

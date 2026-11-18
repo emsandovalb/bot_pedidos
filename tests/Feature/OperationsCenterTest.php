@@ -209,13 +209,13 @@ class OperationsCenterTest extends TestCase
             $duplicateOrder->forceFill(['reviewed_at' => now()])->saveQuietly();
 
             for ($index = 0; $index < 18; $index++) {
-                Carbon::setTestNow(Carbon::parse('2026-06-30 09:' . str_pad((string) (11 + $index), 2, '0', STR_PAD_LEFT) . ':00'));
+                Carbon::setTestNow(Carbon::parse('2026-06-30 09:'.str_pad((string) (11 + $index), 2, '0', STR_PAD_LEFT).':00'));
                 $this->createOrder($vipCustomer, $branch, [
                     'status' => $index % 4 === 0
                         ? Order::STATUS_PREPARING
                         : Order::STATUS_PENDING_REVIEW,
                     'source_channel' => $index % 2 === 0 ? 'whatsapp' : 'telegram',
-                    'raw_message_text' => 'vip backlog order ' . $index,
+                    'raw_message_text' => 'vip backlog order '.$index,
                     'parser_confidence' => 0.6,
                     'possible_duplicate_of_order_id' => null,
                 ], $index % 2 === 0 ? $whatsappProduct : $telegramProduct);

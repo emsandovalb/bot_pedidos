@@ -114,195 +114,195 @@ class OperationsAgendaTest extends TestCase
         Carbon::setTestNow(Carbon::parse('2026-07-10 08:00:00'));
 
         $organization = Organization::create([
-                'name' => 'Agenda Org',
-                'status' => Organization::STATUS_ACTIVE,
-            ]);
+            'name' => 'Agenda Org',
+            'status' => Organization::STATUS_ACTIVE,
+        ]);
 
-            $branch = Branch::create([
-                'organization_id' => $organization->id,
-                'name' => 'Agenda Branch',
-                'channel_type' => Branch::CHANNEL_TYPE_TELEGRAM,
-                'channel_identifier' => '@agenda',
-                'status' => Branch::STATUS_ACTIVE,
-            ]);
+        $branch = Branch::create([
+            'organization_id' => $organization->id,
+            'name' => 'Agenda Branch',
+            'channel_type' => Branch::CHANNEL_TYPE_TELEGRAM,
+            'channel_identifier' => '@agenda',
+            'status' => Branch::STATUS_ACTIVE,
+        ]);
 
-            $user = User::create([
-                'organization_id' => $organization->id,
-                'branch_id' => null,
-                'role' => User::ROLE_OWNER,
-                'name' => 'Agenda Owner',
-                'email' => fake()->unique()->safeEmail(),
-                'email_verified_at' => now(),
-                'password' => 'password',
-            ]);
+        $user = User::create([
+            'organization_id' => $organization->id,
+            'branch_id' => null,
+            'role' => User::ROLE_OWNER,
+            'name' => 'Agenda Owner',
+            'email' => fake()->unique()->safeEmail(),
+            'email_verified_at' => now(),
+            'password' => 'password',
+        ]);
 
-            $organization->update(['owner_user_id' => $user->id]);
+        $organization->update(['owner_user_id' => $user->id]);
 
-            $product = Product::create([
-                'organization_id' => $organization->id,
-                'branch_id' => null,
-                'name' => 'Agenda Product',
-                'sku' => 'AGENDA-01',
-                'unit_label' => 'unidad',
-                'is_active' => true,
-                'sort_order' => 0,
-            ]);
+        $product = Product::create([
+            'organization_id' => $organization->id,
+            'branch_id' => null,
+            'name' => 'Agenda Product',
+            'sku' => 'AGENDA-01',
+            'unit_label' => 'unidad',
+            'is_active' => true,
+            'sort_order' => 0,
+        ]);
 
-            $customer = Customer::create([
-                'organization_id' => $organization->id,
-                'branch_id' => $branch->id,
-                'name' => 'Agenda Customer',
-                'phone' => '+50255551000',
-                'external_id' => null,
-            ]);
+        $customer = Customer::create([
+            'organization_id' => $organization->id,
+            'branch_id' => $branch->id,
+            'name' => 'Agenda Customer',
+            'phone' => '+50255551000',
+            'external_id' => null,
+        ]);
 
-            $criticalFirst = $this->createAgendaOrder($customer, $branch, $product, [
-                'status' => Order::STATUS_PENDING_REVIEW,
-                'raw_message_text' => 'critical first',
-                'remaining_sla_minutes' => -20,
-                'risk_level' => 'critical',
-                'priority_level' => 'urgent',
-                'delivery_method' => 'delivery',
-                'payment_method' => 'cash',
-                'commitment_date' => '2026-07-10',
-                'commitment_time' => '08:15:00',
-            ]);
+        $criticalFirst = $this->createAgendaOrder($customer, $branch, $product, [
+            'status' => Order::STATUS_PENDING_REVIEW,
+            'raw_message_text' => 'critical first',
+            'remaining_sla_minutes' => -20,
+            'risk_level' => 'critical',
+            'priority_level' => 'urgent',
+            'delivery_method' => 'delivery',
+            'payment_method' => 'cash',
+            'commitment_date' => '2026-07-10',
+            'commitment_time' => '08:15:00',
+        ]);
 
-            $criticalSecond = $this->createAgendaOrder($customer, $branch, $product, [
-                'status' => Order::STATUS_PENDING_REVIEW,
-                'raw_message_text' => 'critical second',
-                'remaining_sla_minutes' => -5,
-                'risk_level' => 'critical',
-                'priority_level' => 'urgent',
-                'delivery_method' => 'delivery',
-                'payment_method' => 'cash',
-                'commitment_date' => '2026-07-10',
-                'commitment_time' => '08:30:00',
-            ]);
+        $criticalSecond = $this->createAgendaOrder($customer, $branch, $product, [
+            'status' => Order::STATUS_PENDING_REVIEW,
+            'raw_message_text' => 'critical second',
+            'remaining_sla_minutes' => -5,
+            'risk_level' => 'critical',
+            'priority_level' => 'urgent',
+            'delivery_method' => 'delivery',
+            'payment_method' => 'cash',
+            'commitment_date' => '2026-07-10',
+            'commitment_time' => '08:30:00',
+        ]);
 
-            $dueSoonOrder = $this->createAgendaOrder($customer, $branch, $product, [
-                'status' => Order::STATUS_CONFIRMED,
-                'raw_message_text' => 'due soon',
-                'remaining_sla_minutes' => 25,
-                'risk_level' => 'high',
-                'priority_level' => 'urgent',
-                'delivery_method' => 'pickup',
-                'payment_method' => 'sinpe',
-                'commitment_date' => '2026-07-10',
-                'commitment_time' => '09:30:00',
-            ]);
+        $dueSoonOrder = $this->createAgendaOrder($customer, $branch, $product, [
+            'status' => Order::STATUS_CONFIRMED,
+            'raw_message_text' => 'due soon',
+            'remaining_sla_minutes' => 25,
+            'risk_level' => 'high',
+            'priority_level' => 'urgent',
+            'delivery_method' => 'pickup',
+            'payment_method' => 'sinpe',
+            'commitment_date' => '2026-07-10',
+            'commitment_time' => '09:30:00',
+        ]);
 
-            $todayMorningOrder = $this->createAgendaOrder($customer, $branch, $product, [
-                'status' => Order::STATUS_PREPARING,
-                'raw_message_text' => 'today morning',
-                'remaining_sla_minutes' => 180,
-                'risk_level' => 'low',
-                'priority_level' => 'normal',
-                'delivery_method' => 'pickup',
-                'payment_method' => 'cash',
-                'commitment_date' => '2026-07-10',
-                'commitment_time' => '08:45:00',
-                'requested_time_window' => 'morning',
-            ]);
+        $todayMorningOrder = $this->createAgendaOrder($customer, $branch, $product, [
+            'status' => Order::STATUS_PREPARING,
+            'raw_message_text' => 'today morning',
+            'remaining_sla_minutes' => 180,
+            'risk_level' => 'low',
+            'priority_level' => 'normal',
+            'delivery_method' => 'pickup',
+            'payment_method' => 'cash',
+            'commitment_date' => '2026-07-10',
+            'commitment_time' => '08:45:00',
+            'requested_time_window' => 'morning',
+        ]);
 
-            $todayAfternoonOrder = $this->createAgendaOrder($customer, $branch, $product, [
-                'status' => Order::STATUS_READY_FOR_DISPATCH,
-                'raw_message_text' => 'today afternoon',
-                'remaining_sla_minutes' => 220,
-                'risk_level' => 'low',
-                'priority_level' => 'normal',
-                'delivery_method' => 'delivery',
-                'payment_method' => 'sinpe',
-                'commitment_date' => '2026-07-10',
-                'commitment_time' => '14:30:00',
-                'requested_time_window' => 'afternoon',
-            ]);
+        $todayAfternoonOrder = $this->createAgendaOrder($customer, $branch, $product, [
+            'status' => Order::STATUS_READY_FOR_DISPATCH,
+            'raw_message_text' => 'today afternoon',
+            'remaining_sla_minutes' => 220,
+            'risk_level' => 'low',
+            'priority_level' => 'normal',
+            'delivery_method' => 'delivery',
+            'payment_method' => 'sinpe',
+            'commitment_date' => '2026-07-10',
+            'commitment_time' => '14:30:00',
+            'requested_time_window' => 'afternoon',
+        ]);
 
-            $tomorrowOrder = $this->createAgendaOrder($customer, $branch, $product, [
-                'status' => Order::STATUS_CONFIRMED,
-                'raw_message_text' => 'tomorrow order',
-                'remaining_sla_minutes' => 1440,
-                'risk_level' => 'low',
-                'priority_level' => 'normal',
-                'delivery_method' => 'delivery',
-                'payment_method' => 'cash',
-                'commitment_date' => '2026-07-11',
-                'commitment_time' => '15:00:00',
-                'requested_time_window' => 'afternoon',
-            ]);
+        $tomorrowOrder = $this->createAgendaOrder($customer, $branch, $product, [
+            'status' => Order::STATUS_CONFIRMED,
+            'raw_message_text' => 'tomorrow order',
+            'remaining_sla_minutes' => 1440,
+            'risk_level' => 'low',
+            'priority_level' => 'normal',
+            'delivery_method' => 'delivery',
+            'payment_method' => 'cash',
+            'commitment_date' => '2026-07-11',
+            'commitment_time' => '15:00:00',
+            'requested_time_window' => 'afternoon',
+        ]);
 
-            $noCommitmentOrder = $this->createAgendaOrder($customer, $branch, $product, [
-                'status' => Order::STATUS_CONFIRMED,
-                'raw_message_text' => 'no commitment order',
-                'remaining_sla_minutes' => null,
-                'risk_level' => 'low',
-                'priority_level' => 'normal',
-                'delivery_method' => 'pickup',
-                'payment_method' => 'cash',
-                'commitment_date' => null,
-                'commitment_time' => null,
-            ]);
+        $noCommitmentOrder = $this->createAgendaOrder($customer, $branch, $product, [
+            'status' => Order::STATUS_CONFIRMED,
+            'raw_message_text' => 'no commitment order',
+            'remaining_sla_minutes' => null,
+            'risk_level' => 'low',
+            'priority_level' => 'normal',
+            'delivery_method' => 'pickup',
+            'payment_method' => 'cash',
+            'commitment_date' => null,
+            'commitment_time' => null,
+        ]);
 
-            $completedOrder = $this->createAgendaOrder($customer, $branch, $product, [
-                'status' => Order::STATUS_DISPATCHED,
-                'raw_message_text' => 'completed today',
-                'remaining_sla_minutes' => 60,
-                'risk_level' => 'low',
-                'priority_level' => 'low',
-                'delivery_method' => 'delivery',
-                'payment_method' => 'sinpe',
-                'commitment_date' => '2026-07-10',
-                'commitment_time' => '10:30:00',
-            ]);
+        $completedOrder = $this->createAgendaOrder($customer, $branch, $product, [
+            'status' => Order::STATUS_DISPATCHED,
+            'raw_message_text' => 'completed today',
+            'remaining_sla_minutes' => 60,
+            'risk_level' => 'low',
+            'priority_level' => 'low',
+            'delivery_method' => 'delivery',
+            'payment_method' => 'sinpe',
+            'commitment_date' => '2026-07-10',
+            'commitment_time' => '10:30:00',
+        ]);
 
-            $foreignOrganization = Organization::create([
-                'name' => 'Foreign Agenda Org',
-                'status' => Organization::STATUS_ACTIVE,
-            ]);
+        $foreignOrganization = Organization::create([
+            'name' => 'Foreign Agenda Org',
+            'status' => Organization::STATUS_ACTIVE,
+        ]);
 
-            $foreignBranch = Branch::create([
-                'organization_id' => $foreignOrganization->id,
-                'name' => 'Foreign Agenda Branch',
-                'channel_type' => Branch::CHANNEL_TYPE_WHATSAPP,
-                'channel_identifier' => '@foreign-agenda',
-                'status' => Branch::STATUS_ACTIVE,
-            ]);
+        $foreignBranch = Branch::create([
+            'organization_id' => $foreignOrganization->id,
+            'name' => 'Foreign Agenda Branch',
+            'channel_type' => Branch::CHANNEL_TYPE_WHATSAPP,
+            'channel_identifier' => '@foreign-agenda',
+            'status' => Branch::STATUS_ACTIVE,
+        ]);
 
-            $foreignCustomer = Customer::create([
-                'organization_id' => $foreignOrganization->id,
-                'branch_id' => $foreignBranch->id,
-                'name' => 'Foreign Agenda Customer',
-                'phone' => '+50255559900',
-                'external_id' => null,
-            ]);
+        $foreignCustomer = Customer::create([
+            'organization_id' => $foreignOrganization->id,
+            'branch_id' => $foreignBranch->id,
+            'name' => 'Foreign Agenda Customer',
+            'phone' => '+50255559900',
+            'external_id' => null,
+        ]);
 
-            Order::create([
-                'organization_id' => $foreignOrganization->id,
-                'branch_id' => $foreignBranch->id,
-                'customer_id' => $foreignCustomer->id,
-                'incoming_message_id' => null,
-                'possible_duplicate_of_order_id' => null,
-                'source_channel' => 'whatsapp',
-                'external_message_id' => fake()->uuid(),
-                'status' => Order::STATUS_PENDING_REVIEW,
-                'parser_confidence' => 0.88,
-                'raw_message_text' => 'foreign order',
-                'parsed_payload_json' => ['items' => []],
-                'duplicate_score' => null,
-                'duplicate_reason' => null,
-                'duplicate_checked_at' => now(),
-                'order_fingerprint' => fake()->uuid(),
-                'notes' => null,
-                'reviewed_by' => null,
-                'reviewed_at' => null,
-                'confirmed_by' => null,
-                'confirmed_at' => null,
-                'preparing_at' => null,
-                'ready_for_dispatch_at' => null,
-                'dispatched_at' => null,
-                'cancelled_at' => null,
-                'rejected_at' => null,
-            ]);
+        Order::create([
+            'organization_id' => $foreignOrganization->id,
+            'branch_id' => $foreignBranch->id,
+            'customer_id' => $foreignCustomer->id,
+            'incoming_message_id' => null,
+            'possible_duplicate_of_order_id' => null,
+            'source_channel' => 'whatsapp',
+            'external_message_id' => fake()->uuid(),
+            'status' => Order::STATUS_PENDING_REVIEW,
+            'parser_confidence' => 0.88,
+            'raw_message_text' => 'foreign order',
+            'parsed_payload_json' => ['items' => []],
+            'duplicate_score' => null,
+            'duplicate_reason' => null,
+            'duplicate_checked_at' => now(),
+            'order_fingerprint' => fake()->uuid(),
+            'notes' => null,
+            'reviewed_by' => null,
+            'reviewed_at' => null,
+            'confirmed_by' => null,
+            'confirmed_at' => null,
+            'preparing_at' => null,
+            'ready_for_dispatch_at' => null,
+            'dispatched_at' => null,
+            'cancelled_at' => null,
+            'rejected_at' => null,
+        ]);
 
         return [
             $user->fresh(),

@@ -9,9 +9,7 @@ class CompletedSection
     /**
      * @param  Collection<int, AgendaCard>  $cards
      */
-    public function __construct(private readonly Collection $cards)
-    {
-    }
+    public function __construct(private readonly Collection $cards) {}
 
     /**
      * @return array{key:string,label:string,empty_message:string,collapsed:bool,cards:array<int, array<string, mixed>>}

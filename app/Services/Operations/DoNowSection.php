@@ -14,8 +14,7 @@ class DoNowSection
         private readonly Collection $cards,
         private readonly int $limit = 5,
         private readonly ?CarbonInterface $referenceTime = null,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array{key:string,label:string,empty_message:string,limit:int,cards:array<int, array<string, mixed>>}

@@ -22,8 +22,7 @@ class AgendaCard
     public function __construct(
         private readonly array $order,
         private readonly CarbonInterface $referenceTime,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<string, mixed>
@@ -202,7 +201,7 @@ class AgendaCard
                 'tone' => 'bg-rose-50 text-rose-800 ring-1 ring-rose-100',
             ],
             'high' => [
-                'label' => $remainingSlaMinutes !== null ? 'Vence en ' . $remainingSlaMinutes . ' min' : 'Riesgo alto',
+                'label' => $remainingSlaMinutes !== null ? 'Vence en '.$remainingSlaMinutes.' min' : 'Riesgo alto',
                 'tone' => 'bg-orange-50 text-orange-800 ring-1 ring-orange-100',
             ],
             'medium' => [
@@ -227,10 +226,10 @@ class AgendaCard
         }
 
         if ($remainingSlaMinutes < 60) {
-            return 'Vence en ' . $remainingSlaMinutes . ' min';
+            return 'Vence en '.$remainingSlaMinutes.' min';
         }
 
-        return 'Vence en ' . (int) round($remainingSlaMinutes / 60) . ' h';
+        return 'Vence en '.(int) round($remainingSlaMinutes / 60).' h';
     }
 
     private function channelIcon(): string
