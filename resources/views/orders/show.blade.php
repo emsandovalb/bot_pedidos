@@ -49,9 +49,11 @@
                     <a href="{{ route('orders.index') }}" class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50">
                         Volver a pedidos
                     </a>
-                    <a href="{{ route('orders.edit', $order) }}" class="inline-flex items-center justify-center rounded-2xl bg-brand-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-700">
-                        Editar pedido
-                    </a>
+                    @can('update', $order)
+                        <a href="{{ route('orders.edit', $order) }}" class="inline-flex items-center justify-center rounded-2xl bg-brand-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-700">
+                            Editar pedido
+                        </a>
+                    @endcan
                 </div>
             </div>
         </div>
@@ -289,7 +291,11 @@
                         Ejecuta el siguiente paso operativo sin salir de la ficha del pedido.
                     </p>
                     <div class="mt-4 flex flex-col gap-3">
-                        @if ($order->status === \App\Models\Order::STATUS_PENDING_REVIEW)
+                        @if (auth()->user()->cannot('update', $order))
+                            <div class="rounded-2xl border border-slate-200/80 bg-slate-50 p-4 text-sm leading-6 text-slate-600">
+                                Tu usuario es de solo lectura: podés ver el pedido, pero no cambiarlo.
+                            </div>
+                        @elseif ($order->status === \App\Models\Order::STATUS_PENDING_REVIEW)
                             <form method="POST" action="{{ route('orders.confirm', $order) }}">
                                 @csrf
                                 <button type="submit" class="inline-flex w-full items-center justify-center rounded-2xl bg-brand-primary px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-700">

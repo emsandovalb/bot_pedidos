@@ -37,7 +37,6 @@ pasar. Cuando se arregla algo en la app, se quita la marca en el mismo cambio.
 
 | Caso | Regla |
 | --- | --- |
-| BOT-03 | El usuario de solo lectura no ve "Confirmar pedido" ni "Editar pedido" (el servidor ya los rechaza). |
 | BOT-06 | Saludos y frases de entrega ("Hola", "me los llevan") no son productos; el plural encuentra el producto ("2 pinturas blancas" es "Pintura blanca"). |
 | BOT-14 | Operaciones en español y sin tarjetas "Sin productos visibles". |
 | BOT-15 | El botón de cada tarjeta dice en español lo que hace, y "Preparar" deja el pedido en preparación. |
