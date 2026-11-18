@@ -150,7 +150,7 @@ class OperationsGuidedWorkflowTest extends TestCase
                 'organization_id' => $organization->id,
                 'name' => 'Guided Workflow Branch',
                 'channel_type' => Branch::CHANNEL_TYPE_TELEGRAM,
-                'channel_identifier' => '@guided-workflow-' . Str::slug($status),
+                'channel_identifier' => '@guided-workflow-'.Str::slug($status),
                 'status' => Branch::STATUS_ACTIVE,
             ]);
 
