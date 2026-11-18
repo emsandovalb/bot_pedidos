@@ -48,6 +48,34 @@ class ProductMatchingTest extends TestCase
         $this->assertGreaterThan(0.7, $result['confidence_score']);
     }
 
+    public function test_product_matching_service_finds_a_singular_product_from_a_plural(): void
+    {
+        [$organization, $product] = $this->makeProductWithAliases([
+            'pintura blanca',
+        ]);
+
+        $result = app(ProductMatchingService::class)->match(
+            organization: $organization,
+            productName: 'pinturas blancas',
+            rawText: 'Quiero 2 pinturas blancas',
+        );
+
+        $this->assertSame($product->id, $result['product']?->id);
+        $this->assertSame('pintura blanca', $result['matched_text']);
+    }
+
+    public function test_parser_skips_greetings_and_delivery_phrases(): void
+    {
+        $parser = app(\App\Services\OrderParserService::class);
+
+        $items = $parser->parse('Hola, ocupo 2 tubos pvc y 3 sacos de cemento para mañana')['items'];
+        $this->assertSame(['tubos pvc', 'sacos de cemento'], array_column($items, 'product_name'));
+
+        $result = $parser->parse('Ocupo 4 bloques de concreto para hoy, me los llevan');
+        $this->assertSame(['bloques de concreto'], array_column($result['items'], 'product_name'));
+        $this->assertContains('me lo llevan', $result['notes']);
+    }
+
     /**
      * @param  array<int, string>  $aliases
      * @return array{0: Organization, 1: Product}

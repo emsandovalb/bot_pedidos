@@ -92,7 +92,6 @@ test('BOT-05 Perfil', async ({ page }) => {
 // --- Entrada de pedidos ---
 
 test('BOT-06 Mensaje simulado crea un pedido', async ({ page }) => {
-    pending('el parser vuelve productos "Hola" y "me los llevan", y no reconoce "pinturas blancas"');
     await botLogin(page);
     // Messages as customers write them. Rules: greetings and delivery phrases ("Hola", "me los llevan") are not
     // products, and plurals or capitals still find the product ("2 pinturas blancas" is "Pintura blanca").
