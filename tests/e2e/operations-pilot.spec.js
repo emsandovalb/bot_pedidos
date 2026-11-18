@@ -98,22 +98,22 @@ test('operations pilot flow remains stable end to end', async ({ page, browserNa
 
     const workflowSequences = {
         pending_review: [
-            { button: 'Prepare', response: '/confirm', state: 'Confirmado' },
-            { button: 'Prepare', response: '/prepare', state: 'Preparando' },
-            { button: 'Ready', response: '/ready-for-dispatch', state: 'Listo' },
-            { button: 'Dispatch', response: '/dispatch', state: 'Despachado' },
+            { button: 'Confirmar', response: '/confirm', state: 'Confirmado' },
+            { button: 'Preparar', response: '/prepare', state: 'Preparando' },
+            { button: 'Listo', response: '/ready-for-dispatch', state: 'Listo' },
+            { button: 'Despachar', response: '/dispatch', state: 'Despachado' },
         ],
         confirmed: [
-            { button: 'Prepare', response: '/prepare', state: 'Preparando' },
-            { button: 'Ready', response: '/ready-for-dispatch', state: 'Listo' },
-            { button: 'Dispatch', response: '/dispatch', state: 'Despachado' },
+            { button: 'Preparar', response: '/prepare', state: 'Preparando' },
+            { button: 'Listo', response: '/ready-for-dispatch', state: 'Listo' },
+            { button: 'Despachar', response: '/dispatch', state: 'Despachado' },
         ],
         preparing: [
-            { button: 'Ready', response: '/ready-for-dispatch', state: 'Listo' },
-            { button: 'Dispatch', response: '/dispatch', state: 'Despachado' },
+            { button: 'Listo', response: '/ready-for-dispatch', state: 'Listo' },
+            { button: 'Despachar', response: '/dispatch', state: 'Despachado' },
         ],
         ready_for_dispatch: [
-            { button: 'Dispatch', response: '/dispatch', state: 'Despachado' },
+            { button: 'Despachar', response: '/dispatch', state: 'Despachado' },
         ],
     };
 
@@ -121,7 +121,7 @@ test('operations pilot flow remains stable end to end', async ({ page, browserNa
     for (const [index, step] of workflowSteps.entries()) {
         await Promise.all([
             page.waitForResponse((response) => response.request().method() === 'POST' && response.url().includes(step.response) && response.status() === 200),
-            drawer.getByRole('button', { name: step.button }).click(),
+            drawer.getByRole('button', { name: step.button, exact: true }).click(),
         ]);
 
         await expect(drawer).toContainText(step.state);

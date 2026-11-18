@@ -231,20 +231,25 @@ test('BOT-14 Vista de hoy', async ({ page }) => {
 });
 
 test('BOT-15 Botón Preparar desde la tarjeta', async ({ page }) => {
-    pending('el botón de las tarjetas dice "Prepare" (en inglés) y en un pedido por revisar lo confirma');
     await botLogin(page);
     await page.goto(`${BOT}/operations`);
-    // Rule: each card's button says in Spanish what it does ("Confirmar", "Preparar", "Listo", "Despachar").
+    // Rule: each card's button says in Spanish what it does. It used to say "Prepare" on an order awaiting review
+    // and confirm it; an order with products still to resolve couldn't even be confirmed.
     const english = page.getByRole('button', { name: /^(Confirm|Prepare|Ready|Dispatch|Complete)$/ });
     expect(await english.count(), 'botones de tarjeta en inglés').toBe(0);
-    const before = Object.fromEntries(botSql('select id, status from orders').map((o) => [o.id, o.status]));
-    await page.getByRole('button', { name: /^Preparar$/ }).first().click();
-    let changed = [];
-    await expect.poll(() => {
-        changed = botSql('select id, status from orders').filter((o) => before[o.id] !== o.status).map((o) => ({ from: before[o.id], to: o.status }));
-        return changed.length;
-    }, { timeout: 15000 }).toBe(1);
-    expect(changed[0], '"Preparar" deja el pedido en preparación').toEqual({ from: 'confirmed', to: 'preparing' });
+
+    // An order the parser left for review offers "Revisar", which opens the order.
+    const review = page.getByRole('button', { name: 'Revisar', exact: true }).first();
+    await expect(review).toBeVisible();
+    await review.click();
+    await expect(page).toHaveURL(/\/orders\/\d+$/);
+
+    // A confirmed order offers "Preparar", which leaves it in preparation.
+    const confirmed = botSql("select id from orders where status = 'confirmed' order by id limit 1")[0];
+    await page.goto(`${BOT}/operations?order=${confirmed.id}`);
+    await page.getByRole('button', { name: 'Preparar', exact: true }).first().click();
+    await expect.poll(() => botSql('select status from orders where id = ?', [confirmed.id])[0].status, { timeout: 15000 })
+        .toBe('preparing');
 });
 
 test('BOT-16 Modo simple / foco', async ({ page }) => {
