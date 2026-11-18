@@ -255,7 +255,7 @@
 
                             <div class="hidden items-center gap-3 sm:flex">
                                 <div class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 shadow-sm">
-                                    {{ now()->format('M d, Y') }}
+                                    {{ now()->locale('es')->isoFormat('D MMM YYYY') }}
                                 </div>
                                 <a href="{{ route('operations.index') }}" class="brand-btn-primary">
                                     Pedidos pendientes

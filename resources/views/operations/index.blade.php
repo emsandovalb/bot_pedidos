@@ -282,7 +282,7 @@
                         <div class="rounded-[28px] border border-slate-200/80 bg-slate-50/80 p-4">
                             <div class="flex items-center justify-between gap-3">
                                 <div class="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500" x-text="group.label"></div>
-                                <div class="text-xs text-slate-500" x-text="`${group.cards.length} order(s)`"></div>
+                                <div class="text-xs text-slate-500" x-text="`${group.cards.length} ${group.cards.length === 1 ? 'pedido' : 'pedidos'}`"></div>
                             </div>
 
                             <div class="mt-4 grid gap-3 xl:grid-cols-2">
