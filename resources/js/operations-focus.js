@@ -315,7 +315,7 @@ export function createOperationsFocus(config = {}) {
         toastTimer: null,
         liveConnection: {
             state: 'live',
-            label: 'Live',
+            label: 'En vivo',
             tone: 'green',
             description: 'Conectado',
         },

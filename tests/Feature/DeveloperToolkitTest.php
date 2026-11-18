@@ -315,7 +315,7 @@ class DeveloperToolkitTest extends TestCase
         $this->actingAs($user)
             ->get(route('operations.index'))
             ->assertOk()
-            ->assertSeeText('Benditio Operations Center')
+            ->assertSeeText('Centro de operaciones')
             ->assertSeeText('3 cajas de clavos');
     }
 

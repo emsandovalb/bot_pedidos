@@ -74,10 +74,10 @@ test('operations pilot flow remains stable end to end', async ({ page, browserNa
     await page.screenshot({ path: path.resolve(screenshotDir, '01-toolkit-generated.png'), fullPage: true });
 
     await page.goto('/operations');
-    await expect(page.getByText('DO NOW', { exact: true })).toBeVisible();
-    await expect(page.getByText('NEXT', { exact: true })).toBeVisible();
-    await expect(page.getByText('COMPLETED', { exact: true })).toBeVisible();
-    await expect(page.getByText('Live', { exact: true })).toBeVisible();
+    await expect(page.getByText('AHORA', { exact: true })).toBeVisible();
+    await expect(page.getByText('DESPUÉS', { exact: true })).toBeVisible();
+    await expect(page.getByText('LISTOS', { exact: true })).toBeVisible();
+    await expect(page.getByText('En vivo', { exact: true })).toBeVisible();
     await page.screenshot({ path: path.resolve(screenshotDir, '02-operations-home.png'), fullPage: true });
 
     const feedResponse = await page.request.get('/operations/feed');
@@ -139,14 +139,14 @@ test('operations pilot flow remains stable end to end', async ({ page, browserNa
     await drawer.getByRole('button', { name: /Close|Cerrar/ }).click();
     await expect(drawer).toBeHidden();
 
-    const filtersPanel = page.locator('details').filter({ hasText: 'Secondary toolbar' });
+    const filtersPanel = page.locator('details').filter({ hasText: 'Filtrar' });
     await filtersPanel.locator('summary').click();
     const searchInput = filtersPanel.getByPlaceholder('Search customer, phone, message, branch, or ID');
     await searchInput.fill(customerName);
-    await expect(page.getByText('DO NOW', { exact: true })).toBeVisible();
-    await expect(page.getByText('NEXT', { exact: true })).toBeVisible();
+    await expect(page.getByText('AHORA', { exact: true })).toBeVisible();
+    await expect(page.getByText('DESPUÉS', { exact: true })).toBeVisible();
     await searchInput.fill('');
-    await filtersPanel.getByRole('button', { name: 'Clear' }).click();
+    await filtersPanel.getByRole('button', { name: 'Limpiar' }).click();
 
     const uniqueCustomers = new Set(inbox.map((order) => String(order.customer_name ?? ''))).size;
     const uniqueIdentities = new Set(inbox.map((order) => `${String(order.customer_name ?? '')}|${String(order.channel_key ?? order.source_channel ?? '')}`)).size;

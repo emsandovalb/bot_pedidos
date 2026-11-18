@@ -42,7 +42,6 @@ test('ALL-01 Celular (390 px)', async ({ browser }) => {
 });
 
 test('ALL-02 Idioma', async ({ page }) => {
-    test.fail(true, 'Pendiente conocido: BotPedidos tiene textos en inglés en Operaciones, Canales y Perfil.');
     // Words that only show up when a screen was left in English.
     const english = /\b(Save|Delete Account|Today|Upcoming work|Unknown|Back to hub|Health Check|Disconnect|Reconnect|Configure|View Details|Open Telegram|Inspect WhatsApp|Products imported successfully|Profile Information|Update Password|Channels|Soon|Setup)\b/g;
     const found = [];

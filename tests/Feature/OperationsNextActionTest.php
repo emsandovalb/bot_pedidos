@@ -31,11 +31,11 @@ class OperationsNextActionTest extends TestCase
         $this->actingAs($user)
             ->get(route('operations.index'))
             ->assertOk()
-            ->assertSeeText('Benditio Operations Center')
-            ->assertSeeText('Today')
-            ->assertSeeText('DO NOW')
-            ->assertSeeText('NEXT')
-            ->assertSeeText('COMPLETED')
+            ->assertSeeText('Centro de operaciones')
+            ->assertSeeText('Hoy')
+            ->assertSeeText('AHORA')
+            ->assertSeeText('DESPUÉS')
+            ->assertSeeText('LISTOS')
             ->assertSee('snapshotUrlBase', false);
     }
 
@@ -56,7 +56,7 @@ class OperationsNextActionTest extends TestCase
         $this->assertCount(5, $doNowCards);
         $this->assertSame(-20, (int) data_get($doNowCards->first(), 'remaining_sla_minutes'));
         $this->assertNotEmpty($nextGroups);
-        $this->assertTrue($nextGroups->pluck('label')->contains('Tomorrow'));
+        $this->assertTrue($nextGroups->pluck('label')->contains('Mañana y después'));
         $this->assertNotNull($sections->get('completed'));
     }
 
@@ -141,231 +141,231 @@ class OperationsNextActionTest extends TestCase
         Carbon::setTestNow(Carbon::parse('2026-07-10 08:00:00'));
 
         $organization = Organization::create([
-                'name' => 'Next Action Org',
-                'status' => Organization::STATUS_ACTIVE,
-            ]);
+            'name' => 'Next Action Org',
+            'status' => Organization::STATUS_ACTIVE,
+        ]);
 
-            $branch = Branch::create([
-                'organization_id' => $organization->id,
-                'name' => 'Next Action Branch',
-                'channel_type' => Branch::CHANNEL_TYPE_TELEGRAM,
-                'channel_identifier' => '@next-action',
-                'status' => Branch::STATUS_ACTIVE,
-            ]);
+        $branch = Branch::create([
+            'organization_id' => $organization->id,
+            'name' => 'Next Action Branch',
+            'channel_type' => Branch::CHANNEL_TYPE_TELEGRAM,
+            'channel_identifier' => '@next-action',
+            'status' => Branch::STATUS_ACTIVE,
+        ]);
 
-            $user = User::create([
-                'organization_id' => $organization->id,
-                'branch_id' => null,
-                'role' => User::ROLE_OWNER,
-                'name' => 'Operations Owner',
-                'email' => fake()->unique()->safeEmail(),
-                'email_verified_at' => now(),
-                'password' => 'password',
-            ]);
+        $user = User::create([
+            'organization_id' => $organization->id,
+            'branch_id' => null,
+            'role' => User::ROLE_OWNER,
+            'name' => 'Operations Owner',
+            'email' => fake()->unique()->safeEmail(),
+            'email_verified_at' => now(),
+            'password' => 'password',
+        ]);
 
-            $organization->update(['owner_user_id' => $user->id]);
+        $organization->update(['owner_user_id' => $user->id]);
 
-            $product = Product::create([
-                'organization_id' => $organization->id,
-                'branch_id' => null,
-                'name' => 'Queue Product',
-                'sku' => 'QUEUE-01',
-                'unit_label' => 'unidad',
-                'is_active' => true,
-                'sort_order' => 0,
-            ]);
+        $product = Product::create([
+            'organization_id' => $organization->id,
+            'branch_id' => null,
+            'name' => 'Queue Product',
+            'sku' => 'QUEUE-01',
+            'unit_label' => 'unidad',
+            'is_active' => true,
+            'sort_order' => 0,
+        ]);
 
-            $customer = Customer::create([
-                'organization_id' => $organization->id,
-                'branch_id' => $branch->id,
-                'name' => 'Queue Customer',
-                'phone' => '+50255550000',
-                'external_id' => null,
-            ]);
+        $customer = Customer::create([
+            'organization_id' => $organization->id,
+            'branch_id' => $branch->id,
+            'name' => 'Queue Customer',
+            'phone' => '+50255550000',
+            'external_id' => null,
+        ]);
 
-            $criticalOrder = $this->createOrder($customer, $branch, $product, [
-                'status' => Order::STATUS_PENDING_REVIEW,
-                'raw_message_text' => 'critical order',
-                'remaining_sla_minutes' => -20,
-                'risk_level' => 'critical',
-                'priority_level' => 'urgent',
-                'delivery_method' => 'delivery',
-                'payment_method' => 'cash',
-                'commitment_date' => '2026-07-10',
-                'commitment_time' => '08:15:00',
-                'requested_time_window' => 'morning',
-                'decision_version' => 'v1',
-                'planner_confidence' => 92,
-            ]);
+        $criticalOrder = $this->createOrder($customer, $branch, $product, [
+            'status' => Order::STATUS_PENDING_REVIEW,
+            'raw_message_text' => 'critical order',
+            'remaining_sla_minutes' => -20,
+            'risk_level' => 'critical',
+            'priority_level' => 'urgent',
+            'delivery_method' => 'delivery',
+            'payment_method' => 'cash',
+            'commitment_date' => '2026-07-10',
+            'commitment_time' => '08:15:00',
+            'requested_time_window' => 'morning',
+            'decision_version' => 'v1',
+            'planner_confidence' => 92,
+        ]);
 
-            $dueSoonOrder = $this->createOrder($customer, $branch, $product, [
-                'status' => Order::STATUS_CONFIRMED,
-                'raw_message_text' => 'due soon order',
-                'remaining_sla_minutes' => 25,
-                'risk_level' => 'high',
-                'priority_level' => 'urgent',
-                'delivery_method' => 'pickup',
-                'payment_method' => 'sinpe',
-                'commitment_date' => '2026-07-10',
-                'commitment_time' => '09:30:00',
-                'requested_time_window' => 'morning',
-                'decision_version' => 'v1',
-                'planner_confidence' => 90,
-            ]);
+        $dueSoonOrder = $this->createOrder($customer, $branch, $product, [
+            'status' => Order::STATUS_CONFIRMED,
+            'raw_message_text' => 'due soon order',
+            'remaining_sla_minutes' => 25,
+            'risk_level' => 'high',
+            'priority_level' => 'urgent',
+            'delivery_method' => 'pickup',
+            'payment_method' => 'sinpe',
+            'commitment_date' => '2026-07-10',
+            'commitment_time' => '09:30:00',
+            'requested_time_window' => 'morning',
+            'decision_version' => 'v1',
+            'planner_confidence' => 90,
+        ]);
 
-            $todayMorningOrder = $this->createOrder($customer, $branch, $product, [
-                'status' => Order::STATUS_PREPARING,
-                'raw_message_text' => 'today morning',
-                'remaining_sla_minutes' => 3000,
-                'risk_level' => 'low',
-                'priority_level' => 'normal',
-                'delivery_method' => 'pickup',
-                'payment_method' => 'cash',
-                'commitment_date' => '2026-07-10',
-                'commitment_time' => '08:45:00',
-                'requested_time_window' => 'morning',
-                'decision_version' => 'v1',
-                'planner_confidence' => 88,
-            ]);
+        $todayMorningOrder = $this->createOrder($customer, $branch, $product, [
+            'status' => Order::STATUS_PREPARING,
+            'raw_message_text' => 'today morning',
+            'remaining_sla_minutes' => 3000,
+            'risk_level' => 'low',
+            'priority_level' => 'normal',
+            'delivery_method' => 'pickup',
+            'payment_method' => 'cash',
+            'commitment_date' => '2026-07-10',
+            'commitment_time' => '08:45:00',
+            'requested_time_window' => 'morning',
+            'decision_version' => 'v1',
+            'planner_confidence' => 88,
+        ]);
 
-            $todayAfternoonOrder = $this->createOrder($customer, $branch, $product, [
-                'status' => Order::STATUS_READY_FOR_DISPATCH,
-                'raw_message_text' => 'today afternoon',
-                'remaining_sla_minutes' => 220,
-                'risk_level' => 'low',
-                'priority_level' => 'normal',
-                'delivery_method' => 'delivery',
-                'payment_method' => 'sinpe',
-                'commitment_date' => '2026-07-10',
-                'commitment_time' => '14:30:00',
-                'requested_time_window' => 'afternoon',
-                'decision_version' => 'v1',
-                'planner_confidence' => 85,
-            ]);
+        $todayAfternoonOrder = $this->createOrder($customer, $branch, $product, [
+            'status' => Order::STATUS_READY_FOR_DISPATCH,
+            'raw_message_text' => 'today afternoon',
+            'remaining_sla_minutes' => 220,
+            'risk_level' => 'low',
+            'priority_level' => 'normal',
+            'delivery_method' => 'delivery',
+            'payment_method' => 'sinpe',
+            'commitment_date' => '2026-07-10',
+            'commitment_time' => '14:30:00',
+            'requested_time_window' => 'afternoon',
+            'decision_version' => 'v1',
+            'planner_confidence' => 85,
+        ]);
 
-            $tomorrowOrder = $this->createOrder($customer, $branch, $product, [
-                'status' => Order::STATUS_CONFIRMED,
-                'raw_message_text' => 'tomorrow order',
-                'remaining_sla_minutes' => 1440,
-                'risk_level' => 'low',
-                'priority_level' => 'normal',
-                'delivery_method' => 'delivery',
-                'payment_method' => 'cash',
-                'commitment_date' => '2026-07-11',
-                'commitment_time' => '15:00:00',
-                'requested_time_window' => 'afternoon',
-                'decision_version' => 'v1',
-                'planner_confidence' => 84,
-            ]);
+        $tomorrowOrder = $this->createOrder($customer, $branch, $product, [
+            'status' => Order::STATUS_CONFIRMED,
+            'raw_message_text' => 'tomorrow order',
+            'remaining_sla_minutes' => 1440,
+            'risk_level' => 'low',
+            'priority_level' => 'normal',
+            'delivery_method' => 'delivery',
+            'payment_method' => 'cash',
+            'commitment_date' => '2026-07-11',
+            'commitment_time' => '15:00:00',
+            'requested_time_window' => 'afternoon',
+            'decision_version' => 'v1',
+            'planner_confidence' => 84,
+        ]);
 
-            $noCommitmentOrder = $this->createOrder($customer, $branch, $product, [
-                'status' => Order::STATUS_CONFIRMED,
-                'raw_message_text' => 'no commitment order',
-                'remaining_sla_minutes' => null,
-                'risk_level' => 'low',
-                'priority_level' => 'normal',
-                'delivery_method' => 'pickup',
-                'payment_method' => 'cash',
-                'commitment_date' => null,
-                'commitment_time' => null,
-                'requested_time_window' => null,
-                'decision_version' => 'v1',
-                'planner_confidence' => 82,
-            ]);
+        $noCommitmentOrder = $this->createOrder($customer, $branch, $product, [
+            'status' => Order::STATUS_CONFIRMED,
+            'raw_message_text' => 'no commitment order',
+            'remaining_sla_minutes' => null,
+            'risk_level' => 'low',
+            'priority_level' => 'normal',
+            'delivery_method' => 'pickup',
+            'payment_method' => 'cash',
+            'commitment_date' => null,
+            'commitment_time' => null,
+            'requested_time_window' => null,
+            'decision_version' => 'v1',
+            'planner_confidence' => 82,
+        ]);
 
-            $lateMorningOrder = $this->createOrder($customer, $branch, $product, [
-                'status' => Order::STATUS_CONFIRMED,
-                'raw_message_text' => 'late morning order',
-                'remaining_sla_minutes' => 2000,
-                'risk_level' => 'low',
-                'priority_level' => 'normal',
-                'delivery_method' => 'pickup',
-                'payment_method' => 'cash',
-                'commitment_date' => '2026-07-10',
-                'commitment_time' => '09:45:00',
-                'requested_time_window' => 'morning',
-                'decision_version' => 'v1',
-                'planner_confidence' => 81,
-            ]);
+        $lateMorningOrder = $this->createOrder($customer, $branch, $product, [
+            'status' => Order::STATUS_CONFIRMED,
+            'raw_message_text' => 'late morning order',
+            'remaining_sla_minutes' => 2000,
+            'risk_level' => 'low',
+            'priority_level' => 'normal',
+            'delivery_method' => 'pickup',
+            'payment_method' => 'cash',
+            'commitment_date' => '2026-07-10',
+            'commitment_time' => '09:45:00',
+            'requested_time_window' => 'morning',
+            'decision_version' => 'v1',
+            'planner_confidence' => 81,
+        ]);
 
-            $completedOrder = $this->createOrder($customer, $branch, $product, [
-                'status' => Order::STATUS_DISPATCHED,
-                'raw_message_text' => 'completed order',
-                'remaining_sla_minutes' => 60,
-                'risk_level' => 'low',
-                'priority_level' => 'low',
-                'delivery_method' => 'delivery',
-                'payment_method' => 'sinpe',
-                'commitment_date' => '2026-07-10',
-                'commitment_time' => '10:30:00',
-                'requested_time_window' => 'morning',
-                'decision_version' => 'v1',
-                'planner_confidence' => 80,
-            ]);
+        $completedOrder = $this->createOrder($customer, $branch, $product, [
+            'status' => Order::STATUS_DISPATCHED,
+            'raw_message_text' => 'completed order',
+            'remaining_sla_minutes' => 60,
+            'risk_level' => 'low',
+            'priority_level' => 'low',
+            'delivery_method' => 'delivery',
+            'payment_method' => 'sinpe',
+            'commitment_date' => '2026-07-10',
+            'commitment_time' => '10:30:00',
+            'requested_time_window' => 'morning',
+            'decision_version' => 'v1',
+            'planner_confidence' => 80,
+        ]);
 
-            $dispatchedFutureCommitmentOrder = $this->createOrder($customer, $branch, $product, [
-                'status' => Order::STATUS_DISPATCHED,
-                'raw_message_text' => 'dispatched future commitment',
-                'remaining_sla_minutes' => 45,
-                'risk_level' => 'low',
-                'priority_level' => 'normal',
-                'delivery_method' => 'delivery',
-                'payment_method' => 'cash',
-                'commitment_date' => '2026-07-11',
-                'commitment_time' => '10:45:00',
-                'requested_time_window' => 'morning',
-                'decision_version' => 'v1',
-                'planner_confidence' => 79,
-            ]);
+        $dispatchedFutureCommitmentOrder = $this->createOrder($customer, $branch, $product, [
+            'status' => Order::STATUS_DISPATCHED,
+            'raw_message_text' => 'dispatched future commitment',
+            'remaining_sla_minutes' => 45,
+            'risk_level' => 'low',
+            'priority_level' => 'normal',
+            'delivery_method' => 'delivery',
+            'payment_method' => 'cash',
+            'commitment_date' => '2026-07-11',
+            'commitment_time' => '10:45:00',
+            'requested_time_window' => 'morning',
+            'decision_version' => 'v1',
+            'planner_confidence' => 79,
+        ]);
 
-            $foreignOrganization = Organization::create([
-                'name' => 'Foreign Org',
-                'status' => Organization::STATUS_ACTIVE,
-            ]);
+        $foreignOrganization = Organization::create([
+            'name' => 'Foreign Org',
+            'status' => Organization::STATUS_ACTIVE,
+        ]);
 
-            $foreignBranch = Branch::create([
-                'organization_id' => $foreignOrganization->id,
-                'name' => 'Foreign Branch',
-                'channel_type' => Branch::CHANNEL_TYPE_WHATSAPP,
-                'channel_identifier' => '@foreign',
-                'status' => Branch::STATUS_ACTIVE,
-            ]);
+        $foreignBranch = Branch::create([
+            'organization_id' => $foreignOrganization->id,
+            'name' => 'Foreign Branch',
+            'channel_type' => Branch::CHANNEL_TYPE_WHATSAPP,
+            'channel_identifier' => '@foreign',
+            'status' => Branch::STATUS_ACTIVE,
+        ]);
 
-            $foreignCustomer = Customer::create([
-                'organization_id' => $foreignOrganization->id,
-                'branch_id' => $foreignBranch->id,
-                'name' => 'Foreign Customer',
-                'phone' => '+50255559999',
-                'external_id' => null,
-            ]);
+        $foreignCustomer = Customer::create([
+            'organization_id' => $foreignOrganization->id,
+            'branch_id' => $foreignBranch->id,
+            'name' => 'Foreign Customer',
+            'phone' => '+50255559999',
+            'external_id' => null,
+        ]);
 
-            Order::create([
-                'organization_id' => $foreignOrganization->id,
-                'branch_id' => $foreignBranch->id,
-                'customer_id' => $foreignCustomer->id,
-                'incoming_message_id' => null,
-                'possible_duplicate_of_order_id' => null,
-                'source_channel' => 'whatsapp',
-                'external_message_id' => fake()->uuid(),
-                'status' => Order::STATUS_PENDING_REVIEW,
-                'parser_confidence' => 0.88,
-                'raw_message_text' => 'foreign order',
-                'parsed_payload_json' => ['items' => []],
-                'duplicate_score' => null,
-                'duplicate_reason' => null,
-                'duplicate_checked_at' => now(),
-                'order_fingerprint' => fake()->uuid(),
-                'notes' => null,
-                'reviewed_by' => null,
-                'reviewed_at' => null,
-                'confirmed_by' => null,
-                'confirmed_at' => null,
-                'preparing_at' => null,
-                'ready_for_dispatch_at' => null,
-                'dispatched_at' => null,
-                'cancelled_at' => null,
-                'rejected_at' => null,
-            ]);
+        Order::create([
+            'organization_id' => $foreignOrganization->id,
+            'branch_id' => $foreignBranch->id,
+            'customer_id' => $foreignCustomer->id,
+            'incoming_message_id' => null,
+            'possible_duplicate_of_order_id' => null,
+            'source_channel' => 'whatsapp',
+            'external_message_id' => fake()->uuid(),
+            'status' => Order::STATUS_PENDING_REVIEW,
+            'parser_confidence' => 0.88,
+            'raw_message_text' => 'foreign order',
+            'parsed_payload_json' => ['items' => []],
+            'duplicate_score' => null,
+            'duplicate_reason' => null,
+            'duplicate_checked_at' => now(),
+            'order_fingerprint' => fake()->uuid(),
+            'notes' => null,
+            'reviewed_by' => null,
+            'reviewed_at' => null,
+            'confirmed_by' => null,
+            'confirmed_at' => null,
+            'preparing_at' => null,
+            'ready_for_dispatch_at' => null,
+            'dispatched_at' => null,
+            'cancelled_at' => null,
+            'rejected_at' => null,
+        ]);
 
         return [
             $user->fresh(),

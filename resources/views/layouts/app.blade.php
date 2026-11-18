@@ -73,13 +73,13 @@
 
                         <div class="px-2 pt-6">
                             <div class="px-2 text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                                Channels
+                                Canales
                             </div>
                             <div class="mt-3 space-y-1">
                                 @foreach ([
-                                    ['label' => 'WhatsApp', 'href' => 'channels.show', 'params' => ['whatsapp'], 'active' => 'channels.show', 'icon' => 'M12 2a10 10 0 1 0 5.1 18.6L22 22l-1.4-4.9A10 10 0 0 0 12 2Z', 'accent' => 'green', 'badge' => 'Setup'],
+                                    ['label' => 'WhatsApp', 'href' => 'channels.show', 'params' => ['whatsapp'], 'active' => 'channels.show', 'icon' => 'M12 2a10 10 0 1 0 5.1 18.6L22 22l-1.4-4.9A10 10 0 0 0 12 2Z', 'accent' => 'green', 'badge' => 'Configurar'],
                                     ['label' => 'Telegram', 'href' => 'channels.show', 'params' => ['telegram'], 'active' => 'channels.show', 'icon' => 'M21.8 4.7 3.6 11.4c-1 .4-1 1.8.1 2.1l4.7 1.4 1.8 5.2c.3.9 1.5 1.1 2.1.3l2.8-3.3 4.8 3.5c.8.6 1.9.1 2.1-.9l2.8-13.8c.2-1.1-.9-2-2-1.7Z', 'accent' => 'blue'],
-                                    ['label' => 'Instagram', 'href' => 'channels.show', 'params' => ['instagram'], 'active' => 'channels.show', 'icon' => 'M7.5 3.5h9A4 4 0 0 1 20.5 7.5v9a4 4 0 0 1-4 4h-9a4 4 0 0 1-4-4v-9a4 4 0 0 1 4-4Zm9.5 2.5a1 1 0 1 0 0 2 1 1 0 0 0 0-2ZM12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z', 'accent' => 'rose', 'badge' => 'Soon'],
+                                    ['label' => 'Instagram', 'href' => 'channels.show', 'params' => ['instagram'], 'active' => 'channels.show', 'icon' => 'M7.5 3.5h9A4 4 0 0 1 20.5 7.5v9a4 4 0 0 1-4 4h-9a4 4 0 0 1-4-4v-9a4 4 0 0 1 4-4Zm9.5 2.5a1 1 0 1 0 0 2 1 1 0 0 0 0-2ZM12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z', 'accent' => 'rose', 'badge' => 'Pronto'],
                                 ] as $item)
                                     @php
                                         $isChannelActive = request()->routeIs($item['active']) && request()->route('provider') === ($item['params'][0] ?? null);
@@ -255,7 +255,7 @@
 
                             <div class="hidden items-center gap-3 sm:flex">
                                 <div class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 shadow-sm">
-                                    {{ now()->format('M d, Y') }}
+                                    {{ now()->locale('es')->isoFormat('D MMM YYYY') }}
                                 </div>
                                 <a href="{{ route('operations.index') }}" class="brand-btn-primary">
                                     Pedidos pendientes

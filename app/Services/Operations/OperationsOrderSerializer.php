@@ -31,7 +31,7 @@ class OperationsOrderSerializer
             'phone' => $order->customer?->phone ?? 'Sin telefono',
             'total_orders' => 0,
             'favorite_products' => [],
-            'favorite_channel' => ['name' => 'Unknown', 'percentage' => 0.0],
+            'favorite_channel' => ['name' => 'Sin dato', 'percentage' => 0.0],
             'last_order' => null,
             'segment' => 'Inactive',
             'open_notifications' => 0,
