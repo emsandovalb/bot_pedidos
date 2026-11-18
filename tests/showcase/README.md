@@ -38,7 +38,6 @@ pasar. Cuando se arregla algo en la app, se quita la marca en el mismo cambio.
 | Caso | Regla |
 | --- | --- |
 | BOT-14 | Operaciones en español y sin tarjetas "Sin productos visibles". |
-| BOT-15 | El botón de cada tarjeta dice en español lo que hace, y "Preparar" deja el pedido en preparación. |
 | ALL-02 | Sin textos en inglés en Operaciones, Canales y Perfil. |
 
 ## Cómo está armada

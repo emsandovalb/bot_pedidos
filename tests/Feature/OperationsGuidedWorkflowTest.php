@@ -25,8 +25,8 @@ class OperationsGuidedWorkflowTest extends TestCase
         $this->actingAs($user)
             ->get(route('operations.index', ['order' => $order->id]))
             ->assertOk()
-            ->assertSeeText('Confirm')
-            ->assertDontSee('Prepare');
+            ->assertSeeText('Confirmar')
+            ->assertDontSee('Preparar');
     }
 
     public function test_confirmed_shows_prepare_and_not_confirm(): void
@@ -36,7 +36,7 @@ class OperationsGuidedWorkflowTest extends TestCase
         $this->actingAs($user)
             ->get(route('operations.index', ['order' => $order->id]))
             ->assertOk()
-            ->assertSeeText('Prepare');
+            ->assertSeeText('Preparar');
     }
 
     public function test_preparing_shows_ready_and_not_confirm(): void
@@ -46,8 +46,8 @@ class OperationsGuidedWorkflowTest extends TestCase
         $this->actingAs($user)
             ->get(route('operations.index', ['order' => $order->id]))
             ->assertOk()
-            ->assertSeeText('Ready')
-            ->assertDontSee('Confirm');
+            ->assertSeeText('Listo')
+            ->assertDontSee('Confirmar');
     }
 
     public function test_ready_for_dispatch_shows_dispatch(): void
@@ -57,7 +57,7 @@ class OperationsGuidedWorkflowTest extends TestCase
         $this->actingAs($user)
             ->get(route('operations.index', ['order' => $order->id]))
             ->assertOk()
-            ->assertSeeText('Dispatch');
+            ->assertSeeText('Despachar');
     }
 
     public function test_dispatched_shows_complete_and_no_transition_cta(): void
@@ -67,11 +67,11 @@ class OperationsGuidedWorkflowTest extends TestCase
         $this->actingAs($user)
             ->get(route('operations.index', ['order' => $order->id]))
             ->assertOk()
-            ->assertSeeText('Complete')
-            ->assertDontSee('Confirm')
-            ->assertDontSee('Prepare')
-            ->assertDontSee('Ready')
-            ->assertDontSee('Dispatch');
+            ->assertSeeText('Ver historial')
+            ->assertDontSee('Confirmar')
+            ->assertDontSee('Preparar')
+            ->assertDontSee('Listo')
+            ->assertDontSee('Despachar');
     }
 
     public function test_cancelled_and_rejected_expose_terminal_snapshot_without_actions(): void
@@ -128,9 +128,9 @@ class OperationsGuidedWorkflowTest extends TestCase
         $this->actingAs($user)
             ->get(route('operations.index', ['order' => $order->id]))
             ->assertOk()
-            ->assertSeeText('Ready')
-            ->assertDontSee('Confirm')
-            ->assertDontSee('Prepare');
+            ->assertSeeText('Listo')
+            ->assertDontSee('Confirmar')
+            ->assertDontSee('Preparar');
     }
 
     /**
@@ -150,7 +150,7 @@ class OperationsGuidedWorkflowTest extends TestCase
                 'organization_id' => $organization->id,
                 'name' => 'Guided Workflow Branch',
                 'channel_type' => Branch::CHANNEL_TYPE_TELEGRAM,
-                'channel_identifier' => '@guided-workflow-' . Str::slug($status),
+                'channel_identifier' => '@guided-workflow-'.Str::slug($status),
                 'status' => Branch::STATUS_ACTIVE,
             ]);
 

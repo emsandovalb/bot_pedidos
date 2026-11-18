@@ -167,19 +167,19 @@ test('pilot documentation package captures the Benditio flow end to end', async 
     const drawer = operationsPage.locator('aside').filter({ hasText: 'Detail drawer' });
     await expect(drawer).toBeVisible();
     await expect(drawer.getByText('Items', { exact: true })).toBeVisible();
-    await expect(drawer).toContainText('Prepare');
+    await expect(drawer).toContainText('Confirmar');
     await operationsPage.screenshot({ path: path.resolve(screenshotDir, '05-order-drawer.png'), fullPage: true });
 
-    await transitionOrder(operationsPage, drawer, 'Prepare', 'Prepare', 'Confirmado');
+    await transitionOrder(operationsPage, drawer, 'Confirmar', 'Preparar', 'Confirmado');
 
-    await transitionOrder(operationsPage, drawer, 'Prepare', 'Ready', 'Preparando');
+    await transitionOrder(operationsPage, drawer, 'Preparar', 'Listo', 'Preparando');
     await operationsPage.screenshot({ path: path.resolve(screenshotDir, '06-order-preparing.png'), fullPage: true });
 
-    await transitionOrder(operationsPage, drawer, 'Ready', 'Dispatch', 'Listo');
+    await transitionOrder(operationsPage, drawer, 'Listo', 'Despachar', 'Listo');
     await operationsPage.screenshot({ path: path.resolve(screenshotDir, '07-order-ready.png'), fullPage: true });
 
-    await transitionOrder(operationsPage, drawer, 'Dispatch', null, 'Despachado');
-    await expect(drawer).toContainText('Complete');
+    await transitionOrder(operationsPage, drawer, 'Despachar', null, 'Despachado');
+    await expect(drawer).toContainText('Ver historial');
     await operationsPage.screenshot({ path: path.resolve(screenshotDir, '08-order-dispatched.png'), fullPage: true });
 
     await drawer.getByRole('button', { name: 'Close' }).click();
@@ -301,11 +301,11 @@ function findOrder(orders, criteria) {
 async function transitionOrder(page, drawer, buttonName, nextButtonName, nextStatus) {
     await Promise.all([
         page.waitForResponse((response) => response.request().method() === 'POST' && response.status() === 200 && response.url().includes('/orders/')),
-        drawer.getByRole('button', { name: buttonName }).click(),
+        drawer.getByRole('button', { name: buttonName, exact: true }).click(),
     ]);
 
     if (nextButtonName) {
-        await expect(drawer.getByRole('button', { name: nextButtonName })).toBeVisible();
+        await expect(drawer.getByRole('button', { name: nextButtonName, exact: true })).toBeVisible();
     }
 
     await expect(drawer).toContainText(nextStatus);

@@ -4,11 +4,11 @@
         $selectedOrderDetails = collect($ordersData)->keyBy('id')->all();
         $headerDateLabel = \Illuminate\Support\Carbon::parse($feedData['server_time'] ?? now())->locale('en')->isoFormat('dddd MMMM D');
         $selectedWorkflowLabel = match ($selectedOrder['status'] ?? null) {
-            'pending_review' => 'Confirm',
-            'confirmed' => 'Prepare',
-            'preparing' => 'Ready',
-            'ready_for_dispatch' => 'Dispatch',
-            'dispatched' => 'Complete',
+            'pending_review' => 'Confirmar',
+            'confirmed' => 'Preparar',
+            'preparing' => 'Listo',
+            'ready_for_dispatch' => 'Despachar',
+            'dispatched' => 'Ver historial',
             default => null,
         };
     @endphp
@@ -28,6 +28,7 @@
             queueData: @js($queueData ?? ['sections' => [], 'metrics' => []]),
             filters: @js($filters),
             operatorName: @js($operatorName),
+            canManage: @js(! auth()->user()->isViewer()),
         })"
         x-init="init()"
         x-on:operations-select-order="select($event.detail.orderId, $event.detail.order)"
@@ -254,6 +255,7 @@
 
                                 <button
                                     type="button"
+                                    x-show="canManage"
                                     class="brand-btn-primary px-5 py-3 text-base shadow-none"
                                     @click.stop="submitWorkflowAction(workflowAction(order))"
                                     x-text="workflowActionLabel(order)"
@@ -454,10 +456,11 @@
                                     </div>
                                     <button
                                         type="button"
+                                        x-show="canManage"
                                         class="brand-btn-primary px-5 py-3"
                                         :disabled="submittingActionKey === workflowAction(activeOrder).key"
                                         @click="submitWorkflowAction(workflowAction(activeOrder))"
-                                        x-text="submittingActionKey === workflowAction(activeOrder).key ? 'Processing...' : workflowActionLabel(activeOrder)"
+                                        x-text="submittingActionKey === workflowAction(activeOrder).key ? 'Procesando…' : workflowActionLabel(activeOrder)"
                                     ></button>
                                 </div>
                             </div>

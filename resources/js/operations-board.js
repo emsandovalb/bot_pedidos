@@ -227,13 +227,25 @@ function buildItemLines(items) {
     });
 }
 
-function buildWorkflow(orderId, status, ordersBaseUrl) {
+function buildWorkflow(orderId, status, ordersBaseUrl, canConfirm = true) {
     const base = `${ordersBaseUrl}/${orderId}`;
 
     switch (status) {
         case 'pending_review':
+            // Products still to resolve: the order is reviewed on its page before it can be confirmed.
+            if (!canConfirm) {
+                return {
+                    label: 'Revisar',
+                    key: 'review',
+                    method: 'GET',
+                    url: base,
+                    style: 'primary',
+                    requires_confirmation: false,
+                };
+            }
+
             return {
-                label: 'Prepare',
+                label: 'Confirmar',
                 key: 'confirm',
                 method: 'POST',
                 url: `${base}/confirm`,
@@ -242,7 +254,7 @@ function buildWorkflow(orderId, status, ordersBaseUrl) {
             };
         case 'confirmed':
             return {
-                label: 'Prepare',
+                label: 'Preparar',
                 key: 'prepare',
                 method: 'POST',
                 url: `${base}/prepare`,
@@ -251,7 +263,7 @@ function buildWorkflow(orderId, status, ordersBaseUrl) {
             };
         case 'preparing':
             return {
-                label: 'Ready',
+                label: 'Listo',
                 key: 'ready',
                 method: 'POST',
                 url: `${base}/ready-for-dispatch`,
@@ -260,7 +272,7 @@ function buildWorkflow(orderId, status, ordersBaseUrl) {
             };
         case 'ready_for_dispatch':
             return {
-                label: 'Dispatch',
+                label: 'Despachar',
                 key: 'dispatch',
                 method: 'POST',
                 url: `${base}/dispatch`,
@@ -269,7 +281,7 @@ function buildWorkflow(orderId, status, ordersBaseUrl) {
             };
         case 'dispatched':
             return {
-                label: 'Complete',
+                label: 'Ver historial',
                 key: 'view_history',
                 method: 'GET',
                 url: base,
@@ -278,7 +290,7 @@ function buildWorkflow(orderId, status, ordersBaseUrl) {
             };
         default:
             return {
-                label: 'Cancel',
+                label: 'Cancelar',
                 key: 'cancel',
                 method: 'POST',
                 url: `${base}/cancel`,
@@ -307,11 +319,12 @@ function normalizeOrderDetails(orderDetails) {
 
 function normalizeOrder(order, ordersBaseUrl) {
     const normalizedId = Number(order?.id ?? 0);
-    const workflow = buildWorkflow(normalizedId, order?.status ?? 'pending_review', ordersBaseUrl);
+    const workflow = buildWorkflow(normalizedId, order?.status ?? 'pending_review', ordersBaseUrl, order?.can_confirm !== false);
 
         return {
             id: normalizedId,
             status: order?.status ?? 'pending_review',
+        can_confirm: order?.can_confirm !== false,
         status_label: order?.status_label ?? String(order?.status ?? 'pending review').replaceAll('_', ' '),
         status_tone: order?.status_tone ?? 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
         channel: order?.channel ?? 'Sin canal',
@@ -501,6 +514,8 @@ export function createOperationsBoard(config = {}) {
         },
         toastTimer: null,
         operatorName: config.operatorName ?? 'Carlos',
+        // A read-only user sees the board without the buttons that change an order.
+        canManage: config.canManage ?? true,
         csrfToken: document.querySelector('meta[name="csrf-token"]')?.content ?? '',
         submittingActionKey: null,
         soundMuted: localStorage.getItem('benditio.operations.live-queue.muted') === '1',
@@ -657,11 +672,11 @@ export function createOperationsBoard(config = {}) {
         },
 
         workflowLabel(order) {
-            return buildWorkflow(order.id, order.status, this.ordersBaseUrl).label;
+            return buildWorkflow(order.id, order.status, this.ordersBaseUrl, order.can_confirm !== false).label;
         },
 
         workflowAction(order) {
-            const action = buildWorkflow(order.id, order.status, this.ordersBaseUrl);
+            const action = buildWorkflow(order.id, order.status, this.ordersBaseUrl, order.can_confirm !== false);
             return {
                 key: action.key,
                 label: action.label,
