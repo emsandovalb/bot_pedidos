@@ -45,6 +45,21 @@ class OrderAuthorizationTest extends TestCase
         $this->actingAs($viewer)->get(route('orders.show', $order))->assertOk();
     }
 
+    public function test_viewer_is_not_offered_actions_they_cannot_take(): void
+    {
+        ['viewer' => $viewer, 'owner' => $owner, 'order' => $order] = $this->context();
+
+        $this->actingAs($viewer)->get(route('orders.show', $order))
+            ->assertOk()
+            ->assertDontSee('Confirmar pedido')
+            ->assertDontSee('Editar pedido')
+            ->assertSee('solo lectura');
+
+        $this->actingAs($owner)->get(route('orders.show', $order))
+            ->assertSee('Confirmar pedido')
+            ->assertSee('Editar pedido');
+    }
+
     public function test_seller_cannot_act_on_orders_from_another_branch(): void
     {
         ['seller_other_branch' => $seller, 'order' => $order] = $this->context();

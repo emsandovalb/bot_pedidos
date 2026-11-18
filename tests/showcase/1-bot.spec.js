@@ -35,7 +35,6 @@ test('BOT-02 Vendedor no ve configuración', async ({ page }) => {
 });
 
 test('BOT-03 Viewer es solo lectura', async ({ page }) => {
-    pending('el usuario de solo lectura ve "Confirmar pedido" y "Editar pedido"');
     const order = botSql("select id from orders where status = 'pending_review' order by id limit 1")[0];
     await botLogin(page, 'viewer@local.test');
     const response = await page.goto(`${BOT}/orders/${order.id}`);
