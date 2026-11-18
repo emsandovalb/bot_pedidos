@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Organization;
 use App\Models\Product;
 use App\Models\ProductAlias;
+use App\Services\OrderParserService;
 use App\Services\ProductMatchingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -66,7 +67,7 @@ class ProductMatchingTest extends TestCase
 
     public function test_parser_skips_greetings_and_delivery_phrases(): void
     {
-        $parser = app(\App\Services\OrderParserService::class);
+        $parser = app(OrderParserService::class);
 
         $items = $parser->parse('Hola, ocupo 2 tubos pvc y 3 sacos de cemento para mañana')['items'];
         $this->assertSame(['tubos pvc', 'sacos de cemento'], array_column($items, 'product_name'));
