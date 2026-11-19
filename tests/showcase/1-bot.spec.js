@@ -211,9 +211,27 @@ test('BOT-13 Filtros de Pedidos', async ({ page }) => {
         const errors = watchErrors(page);
         await page.goto(`${BOT}/orders?status=${status}`);
         const expected = botSql('select count(*) as n from orders where status = ?', [status])[0].n;
-        await expect(page.getByRole('link', { name: 'Ver pedido' }), status).toHaveCount(Math.min(expected, 15));
+        await expect(page.getByRole('link', { name: 'Ver pedido' }), status).toHaveCount(Math.min(expected, 25));
         expect(errors).toEqual([]);
     }
+
+    // By channel, from the screen: every order shown is from that channel, and the count matches.
+    const total = page.locator('[data-orders-total]');
+    await page.goto(`${BOT}/orders`);
+    await page.getByLabel('Canal').selectOption('telegram');
+    await page.getByRole('button', { name: 'Buscar' }).click();
+    await expect(page).toHaveURL(/channel=telegram/);
+    const telegram = botSql("select count(*) as n from orders where source_channel = 'telegram'")[0].n;
+    await expect(total).toHaveText(`${telegram} ${telegram === 1 ? 'pedido' : 'pedidos'}`);
+
+    // By customer: a name finds that customer's orders; the status tabs keep the search.
+    const customer = botSql('select c.name, count(*) as n from orders o join customers c on c.id = o.customer_id group by c.id order by n desc limit 1')[0];
+    await page.goto(`${BOT}/orders`);
+    await page.getByLabel('Buscar').fill(customer.name);
+    await page.getByRole('button', { name: 'Buscar' }).click();
+    const named = botSql('select count(*) as n from orders o join customers c on c.id = o.customer_id where c.name like ?', [`%${customer.name}%`])[0].n;
+    await expect(total).toHaveText(`${named} ${named === 1 ? 'pedido' : 'pedidos'}`);
+    await expect(page.getByRole('link', { name: 'En revisión' })).toHaveAttribute('href', /q=/);
 });
 
 // --- Operaciones ---
