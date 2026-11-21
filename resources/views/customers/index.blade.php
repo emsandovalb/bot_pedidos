@@ -14,10 +14,10 @@
             $currentSearch = $filters['search'] ?? '';
         @endphp
 
-        <section class="overflow-hidden rounded-[28px] border border-slate-200/70 surface-hero shadow-card">
+        <section class="overflow-hidden rounded-[20px] border border-slate-200/70 surface-hero shadow-card">
             <div class="flex flex-col gap-6 p-6 sm:p-8 lg:flex-row lg:items-end lg:justify-between">
                 <div class="max-w-3xl">
-                    <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary ring-1 ring-inset ring-blue-100">
+                    <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary">
                         Benditio Customer Identity
                     </div>
                     <h1 class="mt-4 text-3xl font-semibold tracking-tight text-brand-navy sm:text-4xl">Clientes</h1>
@@ -86,7 +86,7 @@
                         ->map(fn ($provider) => $channelLabels[$provider] ?? \Illuminate\Support\Str::headline((string) $provider));
                 @endphp
 
-                <article class="overflow-hidden rounded-[28px] border border-slate-200/80 bg-white shadow-card transition hover:-translate-y-0.5 hover:shadow-raised">
+                <article class="overflow-hidden rounded-[20px] border border-slate-200/80 bg-white shadow-card transition hover:-translate-y-0.5 hover:shadow-raised">
                     <div class="h-1 bg-gradient-to-r from-brand-primary to-emerald-500"></div>
                     <div class="p-5 sm:p-6">
                         <div class="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
@@ -102,18 +102,18 @@
                                         </p>
                                     </div>
 
-                                    <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200">
+                                    <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
                                         #{{ $customer->id }}
                                     </span>
                                 </div>
 
                                 <div class="flex flex-wrap gap-2">
                                     @forelse ($channels as $channel)
-                                        <span class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-brand-primary ring-1 ring-blue-100">
+                                        <span class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-brand-primary">
                                             {{ $channel }}
                                         </span>
                                     @empty
-                                        <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 ring-1 ring-slate-200">
+                                        <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
                                             Sin canal registrado
                                         </span>
                                     @endforelse
@@ -151,7 +151,7 @@
                     </div>
                 </article>
             @empty
-                <div class="rounded-[28px] border border-dashed border-blue-200 bg-blue-50/70 px-6 py-14 text-center shadow-sm">
+                <div class="rounded-[20px] border border-dashed border-blue-200 bg-blue-50/70 px-6 py-14 text-center shadow-sm">
                     <div class="mx-auto max-w-md">
                         <h2 class="text-lg font-semibold text-brand-navy">Aún no hay clientes.</h2>
                         <p class="mt-2 text-sm leading-6 text-slate-600">Los clientes aparecerán cuando Benditio reciba pedidos.</p>

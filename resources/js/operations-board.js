@@ -135,8 +135,8 @@ function buildChannelPill(order) {
         label: CHANNEL_LABELS[key] ?? (order.channel ?? 'Sin canal'),
         glyph: key === 'telegram' ? 'TG' : (key === 'whatsapp' ? 'WA' : 'CH'),
         tone: key === 'telegram'
-            ? 'bg-sky-50 text-sky-800 ring-1 ring-sky-100'
-            : 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100',
+            ? 'bg-sky-50 text-sky-800'
+            : 'bg-emerald-50 text-emerald-800',
     };
 }
 
@@ -326,7 +326,7 @@ function normalizeOrder(order, ordersBaseUrl) {
             status: order?.status ?? 'pending_review',
         can_confirm: order?.can_confirm !== false,
         status_label: order?.status_label ?? String(order?.status ?? 'pending review').replaceAll('_', ' '),
-        status_tone: order?.status_tone ?? 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
+        status_tone: order?.status_tone ?? 'bg-slate-100 text-slate-700',
         channel: order?.channel ?? 'Sin canal',
         channel_key: order?.channel_key ?? '',
         customer_name: order?.customer_name ?? 'Sin cliente',
@@ -441,14 +441,14 @@ function statusLabel(status) {
 
 function statusTone(status) {
     return ({
-        pending_review: 'bg-amber-50 text-amber-800 ring-1 ring-amber-100',
-        confirmed: 'bg-blue-50 text-blue-800 ring-1 ring-blue-100',
-        preparing: 'bg-violet-50 text-violet-800 ring-1 ring-violet-100',
-        ready_for_dispatch: 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100',
-        dispatched: 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
-        cancelled: 'bg-red-50 text-red-800 ring-1 ring-red-100',
-        rejected: 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
-    })[status] ?? 'bg-slate-100 text-slate-700 ring-1 ring-slate-200';
+        pending_review: 'bg-amber-50 text-amber-800',
+        confirmed: 'bg-blue-50 text-blue-800',
+        preparing: 'bg-violet-50 text-violet-800',
+        ready_for_dispatch: 'bg-emerald-50 text-emerald-800',
+        dispatched: 'bg-slate-100 text-slate-700',
+        cancelled: 'bg-red-50 text-red-800',
+        rejected: 'bg-slate-100 text-slate-700',
+    })[status] ?? 'bg-slate-100 text-slate-700';
 }
 
 export function createOperationsColumn(column) {
@@ -1230,27 +1230,27 @@ export function createOperationsBoard(config = {}) {
             const risk = String(order.risk_level ?? '');
 
             return ({
-                critical: 'bg-rose-50 text-rose-800 ring-1 ring-rose-100',
-                high: 'bg-orange-50 text-orange-800 ring-1 ring-orange-100',
-                medium: 'bg-amber-50 text-amber-800 ring-1 ring-amber-100',
-                low: 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
-            })[risk] ?? 'bg-slate-100 text-slate-700 ring-1 ring-slate-200';
+                critical: 'bg-rose-50 text-rose-800',
+                high: 'bg-orange-50 text-orange-800',
+                medium: 'bg-amber-50 text-amber-800',
+                low: 'bg-slate-100 text-slate-700',
+            })[risk] ?? 'bg-slate-100 text-slate-700';
         },
 
         agendaPriorityTone(order) {
             if (String(order.risk_level ?? '') === 'critical' || String(order.risk_level ?? '') === 'high') {
-                return 'bg-amber-50 text-amber-800 ring-1 ring-amber-100';
+                return 'bg-amber-50 text-amber-800';
             }
 
             if (String(order.priority_level ?? '') === 'urgent') {
-                return 'bg-orange-50 text-orange-800 ring-1 ring-orange-100';
+                return 'bg-orange-50 text-orange-800';
             }
 
             if (String(order.priority_level ?? '') === 'low') {
-                return 'bg-slate-100 text-slate-700 ring-1 ring-slate-200';
+                return 'bg-slate-100 text-slate-700';
             }
 
-            return 'bg-blue-50 text-blue-800 ring-1 ring-blue-100';
+            return 'bg-blue-50 text-blue-800';
         },
 
         agendaPriorityLabel(order) {

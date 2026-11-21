@@ -2,7 +2,7 @@
     <div class="space-y-8">
         @php
             $statusLabel = $statusLabels[$setupRequest->status] ?? $setupRequest->status;
-            $statusClass = $statusClasses[$setupRequest->status] ?? 'bg-slate-100 text-slate-700 ring-1 ring-slate-200';
+            $statusClass = $statusClasses[$setupRequest->status] ?? 'bg-slate-100 text-slate-700';
             $currentAssigneeId = old('assigned_to', $setupRequest->assigned_to);
             $currentStatus = old('status', $setupRequest->status);
         @endphp
@@ -10,7 +10,7 @@
         <section class="overflow-hidden rounded-[20px] border border-slate-200/70 surface-hero shadow-sm">
             <div class="grid gap-6 px-6 py-7 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
                 <div class="space-y-4">
-                    <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary ring-1 ring-inset ring-blue-100">
+                    <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary">
                         Configuracion WhatsApp
                     </div>
                     <div class="space-y-3">

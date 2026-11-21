@@ -59,7 +59,8 @@
             ]],
             ['label' => 'Mensajes', 'items' => [
                 ['label' => 'Bandeja de mensajes', 'route' => 'incoming-messages.index', 'active' => 'incoming-messages.*', 'icon' => 'inbox'],
-                ['label' => 'WhatsApp', 'href' => route('channels.show', ['whatsapp']), 'active' => 'channels.show', 'provider' => 'whatsapp', 'icon' => 'whatsapp', 'badge' => 'Configurar'],
+                // /channels/whatsapp tiene sus propias rutas (channels.whatsapp, .configuration, .status), no channels.show.
+                ['label' => 'WhatsApp', 'href' => route('channels.whatsapp'), 'active' => 'channels.whatsapp*', 'icon' => 'whatsapp', 'badge' => 'Configurar'],
                 ['label' => 'Telegram', 'href' => route('channels.show', ['telegram']), 'active' => 'channels.show', 'provider' => 'telegram', 'icon' => 'telegram'],
                 ['label' => 'Instagram', 'href' => route('channels.show', ['instagram']), 'active' => 'channels.show', 'provider' => 'instagram', 'icon' => 'instagram', 'badge' => 'Pronto'],
             ]],

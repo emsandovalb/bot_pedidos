@@ -8,7 +8,7 @@
         <section class="overflow-hidden rounded-[20px] border border-slate-200/70 surface-hero-amber shadow-sm">
             <div class="grid gap-6 px-6 py-7 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
                 <div class="space-y-4">
-                    <div class="inline-flex items-center rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 ring-1 ring-inset ring-amber-100">
+                    <div class="inline-flex items-center rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">
                         Support
                     </div>
                     <div class="max-w-3xl space-y-3">
@@ -47,7 +47,7 @@
                             <div class="mt-2 text-3xl font-semibold tracking-tight text-brand-navy">{{ $metric['value'] }}</div>
                             <p class="mt-1 text-sm text-slate-600">{{ $metric['detail'] }}</p>
                         </div>
-                        <span class="inline-flex h-11 w-11 items-center justify-center rounded-2xl {{ $metric['tone'] === 'amber' ? 'bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-100' : ($metric['tone'] === 'blue' ? 'bg-blue-50 text-brand-primary ring-1 ring-inset ring-blue-100' : ($metric['tone'] === 'emerald' ? 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-100' : 'bg-slate-100 text-slate-600 ring-1 ring-inset ring-slate-200')) }}">
+                        <span class="inline-flex h-11 w-11 items-center justify-center rounded-2xl {{ $metric['tone'] === 'amber' ? 'bg-amber-50 text-amber-700' : ($metric['tone'] === 'blue' ? 'bg-blue-50 text-brand-primary' : ($metric['tone'] === 'emerald' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600')) }}">
                             <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5" aria-hidden="true">
                                 <path d="M4 12h16M12 4v16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
                             </svg>
@@ -89,7 +89,7 @@
                             @forelse ($requests as $request)
                                 @php
                                     $statusLabel = $statusLabels[$request->status] ?? $request->status;
-                                    $statusClass = $statusClasses[$request->status] ?? 'bg-slate-100 text-slate-700 ring-1 ring-slate-200';
+                                    $statusClass = $statusClasses[$request->status] ?? 'bg-slate-100 text-slate-700';
                                 @endphp
                                 <tr class="align-top transition hover:bg-slate-50/70">
                                     <td class="px-5 py-4">

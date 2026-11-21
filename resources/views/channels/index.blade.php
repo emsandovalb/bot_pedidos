@@ -3,7 +3,7 @@
         <section class="overflow-hidden rounded-[20px] border border-slate-200/70 surface-hero-sky shadow-sm">
             <div class="grid gap-6 px-6 py-8 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
                 <div class="space-y-5">
-                    <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary ring-1 ring-inset ring-blue-100">
+                    <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary">
                         Canales
                     </div>
                     <div class="max-w-3xl space-y-3">
@@ -128,7 +128,7 @@
 
                     <div class="mt-5 flex flex-wrap gap-2">
                         @foreach ($card['capability_preview'] as $feature)
-                            <span class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-brand-primary ring-1 ring-inset ring-blue-100">
+                            <span class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-brand-primary">
                                 {{ $feature }}
                             </span>
                         @endforeach
@@ -179,7 +179,7 @@
                         <h2 class="text-lg font-semibold text-brand-navy">Cómo funcionan</h2>
                         <p class="mt-1 text-sm text-slate-500">Todos los canales se manejan igual.</p>
                     </div>
-                    <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-100">
+                    <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
                         Para todos los canales
                     </span>
                 </div>
@@ -218,7 +218,7 @@
 
                 <div class="mt-6 rounded-3xl border border-blue-200/80 bg-white p-5">
                     <div class="flex items-center gap-3">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-brand-primary ring-1 ring-inset ring-blue-100">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-brand-primary">
                             <svg viewBox="0 0 24 24" fill="none" class="h-6 w-6" aria-hidden="true">
                                 <path d="M12 2a10 10 0 1 0 5.1 18.6L22 22l-1.4-4.9A10 10 0 0 0 12 2Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>

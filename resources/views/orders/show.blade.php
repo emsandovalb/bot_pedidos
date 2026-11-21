@@ -12,13 +12,13 @@
             ];
 
             $statusBadgeClasses = [
-                \App\Models\Order::STATUS_PENDING_REVIEW => 'bg-amber-50 text-amber-800 ring-1 ring-amber-100',
-                \App\Models\Order::STATUS_CONFIRMED => 'bg-blue-50 text-blue-800 ring-1 ring-blue-100',
-                \App\Models\Order::STATUS_PREPARING => 'bg-violet-50 text-violet-800 ring-1 ring-violet-100',
-                \App\Models\Order::STATUS_READY_FOR_DISPATCH => 'bg-green-50 text-green-800 ring-1 ring-green-100',
-                \App\Models\Order::STATUS_DISPATCHED => 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100',
-                \App\Models\Order::STATUS_CANCELLED => 'bg-red-50 text-red-800 ring-1 ring-red-100',
-                \App\Models\Order::STATUS_REJECTED => 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
+                \App\Models\Order::STATUS_PENDING_REVIEW => 'bg-amber-50 text-amber-800',
+                \App\Models\Order::STATUS_CONFIRMED => 'bg-blue-50 text-blue-800',
+                \App\Models\Order::STATUS_PREPARING => 'bg-violet-50 text-violet-800',
+                \App\Models\Order::STATUS_READY_FOR_DISPATCH => 'bg-green-50 text-green-800',
+                \App\Models\Order::STATUS_DISPATCHED => 'bg-emerald-50 text-emerald-800',
+                \App\Models\Order::STATUS_CANCELLED => 'bg-red-50 text-red-800',
+                \App\Models\Order::STATUS_REJECTED => 'bg-slate-100 text-slate-700',
             ];
 
             $timelineEntries = $order->orderStatusHistories;
@@ -27,16 +27,16 @@
             $detectedItems = $order->orderItems;
         @endphp
 
-        <div class="overflow-hidden rounded-[28px] border border-slate-200/70 surface-hero shadow-card">
+        <div class="overflow-hidden rounded-[20px] border border-slate-200/70 surface-hero shadow-card">
             <div class="flex flex-col gap-5 p-6 sm:p-8 lg:flex-row lg:items-end lg:justify-between">
                 <div class="max-w-3xl">
                     <div class="text-sm font-medium uppercase tracking-wide text-slate-500">Pedido #{{ $order->id }}</div>
                     <h1 class="mt-2 text-3xl font-semibold tracking-tight text-brand-navy sm:text-4xl">Pedido #{{ $order->id }}</h1>
                     <div class="mt-4 flex flex-wrap items-center gap-3">
-                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $statusBadgeClasses[$order->status] ?? 'bg-slate-100 text-slate-700 ring-1 ring-slate-200' }}">
+                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $statusBadgeClasses[$order->status] ?? 'bg-slate-100 text-slate-700' }}">
                             {{ $statusLabels[$order->status] ?? str_replace('_', ' ', $order->status) }}
                         </span>
-                        <span class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-brand-primary ring-1 ring-blue-100">
+                        <span class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-brand-primary">
                             {{ $order->source_channel ?? 'Canal no definido' }}
                         </span>
                         <span class="text-sm text-slate-600">
@@ -211,7 +211,7 @@
                                     </div>
 
                                     <div class="flex flex-wrap gap-2">
-                                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $item->product !== null ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100' : 'bg-slate-100 text-slate-700 ring-1 ring-slate-200' }}">
+                                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $item->product !== null ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-700' }}">
                                             {{ $item->product !== null ? 'Producto reconocido' : 'Sin producto asociado' }}
                                         </span>
                                     </div>

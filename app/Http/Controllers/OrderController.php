@@ -55,10 +55,6 @@ class OrderController extends Controller
             ])
             ->orderByDesc('created_at');
 
-        if (! empty($filters['status'])) {
-            $query->where('status', $filters['status']);
-        }
-
         if (! empty($filters['channel'])) {
             $query->where('source_channel', $filters['channel']);
         }
@@ -84,11 +80,27 @@ class OrderController extends Controller
             });
         }
 
+        // Count per status for the filter tabs, with the channel and search already chosen.
+        $statusCounts = (clone $query)
+            ->toBase()
+            ->reorder()
+            ->select('status')
+            ->selectRaw('count(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status')
+            ->map(fn ($total): int => (int) $total)
+            ->all();
+
+        if (! empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
         return view('orders.index', [
             'orders' => $query->paginate(25)->withQueryString(),
             'filters' => $filters,
             'statusOptions' => self::ORDER_STATUSES,
             'channelOptions' => self::ORDER_CHANNELS,
+            'statusCounts' => $statusCounts,
         ]);
     }
 
@@ -651,14 +663,14 @@ class OrderController extends Controller
     private function statusTone(string $status): string
     {
         return match ($status) {
-            Order::STATUS_PENDING_REVIEW => 'bg-amber-50 text-amber-800 ring-1 ring-amber-100',
-            Order::STATUS_CONFIRMED => 'bg-blue-50 text-blue-800 ring-1 ring-blue-100',
-            Order::STATUS_PREPARING => 'bg-violet-50 text-violet-800 ring-1 ring-violet-100',
-            Order::STATUS_READY_FOR_DISPATCH => 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100',
-            Order::STATUS_DISPATCHED => 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
-            Order::STATUS_CANCELLED => 'bg-red-50 text-red-800 ring-1 ring-red-100',
-            Order::STATUS_REJECTED => 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
-            default => 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
+            Order::STATUS_PENDING_REVIEW => 'bg-amber-50 text-amber-800',
+            Order::STATUS_CONFIRMED => 'bg-blue-50 text-blue-800',
+            Order::STATUS_PREPARING => 'bg-violet-50 text-violet-800',
+            Order::STATUS_READY_FOR_DISPATCH => 'bg-emerald-50 text-emerald-800',
+            Order::STATUS_DISPATCHED => 'bg-slate-100 text-slate-700',
+            Order::STATUS_CANCELLED => 'bg-red-50 text-red-800',
+            Order::STATUS_REJECTED => 'bg-slate-100 text-slate-700',
+            default => 'bg-slate-100 text-slate-700',
         };
     }
 }

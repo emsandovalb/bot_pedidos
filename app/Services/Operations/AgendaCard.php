@@ -48,7 +48,7 @@ class AgendaCard
             'risk_badge' => $this->riskBadge($riskLevel, $remainingSlaMinutes),
             'sla_label' => $this->slaLabel($remainingSlaMinutes),
             'workflow_status_label' => $this->stringValue($this->order['status_label'] ?? null) ?? 'Sin estado',
-            'workflow_status_tone' => $this->stringValue($this->order['status_tone'] ?? null) ?? 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
+            'workflow_status_tone' => $this->stringValue($this->order['status_tone'] ?? null) ?? 'bg-slate-100 text-slate-700',
             'vip_badge' => (bool) ($this->order['vip'] ?? false),
             'duplicate_badge' => (bool) ($this->order['duplicate'] ?? false),
             'channel_icon' => $this->channelIcon(),
@@ -169,27 +169,27 @@ class AgendaCard
         if ($riskLevel === 'critical' || ($remainingSlaMinutes !== null && $remainingSlaMinutes < 0)) {
             return [
                 'label' => 'Urgente',
-                'tone' => 'bg-rose-50 text-rose-800 ring-1 ring-rose-100',
+                'tone' => 'bg-rose-50 text-rose-800',
             ];
         }
 
         if ($priorityLevel === 'urgent' || $riskLevel === 'high') {
             return [
                 'label' => 'Alta',
-                'tone' => 'bg-amber-50 text-amber-800 ring-1 ring-amber-100',
+                'tone' => 'bg-amber-50 text-amber-800',
             ];
         }
 
         if ($priorityLevel === 'low') {
             return [
                 'label' => 'Baja',
-                'tone' => 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
+                'tone' => 'bg-slate-100 text-slate-700',
             ];
         }
 
         return [
             'label' => 'Normal',
-            'tone' => 'bg-blue-50 text-blue-800 ring-1 ring-blue-100',
+            'tone' => 'bg-blue-50 text-blue-800',
         ];
     }
 
@@ -198,19 +198,19 @@ class AgendaCard
         return match ($riskLevel) {
             'critical' => [
                 'label' => 'Atrasado',
-                'tone' => 'bg-rose-50 text-rose-800 ring-1 ring-rose-100',
+                'tone' => 'bg-rose-50 text-rose-800',
             ],
             'high' => [
                 'label' => $remainingSlaMinutes !== null ? 'Vence en '.$remainingSlaMinutes.' min' : 'Riesgo alto',
-                'tone' => 'bg-orange-50 text-orange-800 ring-1 ring-orange-100',
+                'tone' => 'bg-orange-50 text-orange-800',
             ],
             'medium' => [
                 'label' => 'Medio',
-                'tone' => 'bg-amber-50 text-amber-800 ring-1 ring-amber-100',
+                'tone' => 'bg-amber-50 text-amber-800',
             ],
             default => [
                 'label' => 'Normal',
-                'tone' => 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
+                'tone' => 'bg-slate-100 text-slate-700',
             ],
         };
     }

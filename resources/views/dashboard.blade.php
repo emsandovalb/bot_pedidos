@@ -12,38 +12,29 @@
             ];
 
             $orderStatusClasses = [
-                \App\Models\Order::STATUS_PENDING_REVIEW => 'bg-amber-50 text-amber-800 ring-1 ring-amber-100',
-                \App\Models\Order::STATUS_CONFIRMED => 'bg-blue-50 text-blue-800 ring-1 ring-blue-100',
-                \App\Models\Order::STATUS_PREPARING => 'bg-violet-50 text-violet-800 ring-1 ring-violet-100',
-                \App\Models\Order::STATUS_READY_FOR_DISPATCH => 'bg-sky-50 text-sky-800 ring-1 ring-sky-100',
-                \App\Models\Order::STATUS_DISPATCHED => 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100',
-                \App\Models\Order::STATUS_CANCELLED => 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
-                \App\Models\Order::STATUS_REJECTED => 'bg-rose-50 text-rose-800 ring-1 ring-rose-100',
+                \App\Models\Order::STATUS_PENDING_REVIEW => 'bg-amber-50 text-amber-800',
+                \App\Models\Order::STATUS_CONFIRMED => 'bg-blue-50 text-blue-800',
+                \App\Models\Order::STATUS_PREPARING => 'bg-violet-50 text-violet-800',
+                \App\Models\Order::STATUS_READY_FOR_DISPATCH => 'bg-sky-50 text-sky-800',
+                \App\Models\Order::STATUS_DISPATCHED => 'bg-emerald-50 text-emerald-800',
+                \App\Models\Order::STATUS_CANCELLED => 'bg-slate-100 text-slate-700',
+                \App\Models\Order::STATUS_REJECTED => 'bg-rose-50 text-rose-800',
             ];
         @endphp
 
-        <section class="overflow-hidden rounded-3xl border border-slate-200/70 surface-hero p-6 shadow-sm">
-            <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-                <div class="max-w-3xl">
-                    <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary ring-1 ring-inset ring-blue-100">
-                        Sistema operativo
-                    </div>
-                    <h1 class="mt-4 text-3xl font-semibold tracking-tight text-brand-navy sm:text-4xl">Benditio</h1>
-                    <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
-                        Convierte mensajes en ventas.
-                    </p>
-                </div>
-
-                <div class="flex flex-wrap items-center gap-3">
-                    <a href="{{ route('order-reviews.index') }}" class="inline-flex items-center justify-center rounded-xl bg-brand-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-700">
-                        Revisar pedidos
-                    </a>
-                    <a href="{{ route('daily-order-closures.index') }}" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-brand-primary/30 hover:text-brand-primary">
-                        Cierres diarios
-                    </a>
-                </div>
-            </div>
-        </section>
+        <x-hero
+            :eyebrow="'Hola, ' . strtok(auth()->user()->name, ' ')"
+            title="Convierte mensajes en ventas"
+            :subtitle="$orderPendingReviewCount . ' ' . ($orderPendingReviewCount === 1 ? 'pedido espera' : 'pedidos esperan') . ' revisión · ' . $ordersTodayCount . ' ' . ($ordersTodayCount === 1 ? 'pedido' : 'pedidos') . ' hoy'"
+        >
+            <x-slot:actions>
+                <a href="{{ route('order-reviews.index') }}" class="hero-btn">
+                    <x-icon name="review" class="h-5 w-5" />
+                    Revisar pedidos
+                </a>
+                <a href="{{ route('daily-order-closures.index') }}" class="hero-link">Ver cierres diarios →</a>
+            </x-slot:actions>
+        </x-hero>
 
         @if ($openSetupRequestsCount > 0)
             <section class="rounded-3xl border border-amber-200 bg-amber-50/70 p-5 shadow-sm">
@@ -60,7 +51,7 @@
             </section>
         @endif
 
-        <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+        <section class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-6">
             <x-stat-card :href="route('orders.index', ['status' => \App\Models\Order::STATUS_PENDING_REVIEW])" label="Pedidos hoy" :value="$ordersTodayCount" hint="Pedidos creados durante el día" icon="list" tone="blue" />
             <x-stat-card :href="route('orders.index', ['status' => \App\Models\Order::STATUS_PENDING_REVIEW])" label="Pendientes de revisión" :value="$orderPendingReviewCount" hint="Pedidos listos para validar" icon="review" tone="amber" />
             <x-stat-card :href="route('orders.index', ['status' => \App\Models\Order::STATUS_CONFIRMED])" label="Confirmados" :value="$orderConfirmedCount" hint="Pedidos confirmados en el flujo" icon="check" tone="green" />
@@ -85,7 +76,7 @@
                     @forelse ($recentOrders as $order)
                         @php
                             $statusLabel = $orderStatusLabels[$order->status] ?? str_replace('_', ' ', $order->status);
-                            $statusClass = $orderStatusClasses[$order->status] ?? 'bg-slate-100 text-slate-700 ring-1 ring-slate-200';
+                            $statusClass = $orderStatusClasses[$order->status] ?? 'bg-slate-100 text-slate-700';
                         @endphp
                         <article class="rounded-xl border border-slate-200/80 bg-slate-50/80 p-4 transition hover:-translate-y-0.5 hover:border-brand-primary/25 hover:bg-white">
                             <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">

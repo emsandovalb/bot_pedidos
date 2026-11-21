@@ -301,11 +301,11 @@ class SetupRequestController extends Controller
     private function statusClasses(): array
     {
         return [
-            SetupRequest::STATUS_OPEN => 'bg-amber-50 text-amber-800 ring-1 ring-amber-100',
-            SetupRequest::STATUS_SCHEDULED => 'bg-blue-50 text-blue-800 ring-1 ring-blue-100',
-            SetupRequest::STATUS_IN_PROGRESS => 'bg-sky-50 text-sky-800 ring-1 ring-sky-100',
-            SetupRequest::STATUS_COMPLETED => 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100',
-            SetupRequest::STATUS_CANCELLED => 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
+            SetupRequest::STATUS_OPEN => 'bg-amber-50 text-amber-800',
+            SetupRequest::STATUS_SCHEDULED => 'bg-blue-50 text-blue-800',
+            SetupRequest::STATUS_IN_PROGRESS => 'bg-sky-50 text-sky-800',
+            SetupRequest::STATUS_COMPLETED => 'bg-emerald-50 text-emerald-800',
+            SetupRequest::STATUS_CANCELLED => 'bg-slate-100 text-slate-700',
         ];
     }
 

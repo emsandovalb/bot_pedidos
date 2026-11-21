@@ -69,7 +69,7 @@
             <div class="overflow-hidden rounded-[32px] border border-slate-200/70 bg-white/85 shadow-raised backdrop-blur">
                 <div class="flex flex-col gap-6 px-5 py-6 sm:px-8 lg:flex-row lg:items-end lg:justify-between">
                     <div class="max-w-3xl">
-                        <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-brand-primary ring-1 ring-inset ring-blue-100">
+                        <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-brand-primary">
                             Centro de operaciones
                         </div>
                         <div class="mt-4 flex flex-wrap items-baseline gap-x-4 gap-y-1">
@@ -126,7 +126,7 @@
         </section>
 
         <section class="mx-auto max-w-[1680px] px-4 sm:px-6 lg:px-8">
-            <details class="group rounded-[28px] border border-slate-200/80 bg-white/90 shadow-card">
+            <details class="group rounded-[20px] border border-slate-200/80 bg-white/90 shadow-card">
                 <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 sm:px-6">
                     <div>
                         <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Filtros</div>
@@ -195,7 +195,7 @@
                 </div>
 
                 <template x-if="doNowCards.length === 0 && upcomingGroups.length === 0">
-                    <div class="mt-6 rounded-[28px] border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center">
+                    <div class="mt-6 rounded-[20px] border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center">
                         <div class="text-2xl font-semibold text-brand-navy">Nada urgente.</div>
                         <p class="mt-2 text-sm text-slate-600">¡Bien! Vas al día.</p>
                     </div>
@@ -204,7 +204,7 @@
                 <div class="mt-6 grid gap-4 xl:grid-cols-2 2xl:grid-cols-3" x-show="doNowCards.length > 0" x-cloak>
                     <template x-for="order in doNowCards" :key="order.id">
                         <article
-                            class="group flex h-full flex-col rounded-[28px] border border-slate-200/80 bg-white p-5 shadow-soft transition hover:-translate-y-0.5 hover:shadow-soft"
+                            class="group flex h-full flex-col rounded-[20px] border border-slate-200/80 bg-white p-5 shadow-soft transition hover:-translate-y-0.5 hover:shadow-soft"
                             :class="flashOrderIds.includes(order.id) ? 'ring-2 ring-emerald-200' : ''"
                             @click="openDrawer(order)"
                         >
@@ -242,7 +242,7 @@
 
                             <div class="mt-4 flex flex-wrap gap-2">
                                 <template x-for="label in agendaSmartLabels(order)" :key="label">
-                                    <span class="rounded-full bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-500 ring-1 ring-slate-200" x-text="label"></span>
+                                    <span class="rounded-full bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-500" x-text="label"></span>
                                 </template>
                             </div>
 
@@ -279,7 +279,7 @@
 
                 <div class="mt-6 grid gap-4">
                     <template x-for="group in upcomingGroups" :key="group.key">
-                        <div class="rounded-[28px] border border-slate-200/80 bg-slate-50/80 p-4">
+                        <div class="rounded-[20px] border border-slate-200/80 bg-slate-50/80 p-4">
                             <div class="flex items-center justify-between gap-3">
                                 <div class="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500" x-text="group.label"></div>
                                 <div class="text-xs text-slate-500" x-text="`${group.cards.length} ${group.cards.length === 1 ? 'pedido' : 'pedidos'}`"></div>
@@ -422,7 +422,7 @@
                             <div class="rounded-[26px] border border-slate-200/80 bg-white p-5 shadow-sm">
                                 <div class="flex flex-wrap items-center gap-3">
                                     <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold" :class="activeOrder.status_tone" x-text="activeOrder.status_label"></span>
-                                    <span class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-brand-primary ring-1 ring-blue-100" x-text="activeOrder.channel"></span>
+                                    <span class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-brand-primary" x-text="activeOrder.channel"></span>
                                     <span class="text-sm text-slate-500" x-text="activeOrder.elapsed_label"></span>
                                     <span class="text-sm font-semibold text-slate-700" x-text="'#' + activeOrder.id"></span>
                                 </div>

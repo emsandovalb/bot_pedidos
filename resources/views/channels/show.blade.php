@@ -3,7 +3,7 @@
         <section class="overflow-hidden rounded-[20px] border border-slate-200/70 surface-hero-sky shadow-sm">
             <div class="grid gap-6 px-6 py-8 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
                 <div class="space-y-4">
-                    <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary ring-1 ring-inset ring-blue-100">
+                    <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary">
                         Detalle del canal
                     </div>
 
@@ -94,7 +94,7 @@
                         <h2 class="text-lg font-semibold text-brand-navy">Configuración</h2>
                         <p class="mt-1 text-sm text-slate-500">Datos de conexión y validación.</p>
                     </div>
-                    <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-100">
+                    <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
                         {{ $connection ? 'Persisted' : 'No connection yet' }}
                     </span>
                 </div>
@@ -142,14 +142,14 @@
                     @if ($validationErrors !== [])
                         <ul class="mt-3 space-y-2 text-sm text-slate-600">
                             @foreach ($validationErrors as $error)
-                                <li class="rounded-xl bg-slate-50 px-3 py-2 ring-1 ring-inset ring-slate-200">{{ $error }}</li>
+                                <li class="rounded-xl bg-slate-50 px-3 py-2">{{ $error }}</li>
                             @endforeach
                         </ul>
                     @endif
                     @if ($validationWarnings !== [])
                         <ul class="mt-3 space-y-2 text-sm text-amber-700">
                             @foreach ($validationWarnings as $warning)
-                                <li class="rounded-xl bg-amber-50 px-3 py-2 ring-1 ring-inset ring-amber-100">{{ $warning }}</li>
+                                <li class="rounded-xl bg-amber-50 px-3 py-2">{{ $warning }}</li>
                             @endforeach
                         </ul>
                     @endif
@@ -198,7 +198,7 @@
                     <div class="text-sm font-medium text-slate-500">Errores recientes</div>
                     <ul class="mt-3 space-y-2 text-sm text-slate-600">
                         @foreach ($recentErrors as $error)
-                            <li class="rounded-xl bg-slate-50 px-3 py-2 ring-1 ring-inset ring-slate-200">{{ $error }}</li>
+                            <li class="rounded-xl bg-slate-50 px-3 py-2">{{ $error }}</li>
                         @endforeach
                     </ul>
                 </div>
@@ -212,7 +212,7 @@
                         <h2 class="text-lg font-semibold text-brand-navy">Funciones</h2>
                         <p class="mt-1 text-sm text-slate-500">Lo que este canal puede hacer.</p>
                     </div>
-                    <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-brand-primary ring-1 ring-inset ring-blue-100">
+                    <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-brand-primary">
                         Datos del proveedor
                     </span>
                 </div>
@@ -221,7 +221,7 @@
                     @foreach ($capabilityItems as $item)
                         <div class="flex items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-slate-50/70 px-4 py-3">
                             <div class="text-sm font-medium text-brand-navy">{{ $item['label'] }}</div>
-                            <div class="inline-flex h-8 w-8 items-center justify-center rounded-full {{ $item['enabled'] ? 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-100' : 'bg-slate-100 text-slate-400 ring-1 ring-inset ring-slate-200' }}">
+                            <div class="inline-flex h-8 w-8 items-center justify-center rounded-full {{ $item['enabled'] ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-400' }}">
                                 {!! $item['enabled'] ? '&#10003;' : '&#10007;' !!}
                             </div>
                         </div>
@@ -255,7 +255,7 @@
                     <div class="text-sm font-medium text-slate-500">Errores recientes</div>
                     <div class="mt-3 space-y-2">
                         @foreach ($recentErrors as $error)
-                            <div class="rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-600 ring-1 ring-inset ring-slate-200">{{ $error }}</div>
+                            <div class="rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-600">{{ $error }}</div>
                         @endforeach
                     </div>
                 </div>

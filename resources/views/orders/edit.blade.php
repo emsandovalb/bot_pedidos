@@ -12,26 +12,26 @@
             ];
 
             $statusBadgeClasses = [
-                \App\Models\Order::STATUS_PENDING_REVIEW => 'bg-amber-100 text-amber-800 ring-1 ring-amber-200',
-                \App\Models\Order::STATUS_CONFIRMED => 'bg-blue-100 text-blue-800 ring-1 ring-blue-200',
-                \App\Models\Order::STATUS_PREPARING => 'bg-violet-100 text-violet-800 ring-1 ring-violet-200',
-                \App\Models\Order::STATUS_READY_FOR_DISPATCH => 'bg-green-100 text-green-800 ring-1 ring-green-200',
-                \App\Models\Order::STATUS_DISPATCHED => 'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200',
-                \App\Models\Order::STATUS_CANCELLED => 'bg-red-100 text-red-800 ring-1 ring-red-200',
-                \App\Models\Order::STATUS_REJECTED => 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
+                \App\Models\Order::STATUS_PENDING_REVIEW => 'bg-amber-100 text-amber-800',
+                \App\Models\Order::STATUS_CONFIRMED => 'bg-blue-100 text-blue-800',
+                \App\Models\Order::STATUS_PREPARING => 'bg-violet-100 text-violet-800',
+                \App\Models\Order::STATUS_READY_FOR_DISPATCH => 'bg-green-100 text-green-800',
+                \App\Models\Order::STATUS_DISPATCHED => 'bg-emerald-100 text-emerald-800',
+                \App\Models\Order::STATUS_CANCELLED => 'bg-red-100 text-red-800',
+                \App\Models\Order::STATUS_REJECTED => 'bg-slate-100 text-slate-700',
             ];
         @endphp
 
-        <div class="overflow-hidden rounded-[28px] border border-slate-200/70 bg-gradient-to-br from-white via-white to-slate-50 shadow-card">
+        <div class="overflow-hidden rounded-[20px] border border-slate-200/70 bg-gradient-to-br from-white via-white to-slate-50 shadow-card">
             <div class="flex flex-col gap-5 p-6 sm:p-8 lg:flex-row lg:items-end lg:justify-between">
                 <div class="max-w-3xl">
                     <div class="text-sm font-medium uppercase tracking-wide text-slate-500">Pedido #{{ $order->id }}</div>
                     <h1 class="mt-2 text-3xl font-semibold tracking-tight text-brand-navy sm:text-4xl">Editar pedido #{{ $order->id }}</h1>
                     <div class="mt-4 flex flex-wrap items-center gap-3">
-                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $statusBadgeClasses[$order->status] ?? 'bg-slate-100 text-slate-700 ring-1 ring-slate-200' }}">
+                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $statusBadgeClasses[$order->status] ?? 'bg-slate-100 text-slate-700' }}">
                             {{ $statusLabels[$order->status] ?? str_replace('_', ' ', $order->status) }}
                         </span>
-                        <span class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-brand-primary ring-1 ring-blue-100">
+                        <span class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-brand-primary">
                             {{ $order->source_channel ?? 'Canal no definido' }}
                         </span>
                         <span class="text-sm text-slate-600">
@@ -82,7 +82,7 @@
                                 <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                                     <div class="min-w-0 flex-1">
                                         <div class="flex flex-wrap items-center gap-2">
-                                            <span class="inline-flex items-center rounded-full bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200">
+                                            <span class="inline-flex items-center rounded-full bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">
                                                 Item #{{ $item->id }}
                                             </span>
                                             <span class="text-sm font-semibold text-slate-900">Orden {{ $item->sort_order }}</span>
@@ -111,11 +111,11 @@
 
                                     <div class="flex flex-wrap gap-2">
                                         @if ($item->product !== null)
-                                            <span class="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-100">
+                                            <span class="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
                                                 Producto del catálogo: {{ $item->product->name }}
                                             </span>
                                         @else
-                                            <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200">
+                                            <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
                                                 Sin producto asociado
                                             </span>
                                         @endif

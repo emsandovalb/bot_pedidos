@@ -1,13 +1,13 @@
 <x-app-layout>
     @php
         $statusBadgeClasses = [
-            \App\Models\Order::STATUS_PENDING_REVIEW => 'bg-amber-50 text-amber-800 ring-1 ring-amber-100',
-            \App\Models\Order::STATUS_CONFIRMED => 'bg-blue-50 text-blue-800 ring-1 ring-blue-100',
-            \App\Models\Order::STATUS_PREPARING => 'bg-violet-50 text-violet-800 ring-1 ring-violet-100',
-            \App\Models\Order::STATUS_READY_FOR_DISPATCH => 'bg-sky-50 text-sky-800 ring-1 ring-sky-100',
-            \App\Models\Order::STATUS_DISPATCHED => 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100',
-            \App\Models\Order::STATUS_CANCELLED => 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
-            \App\Models\Order::STATUS_REJECTED => 'bg-rose-50 text-rose-800 ring-1 ring-rose-100',
+            \App\Models\Order::STATUS_PENDING_REVIEW => 'bg-amber-50 text-amber-800',
+            \App\Models\Order::STATUS_CONFIRMED => 'bg-blue-50 text-blue-800',
+            \App\Models\Order::STATUS_PREPARING => 'bg-violet-50 text-violet-800',
+            \App\Models\Order::STATUS_READY_FOR_DISPATCH => 'bg-sky-50 text-sky-800',
+            \App\Models\Order::STATUS_DISPATCHED => 'bg-emerald-50 text-emerald-800',
+            \App\Models\Order::STATUS_CANCELLED => 'bg-slate-100 text-slate-700',
+            \App\Models\Order::STATUS_REJECTED => 'bg-rose-50 text-rose-800',
         ];
 
         $statusLabels = $statusLabels ?? [];
@@ -22,7 +22,7 @@
         <section class="rounded-[20px] border border-slate-200/70 surface-hero p-6 shadow-sm sm:p-8">
             <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                 <div class="max-w-3xl">
-                    <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary ring-1 ring-inset ring-blue-100">
+                    <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary">
                         Benditio analytics v1
                     </div>
                     <h1 class="mt-4 text-3xl font-semibold tracking-tight text-brand-navy sm:text-4xl">
@@ -53,12 +53,12 @@
             </div>
         </section>
 
-        <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+        <section class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-5">
             <x-stat-card label="Pedidos hoy" :value="$ordersTodayCount" hint="Pedidos creados durante el día" icon="list" tone="blue" />
             <x-stat-card label="Pedidos últimos 7 días" :value="$ordersLast7DaysCount" hint="Volumen semanal visible" icon="chart" tone="blue" />
             <x-stat-card label="Pedidos este mes" :value="$ordersThisMonthCount" hint="Acumulado mensual" icon="calendar" tone="violet" />
             <x-stat-card label="Despachados este mes" :value="$dispatchedThisMonthCount" hint="Pedidos ya entregados" icon="truck" tone="green" />
-            <x-stat-card label="Pendientes de revisión" :value="$pendingReviewCount" hint="Esperando validación manual" icon="review" tone="amber" />
+            <x-stat-card label="Pendientes de revisión" :value="$pendingReviewCount" hint="Esperando validación manual" icon="review" tone="amber" class="col-span-2 md:col-span-1" />
         </section>
 
         <section class="grid gap-8 xl:grid-cols-[1.35fr_0.9fr]">
@@ -102,7 +102,7 @@
                                 <div class="text-sm font-medium text-slate-500">Ítems totales</div>
                                 <div class="mt-1 text-2xl font-semibold tracking-tight text-brand-navy">{{ $totalOrderItems }}</div>
                             </div>
-                            <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-brand-primary ring-1 ring-inset ring-blue-100">#</div>
+                            <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-brand-primary">#</div>
                         </div>
                     </div>
 

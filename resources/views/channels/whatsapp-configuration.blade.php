@@ -21,7 +21,7 @@
         <section class="overflow-hidden rounded-[20px] border border-slate-200/70 surface-hero-sky shadow-sm">
             <div class="grid gap-6 px-6 py-8 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
                 <div class="space-y-5">
-                    <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary ring-1 ring-inset ring-blue-100">
+                    <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary">
                         WhatsApp Provider Readiness
                     </div>
                     <div class="max-w-3xl space-y-3">
@@ -81,7 +81,7 @@
                             <h2 class="text-lg font-semibold text-brand-navy">Application</h2>
                             <p class="mt-1 text-sm text-slate-500">Store the Meta application values used by the channel.</p>
                         </div>
-                        <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-brand-primary ring-1 ring-inset ring-blue-100">
+                        <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-brand-primary">
                             Encrypted storage
                         </span>
                     </div>

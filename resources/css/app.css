@@ -320,6 +320,66 @@
         color: #062b1c;
     }
 
+    /* Acción principal sobre un bloque marino: botón blanco con texto marino, igual en los dos temas. */
+    .hero-btn {
+        @apply inline-flex items-center justify-center gap-2.5 rounded-xl px-5 py-3 text-[0.95rem] font-extrabold transition;
+        background: #ffffff;
+        color: #0c1d3c;
+        box-shadow: 0 14px 30px -18px rgba(0, 0, 0, 0.6);
+    }
+
+    .hero-btn:hover {
+        background: #eef3ff;
+    }
+
+    .hero-btn svg {
+        color: #2861f4;
+    }
+
+    .hero-link {
+        @apply text-sm font-semibold transition;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .hero-link:hover {
+        color: #ffffff;
+    }
+
+    /* Filtros como pestañas con conteo (Pedidos, Revisión). */
+    .filter-tabs {
+        @apply flex gap-1.5 overflow-x-auto rounded-2xl border p-1.5;
+        border-color: var(--line);
+        background: var(--card);
+        scrollbar-width: thin;
+    }
+
+    .filter-tab {
+        @apply inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-xl px-3.5 py-2 text-sm font-semibold transition;
+        color: var(--text-3);
+    }
+
+    .filter-tab:hover {
+        background: var(--card-muted);
+        color: var(--text);
+    }
+
+    .filter-tab.is-active {
+        background: var(--brand-tint);
+        color: var(--text-brand);
+        font-weight: 700;
+    }
+
+    .filter-tab .count {
+        @apply rounded-full px-2 text-xs font-extrabold;
+        background: var(--card-sunken);
+        color: var(--text-muted);
+    }
+
+    .filter-tab.is-active .count {
+        background: var(--card);
+        color: var(--text-brand);
+    }
+
     .avatar {
         @apply inline-flex shrink-0 items-center justify-center rounded-full text-xs font-extrabold;
         background: var(--brand);

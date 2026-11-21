@@ -12,22 +12,22 @@
             ];
 
             $statusClasses = [
-                \App\Models\Order::STATUS_PENDING_REVIEW => 'bg-amber-50 text-amber-800 ring-1 ring-amber-100',
-                \App\Models\Order::STATUS_CONFIRMED => 'bg-blue-50 text-blue-800 ring-1 ring-blue-100',
-                \App\Models\Order::STATUS_PREPARING => 'bg-violet-50 text-violet-800 ring-1 ring-violet-100',
-                \App\Models\Order::STATUS_READY_FOR_DISPATCH => 'bg-sky-50 text-sky-800 ring-1 ring-sky-100',
-                \App\Models\Order::STATUS_DISPATCHED => 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100',
-                \App\Models\Order::STATUS_CANCELLED => 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
-                \App\Models\Order::STATUS_REJECTED => 'bg-rose-50 text-rose-800 ring-1 ring-rose-100',
+                \App\Models\Order::STATUS_PENDING_REVIEW => 'bg-amber-50 text-amber-800',
+                \App\Models\Order::STATUS_CONFIRMED => 'bg-blue-50 text-blue-800',
+                \App\Models\Order::STATUS_PREPARING => 'bg-violet-50 text-violet-800',
+                \App\Models\Order::STATUS_READY_FOR_DISPATCH => 'bg-sky-50 text-sky-800',
+                \App\Models\Order::STATUS_DISPATCHED => 'bg-emerald-50 text-emerald-800',
+                \App\Models\Order::STATUS_CANCELLED => 'bg-slate-100 text-slate-700',
+                \App\Models\Order::STATUS_REJECTED => 'bg-rose-50 text-rose-800',
             ];
 
             $displayName = $customer->name ?: $customer->phone ?: $customer->external_id ?: 'Cliente sin nombre';
         @endphp
 
-        <section class="overflow-hidden rounded-[28px] border border-slate-200/70 surface-hero shadow-card">
+        <section class="overflow-hidden rounded-[20px] border border-slate-200/70 surface-hero shadow-card">
             <div class="flex flex-col gap-6 p-6 sm:p-8 lg:flex-row lg:items-end lg:justify-between">
                 <div class="max-w-3xl">
-                    <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary ring-1 ring-inset ring-blue-100">
+                    <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary">
                         Benditio Customer Identity
                     </div>
                     <h1 class="mt-4 text-3xl font-semibold tracking-tight text-brand-navy sm:text-4xl">Cliente</h1>
@@ -70,7 +70,7 @@
             </div>
         </section>
 
-        <section class="rounded-[28px] border border-slate-200/70 bg-white p-6 shadow-sm">
+        <section class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
             <div class="flex items-center justify-between gap-3">
                 <div>
                     <h2 class="text-lg font-semibold text-brand-navy">Customer Insights</h2>
@@ -80,10 +80,10 @@
 
             @php
                 $segmentClasses = [
-                    'NEW' => 'bg-sky-50 text-sky-800 ring-1 ring-sky-100',
-                    'FREQUENT' => 'bg-blue-50 text-blue-800 ring-1 ring-blue-100',
-                    'VIP' => 'bg-amber-50 text-amber-800 ring-1 ring-amber-100',
-                    'INACTIVE' => 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
+                    'NEW' => 'bg-sky-50 text-sky-800',
+                    'FREQUENT' => 'bg-blue-50 text-blue-800',
+                    'VIP' => 'bg-amber-50 text-amber-800',
+                    'INACTIVE' => 'bg-slate-100 text-slate-700',
                 ];
             @endphp
 
@@ -91,7 +91,7 @@
                 <article class="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4">
                     <div class="text-sm font-medium text-slate-500">Segment</div>
                     <div class="mt-3">
-                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $segmentClasses[$customerInsights->segment] ?? 'bg-slate-100 text-slate-700 ring-1 ring-slate-200' }}">
+                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $segmentClasses[$customerInsights->segment] ?? 'bg-slate-100 text-slate-700' }}">
                             {{ $customerInsights->segment }}
                         </span>
                     </div>
@@ -122,7 +122,7 @@
                     <div class="text-sm font-medium text-slate-500">Inactive days</div>
                     <div class="mt-3 flex flex-wrap gap-2">
                         @forelse ($customerInsights->inactive_days as $day)
-                            <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200">
+                            <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
                                 {{ $day }}
                             </span>
                         @empty
@@ -137,7 +137,7 @@
                         @forelse ($customerInsights->favorite_products as $favoriteProduct)
                             <div class="flex items-center justify-between gap-3 rounded-xl bg-white px-3 py-2 ring-1 ring-slate-200">
                                 <span class="min-w-0 truncate text-sm font-medium text-brand-navy">{{ $favoriteProduct['product'] }}</span>
-                                <span class="inline-flex shrink-0 items-center rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-brand-primary ring-1 ring-blue-100">
+                                <span class="inline-flex shrink-0 items-center rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-brand-primary">
                                     {{ $favoriteProduct['times_ordered'] }}
                                 </span>
                             </div>
@@ -152,7 +152,7 @@
         </section>
 
         <section class="grid gap-6 xl:grid-cols-2">
-            <div class="rounded-[28px] border border-slate-200/70 bg-white p-6 shadow-sm">
+            <div class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                 <div class="flex items-center justify-between gap-3">
                     <div>
                         <h2 class="text-lg font-semibold text-brand-navy">Identidades del cliente</h2>
@@ -164,15 +164,15 @@
                     @forelse ($customerIdentities as $identity)
                         <article class="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4">
                             <div class="flex flex-wrap items-center gap-2">
-                                <span class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-brand-primary ring-1 ring-blue-100">
+                                <span class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-brand-primary">
                                     {{ \Illuminate\Support\Str::headline((string) $identity->provider) }}
                                 </span>
                                 @if ($identity->is_primary)
-                                    <span class="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-100">
+                                    <span class="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
                                         Principal
                                     </span>
                                 @endif
-                                <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 ring-1 ring-slate-200">
+                                <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
                                     Confianza {{ number_format((float) $identity->confidence_score, 0) }}%
                                 </span>
                             </div>
@@ -212,7 +212,7 @@
                 </div>
             </div>
 
-            <div class="rounded-[28px] border border-slate-200/70 bg-white p-6 shadow-sm">
+            <div class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                 <div class="flex items-center justify-between gap-3">
                     <div>
                         <h2 class="text-lg font-semibold text-brand-navy">Estados de pedidos</h2>
@@ -272,7 +272,7 @@
                                                 Marcado como posible duplicado de #{{ $duplicateOrder->possibleDuplicateOf?->id ?? '—' }}
                                             </div>
                                         </div>
-                                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $statusClasses[$duplicateOrder->status] ?? 'bg-slate-100 text-slate-700 ring-1 ring-slate-200' }}">
+                                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $statusClasses[$duplicateOrder->status] ?? 'bg-slate-100 text-slate-700' }}">
                                             {{ $statusLabels[$duplicateOrder->status] ?? $duplicateOrder->status }}
                                         </span>
                                     </div>
@@ -284,7 +284,7 @@
             </div>
         </section>
 
-        <section class="rounded-[28px] border border-slate-200/70 bg-white p-6 shadow-sm">
+        <section class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
             <div class="flex items-center justify-between gap-3">
                 <div>
                     <h2 class="text-lg font-semibold text-brand-navy">Pedidos recientes</h2>
@@ -299,14 +299,14 @@
                             <div class="min-w-0 flex-1 space-y-2">
                                 <div class="flex flex-wrap items-center gap-2">
                                     <span class="text-sm font-semibold text-brand-navy">#{{ $order->id }}</span>
-                                    <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $statusClasses[$order->status] ?? 'bg-slate-100 text-slate-700 ring-1 ring-slate-200' }}">
+                                    <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $statusClasses[$order->status] ?? 'bg-slate-100 text-slate-700' }}">
                                         {{ $statusLabels[$order->status] ?? $order->status }}
                                     </span>
-                                    <span class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-brand-primary ring-1 ring-blue-100">
+                                    <span class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-brand-primary">
                                         {{ \Illuminate\Support\Str::headline((string) $order->source_channel) }}
                                     </span>
                                     @if ($order->possibleDuplicateOf)
-                                        <span class="inline-flex items-center rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800 ring-1 ring-amber-100">
+                                        <span class="inline-flex items-center rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800">
                                             Posible duplicado
                                         </span>
                                     @endif

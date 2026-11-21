@@ -3,7 +3,7 @@
         <section class="overflow-hidden rounded-[20px] border border-slate-200/70 surface-hero-green shadow-sm">
             <div class="grid gap-6 px-6 py-7 lg:grid-cols-[1.2fr_0.8fr] lg:px-8">
                 <div class="space-y-4">
-                    <div class="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700 ring-1 ring-inset ring-emerald-100">
+                    <div class="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
                         Estado de WhatsApp
                     </div>
                     <div class="max-w-3xl space-y-3">
@@ -34,7 +34,7 @@
                             <p class="mt-2 text-3xl font-semibold tracking-tight text-brand-navy">{{ $connectionStatus['value'] }}</p>
                             <p class="mt-2 text-sm leading-6 text-slate-600">{{ $connectionStatus['description'] }}</p>
                         </div>
-                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-100">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">
                             <svg viewBox="0 0 24 24" fill="none" class="h-6 w-6" aria-hidden="true">
                                 <path d="M9 12l2 2 4-4M20 12a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
@@ -93,7 +93,7 @@
                                     <div class="text-sm font-semibold text-brand-navy">{{ $check['title'] }}</div>
                                     <p class="mt-2 text-sm leading-6 text-slate-600">{{ $check['detail'] }}</p>
                                 </div>
-                                <span class="rounded-full {{ $check['state'] === 'Ok' ? 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-100' : ($check['state'] === 'Pendiente' ? 'bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-100' : 'bg-slate-100 text-slate-600') }} px-3 py-1 text-xs font-semibold">
+                                <span class="rounded-full {{ $check['state'] === 'Ok' ? 'bg-emerald-50 text-emerald-700' : ($check['state'] === 'Pendiente' ? 'bg-amber-50 text-amber-700' : 'bg-slate-100 text-slate-600') }} px-3 py-1 text-xs font-semibold">
                                     {{ $check['state'] }}
                                 </span>
                             </div>

@@ -3,7 +3,7 @@
         <section class="overflow-hidden rounded-[20px] border border-slate-200/70 surface-hero shadow-sm">
             <div class="relative px-6 py-7 lg:px-8">
                 <div class="max-w-4xl space-y-4">
-                    <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary ring-1 ring-inset ring-blue-100">
+                    <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary">
                         Configuración
                     </div>
                     <div class="space-y-3">

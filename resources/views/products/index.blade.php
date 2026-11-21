@@ -122,15 +122,15 @@
                                         <span class="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
                                             SKU: {{ $product->sku ?? 'Sin SKU' }}
                                         </span>
-                                        <span class="inline-flex rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-brand-primary ring-1 ring-inset ring-blue-100">
+                                        <span class="inline-flex rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-brand-primary">
                                             Unidad: {{ $product->unit_label ?? 'Sin unidad' }}
                                         </span>
-                                        <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium {{ $product->price !== null ? 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-100' : 'bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-100' }}">
+                                        <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium {{ $product->price !== null ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">
                                             {{ $product->price !== null ? 'Precio: '.number_format((float) $product->price, 2) : 'Sin precio' }}
                                         </span>
                                     </div>
                                 </div>
-                                <span class="inline-flex shrink-0 rounded-full px-3 py-1 text-xs font-semibold {{ $product->is_active ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100' : 'bg-slate-100 text-slate-600 ring-1 ring-slate-200' }}">
+                                <span class="inline-flex shrink-0 rounded-full px-3 py-1 text-xs font-semibold {{ $product->is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">
                                     {{ $product->is_active ? 'Activo' : 'Inactivo' }}
                                 </span>
                             </div>

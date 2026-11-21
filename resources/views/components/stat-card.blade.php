@@ -27,7 +27,7 @@
 <{{ $tag }}
     @if ($href) href="{{ $href }}" @endif
     {{ $attributes->class([
-        'stat-card flex flex-col gap-3 rounded-[18px] border border-slate-200 bg-white p-5 shadow-sm',
+        'stat-card flex flex-col gap-3 rounded-[18px] border border-slate-200 bg-white p-4 shadow-sm sm:p-5',
         'transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-card' => $href,
     ]) }}
 >

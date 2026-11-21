@@ -116,7 +116,7 @@ class OperationsGuidedWorkflowTest extends TestCase
             ->assertJsonPath('order.id', $order->id)
             ->assertJsonPath('order.status', Order::STATUS_CONFIRMED)
             ->assertJsonPath('order.status_label', 'Confirmado')
-            ->assertJsonPath('order.status_tone', 'bg-blue-50 text-blue-800 ring-1 ring-blue-100')
+            ->assertJsonPath('order.status_tone', 'bg-blue-50 text-blue-800')
             ->assertJsonPath('order.allowed_actions.0.key', 'prepare')
             ->assertJsonPath('next_actions.0.key', 'prepare');
     }

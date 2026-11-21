@@ -476,16 +476,16 @@ export class LiveQueue {
 
     resolveStatusTone(status) {
         const map = {
-            pending_review: 'bg-amber-50 text-amber-800 ring-1 ring-amber-100',
-            confirmed: 'bg-blue-50 text-blue-800 ring-1 ring-blue-100',
-            preparing: 'bg-violet-50 text-violet-800 ring-1 ring-violet-100',
-            ready_for_dispatch: 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100',
-            dispatched: 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
-            cancelled: 'bg-red-50 text-red-800 ring-1 ring-red-100',
-            rejected: 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
+            pending_review: 'bg-amber-50 text-amber-800',
+            confirmed: 'bg-blue-50 text-blue-800',
+            preparing: 'bg-violet-50 text-violet-800',
+            ready_for_dispatch: 'bg-emerald-50 text-emerald-800',
+            dispatched: 'bg-slate-100 text-slate-700',
+            cancelled: 'bg-red-50 text-red-800',
+            rejected: 'bg-slate-100 text-slate-700',
         };
 
-        return map[status] ?? 'bg-slate-100 text-slate-700 ring-1 ring-slate-200';
+        return map[status] ?? 'bg-slate-100 text-slate-700';
     }
 
     titleCase(value) {
