@@ -1,154 +1,138 @@
 <x-guest-layout>
-    <div style="position:relative;min-height:100vh;width:100%;overflow:hidden;background:#0a2342;display:flex;align-items:center;justify-content:center;box-sizing:border-box;font-family:'Inter',system-ui,-apple-system,sans-serif;">
-        <div style="position:fixed;inset:0;background:linear-gradient(120deg,#0a2342 0%,#0c3350 42%,#136046 74%,#1f8f3f 100%);"></div>
-        <div style="position:fixed;inset:0;background:radial-gradient(circle at 12% 8%, rgba(18,112,223,.30), transparent 40%),radial-gradient(circle at 98% 4%, rgba(60,205,104,.30), transparent 34%),radial-gradient(circle at 100% 100%, rgba(60,205,104,.35), transparent 42%);"></div>
+    <x-slot name="fullPage">1</x-slot>
 
-        <div style="position:relative;width:100%;max-width:1280px;">
-            <div style="position:relative;display:grid;grid-template-columns:1fr 432px;min-height:720px;">
-                {{-- LEFT --}}
-                <section style="padding:44px 52px;color:#fff;display:flex;flex-direction:column;justify-content:space-between;box-sizing:border-box;">
-                    <div>
-                        <div style="display:flex;align-items:center;">
-                            <a href="{{ url('/') }}" style="display:inline-flex;align-items:center;text-decoration:none;">
-                                <x-application-logo class="h-14 w-auto" />
-                            </a>
-                        </div>
+    <div class="grid min-h-screen lg:grid-cols-[1.12fr_1fr]">
+        {{-- Izquierda: qué hace Benditio. Marino en los dos temas. --}}
+        <section class="app-sidebar on-navy relative flex flex-col justify-between gap-8 overflow-hidden px-6 py-8 sm:px-10 lg:px-16 lg:py-12">
+            <div class="pointer-events-none absolute -right-44 -top-44 h-[520px] w-[520px] rounded-full border border-white/5 shadow-[0_0_0_70px_rgba(255,255,255,0.025),0_0_0_140px_rgba(255,255,255,0.02)]" aria-hidden="true"></div>
 
-                        <h1 style="margin:46px 0 0;font-size:62px;line-height:.95;font-weight:900;letter-spacing:-.05em;">Convierte <span style="color:#3ccd68;">mensajes</span><br>en ventas.</h1>
-                        <p style="margin:22px 0 0;font-size:17px;line-height:1.5;color:rgba(226,232,240,.86);max-width:34ch;">Gestiona pedidos, clientes y operaciones desde una sola plataforma.</p>
+            <a href="{{ url('/') }}" class="relative self-start">
+                <img src="{{ asset('images/benditio-logo-blanco.svg') }}" alt="Benditio" class="h-9 w-auto lg:h-11">
+            </a>
 
-                        <div style="margin:34px 0 0;display:grid;grid-template-columns:1fr 1fr;column-gap:46px;row-gap:14px;max-width:430px;">
-                            @foreach (['Pedidos', 'WhatsApp', 'Telegram', 'Analytics', 'Catálogo', 'Clientes', 'Cierres diarios'] as $feature)
-                                <div style="display:flex;align-items:center;gap:11px;font-size:16px;">
-                                    <span style="width:21px;height:21px;flex:none;border-radius:50%;background:#3ccd68;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 18px -10px rgba(60,205,104,.9);">
-                                        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                                    </span>
-                                    <span style="color:rgba(255,255,255,.96);">{{ $feature }}</span>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-
-                    <div style="position:relative;height:300px;margin:30px 0 0;">
-                        <div style="position:absolute;left:60px;top:26px;width:84px;height:84px;border:2px solid rgba(255,255,255,.16);border-radius:50%;"></div>
-                        <div style="position:absolute;left:128px;top:64px;width:54px;height:54px;border:2px solid rgba(255,255,255,.16);border-radius:50%;"></div>
-                        <div style="position:absolute;left:430px;top:24px;width:52px;height:52px;border:2px solid rgba(255,255,255,.16);border-radius:50%;"></div>
-
-                        <div style="position:absolute;left:474px;top:118px;width:34px;height:34px;border-radius:50%;background:#3ccd68;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 26px -10px rgba(60,205,104,.7);">
-                            <svg viewBox="0 0 24 24" width="18" height="18" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2Zm5.2 14.2c-.2.6-1.2 1.2-1.7 1.2-.4 0-1 .1-3.4-.9-2.9-1.2-4.7-4.1-4.8-4.3-.1-.2-1.1-1.5-1.1-2.8s.7-2 .9-2.2c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5.2.5.7 1.8.8 1.9.1.1.1.3 0 .5-.1.2-.2.4-.3.5l-.4.5c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.4.1.6-.1.2-.2.7-.8.9-1.1.2-.3.4-.2.6-.1l1.8.9c.2.1.4.2.4.3.1.2.1.6-.1 1.1Z"/></svg>
-                        </div>
-
-                        <div style="position:absolute;left:178px;top:8px;width:300px;height:268px;border-radius:18px;border:1px solid rgba(255,255,255,.14);background:linear-gradient(180deg,rgba(11,32,58,.62),rgba(8,22,42,.5));padding:20px;overflow:hidden;box-sizing:border-box;">
-                            <div style="display:flex;justify-content:space-between;align-items:center;">
-                                <span style="display:block;width:74px;height:9px;border-radius:6px;background:rgba(255,255,255,.16);"></span>
-                                <span style="display:block;width:66px;height:12px;border-radius:7px;background:rgba(60,205,104,.85);"></span>
-                            </div>
-                            <svg viewBox="0 0 260 118" width="100%" height="118" style="margin-top:14px;display:block;" preserveAspectRatio="none">
-                                <defs>
-                                    <linearGradient id="lnchart" x1="0" y1="0" x2="1" y2="0">
-                                        <stop offset="0" stop-color="#2aa6e6"/>
-                                        <stop offset="1" stop-color="#3ccd68"/>
-                                    </linearGradient>
-                                </defs>
-                                <polyline points="6,96 48,68 90,82 132,52 174,58 216,30 252,12" fill="none" stroke="url(#lnchart)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                                <circle cx="48" cy="68" r="4" fill="#2aa6e6"/>
-                                <circle cx="132" cy="52" r="4" fill="#34bf83"/>
-                                <circle cx="216" cy="30" r="4" fill="#3ccd68"/>
-                                <circle cx="252" cy="12" r="4" fill="#3ccd68"/>
-                            </svg>
-                            <div style="display:flex;gap:12px;margin-top:16px;">
-                                <div style="flex:1;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);padding:11px 12px;">
-                                    <div style="display:flex;align-items:center;gap:8px;">
-                                        <span style="width:18px;height:18px;border-radius:50%;background:#229ed9;display:flex;align-items:center;justify-content:center;">
-                                            <svg viewBox="0 0 24 24" width="11" height="11" fill="#fff"><path d="M21.9 4.3 2.7 11.6c-1 .4-1 1.8 0 2.1l4.8 1.6 1.9 5.6c.3.8 1.3.9 1.8.3l2.5-2.7 4.8 3.5c.6.4 1.5.1 1.7-.7L23 5.4c.2-.9-.7-1.5-1.1-1.1Z"/></svg>
-                                        </span>
-                                        <span style="font-size:12px;color:rgba(255,255,255,.85);">Telegram</span>
-                                    </div>
-                                    <span style="display:block;width:62%;height:6px;border-radius:4px;background:rgba(255,255,255,.13);margin-top:9px;"></span>
-                                </div>
-                                <div style="flex:1;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);padding:11px 12px;">
-                                    <div style="display:flex;align-items:center;gap:8px;">
-                                        <span style="width:18px;height:18px;border-radius:50%;background:#3ccd68;display:flex;align-items:center;justify-content:center;">
-                                            <svg viewBox="0 0 24 24" width="11" height="11" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2Zm5.2 14.2c-.2.6-1.2 1.2-1.7 1.2-.4 0-1 .1-3.4-.9-2.9-1.2-4.7-4.1-4.8-4.3-.1-.2-1.1-1.5-1.1-2.8s.7-2 .9-2.2c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5.2.5.7 1.8.8 1.9.1.1.1.3 0 .5l-.7 1c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.4.1.6-.1.2-.2.7-.8.9-1.1.2-.3.4-.2.6-.1l1.8.9c.2.1.4.2.4.3.1.2.1.6-.1 1.1Z"/></svg>
-                                        </span>
-                                        <span style="font-size:12px;color:rgba(255,255,255,.85);">WhatsApp</span>
-                                    </div>
-                                    <span style="display:block;width:62%;height:6px;border-radius:4px;background:rgba(255,255,255,.13);margin-top:9px;"></span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="display:inline-flex;align-items:center;gap:12px;align-self:flex-start;margin-top:30px;border-radius:16px;border:1px solid rgba(255,255,255,.1);background:rgba(2,6,23,.24);padding:12px 16px;font-size:13.5px;color:rgba(255,255,255,.9);">
-                        <span style="width:32px;height:32px;flex:none;border-radius:50%;border:1px solid rgba(60,205,104,.25);background:rgba(15,35,63,.7);color:#3ccd68;display:flex;align-items:center;justify-content:center;">
-                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 2 4.5 5.5v5.9c0 4.9 3.2 9.3 7.5 10.6 4.3-1.3 7.5-5.7 7.5-10.6V5.5L12 2Z"/><path d="M9.4 12.4 11.2 14l3.4-3.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        </span>
-                        <span>Seguro, confiable y siempre disponible.</span>
-                    </div>
-                </section>
-
-                <section style="display:flex;align-items:center;justify-content:center;padding:36px 44px;box-sizing:border-box;">
-                    <div x-data="{ showPassword: false }" style="width:100%;max-width:392px;background:#fff;border-radius:24px;box-shadow:0 30px 60px -38px rgba(3,13,31,.5);padding:34px 32px;box-sizing:border-box;">
-                        <div style="text-align:center;">
-                            <h2 style="margin:0;font-size:30px;font-weight:700;letter-spacing:-.03em;color:#0f172a;">Iniciar sesión</h2>
-                            <p style="margin:8px 0 0;font-size:14px;color:#64748b;">Accede a tu cuenta de Benditio</p>
-                        </div>
-
-                        @if (session('status'))
-                            <div style="margin-top:16px;font-size:13px;font-weight:600;color:#16a34a;text-align:center;">{{ session('status') }}</div>
-                        @endif
-
-                        <form method="POST" action="{{ route('login') }}" style="margin-top:26px;display:flex;flex-direction:column;gap:18px;">
-                            @csrf
-
-                            <div>
-                                <label for="email" style="display:block;font-size:12.5px;font-weight:600;color:#334155;margin-bottom:8px;">Correo electrónico</label>
-                                <div style="position:relative;">
-                                    <span style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#94a3b8;display:flex;">
-                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6.5h16a1.5 1.5 0 0 1 1.5 1.5v8A1.5 1.5 0 0 1 20 17.5H4A1.5 1.5 0 0 1 2.5 16V8A1.5 1.5 0 0 1 4 6.5Z"/><path d="m3.5 8 8.2 5.1a1 1 0 0 0 1 0L20.9 8"/></svg>
-                                    </span>
-                                    <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username" placeholder="tu@negocio.com"
-                                        style="width:100%;border:1px solid #e2e8f0;border-radius:10px;background:#f1f5fb;padding:11px 14px 11px 38px;font-size:13.5px;color:#0f172a;box-sizing:border-box;outline:none;" />
-                                </div>
-                                @error('email')
-                                    <p style="margin:6px 0 0;font-size:12px;color:#dc2626;">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            <div>
-                                <label for="password" style="display:block;font-size:12.5px;font-weight:600;color:#334155;margin-bottom:8px;">Contraseña</label>
-                                <div style="position:relative;">
-                                    <input id="password" name="password" required autocomplete="current-password" placeholder="••••••••••"
-                                        type="password" x-bind:type="showPassword ? 'text' : 'password'"
-                                        style="width:100%;border:1px solid #e2e8f0;border-radius:10px;background:#f1f5fb;padding:11px 42px 11px 14px;font-size:13.5px;color:#0f172a;box-sizing:border-box;outline:none;" />
-                                    <button type="button" @click="showPassword = !showPassword" aria-label="Mostrar contraseña"
-                                        style="position:absolute;right:0;top:0;height:100%;padding:0 13px;border:0;background:transparent;color:#94a3b8;cursor:pointer;display:flex;align-items:center;">
-                                        <svg x-show="!showPassword" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2.2 12s3.1-6 9.8-6 9.8 6 9.8 6-3.1 6-9.8 6-9.8-6-9.8-6Z"/><circle cx="12" cy="12" r="3"/></svg>
-                                        <svg x-show="showPassword" x-cloak viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 3l18 18"/><path d="M10.6 10.6A3 3 0 0 0 13.4 13.4"/><path d="M9.9 5.1A11 11 0 0 1 12 5c6.7 0 9.8 7 9.8 7a20.6 20.6 0 0 1-4.2 5.2"/><path d="M6.2 6.2C3.8 8 2.2 12 2.2 12s3.1 6 9.8 6c1 0 1.9-.1 2.8-.4"/></svg>
-                                    </button>
-                                </div>
-                                @error('password')
-                                    <p style="margin:6px 0 0;font-size:12px;color:#dc2626;">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
-                                <label for="remember_me" style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;">
-                                    <input id="remember_me" type="checkbox" name="remember" style="width:15px;height:15px;accent-color:#1270df;">
-                                    <span style="font-size:12.5px;font-weight:500;color:#334155;">Recordarme</span>
-                                </label>
-                                @if (Route::has('password.request'))
-                                    <a href="{{ route('password.request') }}" style="font-size:12.5px;font-weight:600;color:#1270df;text-decoration:none;">¿Olvidaste tu contraseña?</a>
-                                @endif
-                            </div>
-
-                            <button type="submit" style="height:44px;width:100%;border:0;border-radius:10px;background:linear-gradient(90deg,#1270df 0%,#3ccd68 100%);color:#fff;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 14px 28px -16px rgba(18,112,223,.8);">Entrar</button>
-                        </form>
-
-                        <p style="margin:22px 0 0;text-align:center;font-size:12.5px;color:#64748b;">¿No tienes una cuenta? <a href="mailto:soporte@benditio.com" style="font-weight:600;color:#1270df;text-decoration:none;">Contacta a tu administrador</a></p>
-                    </div>
-                </section>
+            <div class="relative">
+                <h1 class="text-4xl font-extrabold leading-[1.02] tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl">
+                    Convierte <span class="text-[#3fd394]">mensajes</span><br>en ventas
+                </h1>
+                <p class="mt-4 max-w-[31em] text-base leading-relaxed text-white/75 lg:text-lg">
+                    Benditio lee los pedidos que llegan por WhatsApp y Telegram y los ordena para que tu equipo los confirme, prepare y despache.
+                </p>
             </div>
-        </div>
+
+            {{-- Un mensaje que se vuelve pedido: lo que hace Benditio, en un vistazo.
+                 Es una ilustración sobre el fondo marino, así que usa colores fijos: se ve igual en claro y en oscuro. --}}
+            <div class="relative hidden max-w-[660px] grid-cols-[1fr_34px_1.1fr] items-center gap-2.5 lg:grid" aria-hidden="true">
+                <div class="grid gap-2 rounded-[20px_20px_20px_6px] border border-white/15 bg-white/10 px-4 py-4">
+                    <span class="flex items-center gap-2 text-xs font-bold text-[#3fd394]">
+                        <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4"><path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                        WhatsApp · 22:56
+                    </span>
+                    <span class="text-base font-semibold leading-snug text-white">“Me manda 2 martillito 903 y 3 sacos de cemento”</span>
+                </div>
+                <span class="grid h-[34px] w-[34px] place-items-center rounded-full bg-[#3fd394] text-[#062b1c]">
+                    <svg viewBox="0 0 24 24" fill="none" class="h-[18px] w-[18px]"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                </span>
+                <div class="grid gap-2 rounded-[20px] bg-[#ffffff] px-4 py-4 text-[#0c1d3c] shadow-[0_30px_60px_-28px_rgba(0,0,0,0.7)]">
+                    <div class="flex items-center justify-between gap-2">
+                        <div>
+                            <b class="font-display text-lg font-extrabold tracking-tight">Pedido #29</b>
+                            <span class="block text-xs font-semibold text-[#6d7f98]">Cliente Auditoría · Central Branch</span>
+                        </div>
+                        <span class="whitespace-nowrap rounded-full bg-[#fff3e6] px-2.5 py-0.5 text-[0.7rem] font-bold text-[#b45309]">Por revisar</span>
+                    </div>
+                    <div class="flex justify-between border-t border-[#e6ecf3] pt-2 text-sm text-[#56677b]"><span>Martillo 903</span><b class="text-[#0c1d3c]">× 2</b></div>
+                    <div class="flex justify-between border-t border-[#e6ecf3] pt-2 text-sm text-[#56677b]"><span>Saco de cemento</span><b class="text-[#0c1d3c]">× 3</b></div>
+                    <div class="flex items-center justify-between text-xs font-semibold text-[#6d7f98]">
+                        <span>Detectado en 2 s</span>
+                        <span class="text-[#16804a]">✓ Listo para confirmar</span>
+                    </div>
+                </div>
+            </div>
+
+            <dl class="relative hidden gap-9 border-t border-white/10 pt-5 lg:flex">
+                <div><dt class="font-display text-xl font-extrabold text-white">WhatsApp y Telegram</dt><dd class="text-sm font-semibold text-white/60">en una sola bandeja</dd></div>
+                <div><dt class="font-display text-xl font-extrabold text-white">Revisión</dt><dd class="text-sm font-semibold text-white/60">con nivel de confianza</dd></div>
+                <div><dt class="font-display text-xl font-extrabold text-white">Cierres</dt><dd class="text-sm font-semibold text-white/60">diarios por sucursal</dd></div>
+            </dl>
+        </section>
+
+        {{-- Derecha: el formulario. --}}
+        <section class="flex flex-col bg-white px-6 py-8 sm:px-10 lg:px-16">
+            <p class="text-right text-sm text-slate-500">
+                ¿No tienes una cuenta?
+                <a href="mailto:soporte@benditio.com" class="font-bold text-brand-primary hover:underline">Contacta a tu administrador</a>
+            </p>
+
+            <div x-data="{ showPassword: false }" class="my-auto w-full max-w-[440px] py-10">
+                <p class="text-xs font-extrabold uppercase tracking-[0.18em] text-emerald-700">Bienvenido de vuelta</p>
+                <h2 class="mt-1.5 text-[2.4rem] font-extrabold leading-tight tracking-[-0.03em] text-brand-navy">Iniciar sesión</h2>
+                <p class="mt-2 text-[0.95rem] text-slate-500">Accede a tu cuenta de Benditio para ver los pedidos de hoy.</p>
+
+                @if (session('status'))
+                    <div class="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800" role="status">
+                        {{ session('status') }}
+                    </div>
+                @endif
+
+                <form method="POST" action="{{ route('login') }}" class="mt-7 grid gap-5">
+                    @csrf
+
+                    <div class="grid gap-2">
+                        <label for="email" class="text-sm font-bold text-brand-navy">Correo electrónico</label>
+                        <div class="relative">
+                            <svg viewBox="0 0 24 24" fill="none" class="pointer-events-none absolute left-4 top-1/2 h-[19px] w-[19px] -translate-y-1/2 text-slate-400" aria-hidden="true"><path d="M4 6h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1Zm-1 1 9 6 9-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                            <input
+                                id="email" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username" placeholder="tu@negocio.com"
+                                class="brand-input h-[54px] w-full rounded-xl border-[1.5px] pl-12 pr-4 text-[0.95rem]"
+                            >
+                        </div>
+                        @error('email')
+                            <p class="text-sm font-medium text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div class="grid gap-2">
+                        <div class="flex items-center justify-between">
+                            <label for="password" class="text-sm font-bold text-brand-navy">Contraseña</label>
+                            @if (Route::has('password.request'))
+                                <a href="{{ route('password.request') }}" class="text-sm font-bold text-brand-primary hover:underline">¿Olvidaste tu contraseña?</a>
+                            @endif
+                        </div>
+                        <div class="relative">
+                            <svg viewBox="0 0 24 24" fill="none" class="pointer-events-none absolute left-4 top-1/2 h-[19px] w-[19px] -translate-y-1/2 text-slate-400" aria-hidden="true"><path d="M7 11V8a5 5 0 0 1 10 0v3M6 11h12a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1Zm6 4v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                            <input
+                                id="password" name="password" required autocomplete="current-password" placeholder="••••••••••"
+                                type="password" x-bind:type="showPassword ? 'text' : 'password'"
+                                class="brand-input h-[54px] w-full rounded-xl border-[1.5px] pl-12 pr-12 text-[0.95rem]"
+                            >
+                            <button
+                                type="button" @click="showPassword = !showPassword"
+                                class="absolute inset-y-0 right-0 flex items-center px-4 text-slate-400 hover:text-brand-navy"
+                                :aria-label="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                                aria-label="Mostrar contraseña"
+                            >
+                                <svg x-show="!showPassword" viewBox="0 0 24 24" fill="none" class="h-[19px] w-[19px]" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Zm9.5 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                                <svg x-show="showPassword" x-cloak viewBox="0 0 24 24" fill="none" class="h-[19px] w-[19px]" aria-hidden="true"><path d="M3 3l18 18M10.6 10.6a3 3 0 0 0 2.8 2.8M9.9 5.1A11 11 0 0 1 12 5c6.7 0 9.8 7 9.8 7a20.6 20.6 0 0 1-4.2 5.2M6.2 6.2C3.8 8 2.2 12 2.2 12s3.1 6 9.8 6c1 0 1.9-.1 2.8-.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                            </button>
+                        </div>
+                        @error('password')
+                            <p class="text-sm font-medium text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <label for="remember_me" class="inline-flex cursor-pointer items-center gap-2.5 text-sm font-semibold text-slate-600">
+                        <input id="remember_me" type="checkbox" name="remember" class="h-5 w-5 rounded-md border-slate-300 text-brand-primary focus:ring-brand-primary">
+                        Mantener la sesión abierta en este equipo
+                    </label>
+
+                    <button type="submit" class="brand-btn-primary h-14 gap-2.5 rounded-xl text-base">
+                        Entrar a Benditio
+                        <svg viewBox="0 0 24 24" fill="none" class="h-[18px] w-[18px]" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                    </button>
+                </form>
+            </div>
+
+            <p class="text-sm font-semibold text-slate-500"><b class="font-display text-brand-navy">Benditio</b> · parte de la familia OriA</p>
+        </section>
     </div>
 </x-guest-layout>

@@ -259,6 +259,73 @@
         background: linear-gradient(90deg, var(--benditio), var(--brand));
     }
 
+    /*
+    | Menú lateral marino, igual que OriA. Es marino en los dos temas.
+    */
+    .app-sidebar {
+        background:
+            radial-gradient(120% 55% at 100% 0%, rgba(59, 123, 255, 0.38) 0%, rgba(59, 123, 255, 0) 60%),
+            linear-gradient(170deg, var(--navy-700) 0%, var(--navy-800) 40%, var(--navy-900) 100%);
+        color: #ffffff;
+    }
+
+    /* Dentro del menú, `white` es blanco de verdad en los dos temas (fuera de él, en oscuro es el color de tarjeta). */
+    [data-theme="dark"] .app-sidebar,
+    [data-theme="dark"] .on-navy {
+        --tw-c-white: 255 255 255;
+    }
+
+    .nav-group-label {
+        @apply px-3 pb-1.5 pt-5 text-[0.68rem] font-extrabold uppercase tracking-[0.14em];
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    .nav-link {
+        @apply relative flex items-center gap-3 rounded-[11px] px-3 py-2.5 text-sm font-semibold transition;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .nav-link svg {
+        color: rgba(255, 255, 255, 0.62);
+    }
+
+    .nav-link:hover {
+        background: rgba(255, 255, 255, 0.07);
+        color: #ffffff;
+    }
+
+    .nav-link:focus-visible {
+        outline: 2px solid #8bacff;
+        outline-offset: 2px;
+    }
+
+    .nav-link.is-active {
+        background: rgba(255, 255, 255, 0.13);
+        color: #ffffff;
+        box-shadow: inset 3px 0 0 var(--nav-accent, #3fd394);
+    }
+
+    .nav-link.is-active svg {
+        color: #ffffff;
+    }
+
+    .nav-badge {
+        @apply ml-auto rounded-full px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-[0.08em];
+        background: rgba(255, 255, 255, 0.12);
+        color: rgba(255, 255, 255, 0.85);
+    }
+
+    .nav-badge.is-plus {
+        background: #3fd394;
+        color: #062b1c;
+    }
+
+    .avatar {
+        @apply inline-flex shrink-0 items-center justify-center rounded-full text-xs font-extrabold;
+        background: var(--brand);
+        color: #ffffff;
+    }
+
     .theme-toggle {
         @apply inline-flex h-10 w-10 items-center justify-center rounded-full border transition;
         border-color: var(--line);
@@ -286,6 +353,13 @@
 [data-theme="dark"] .text-white,
 [data-theme="dark"] .hover\:text-white:hover {
     color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+}
+
+/* El plugin de formularios pinta las casillas sin marcar de blanco fijo. */
+[data-theme="dark"] [type="checkbox"]:not(:checked),
+[data-theme="dark"] [type="radio"]:not(:checked) {
+    background-color: var(--card);
+    border-color: var(--line-strong);
 }
 
 [data-theme="dark"] .text-white\/70 {
