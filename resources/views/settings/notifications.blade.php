@@ -7,7 +7,7 @@
 
 <x-app-layout>
     <div class="space-y-8">
-        <section class="overflow-hidden rounded-[2rem] border border-slate-200/70 surface-hero shadow-sm">
+        <section class="overflow-hidden rounded-[20px] border border-slate-200/70 surface-hero shadow-sm">
             <div class="relative px-6 py-7 lg:px-8">
                 <div class="max-w-4xl space-y-4">
                     <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary ring-1 ring-inset ring-blue-100">
@@ -42,7 +42,7 @@
                     $channelSettings = $settingsByChannel[$channel] ?? [];
                 @endphp
 
-                <section class="rounded-[2rem] border border-slate-200/70 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                     <div class="flex flex-col gap-3 border-b border-slate-200/80 pb-5 lg:flex-row lg:items-start lg:justify-between">
                         <div class="space-y-2">
                             <div class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] {{ $channel === 'whatsapp' ? 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-100' : 'bg-slate-100 text-slate-600 ring-1 ring-inset ring-slate-200' }}">

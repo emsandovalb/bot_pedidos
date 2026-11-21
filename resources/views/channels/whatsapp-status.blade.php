@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="space-y-8">
-        <section class="overflow-hidden rounded-[2rem] border border-slate-200/70 surface-hero-green shadow-sm">
+        <section class="overflow-hidden rounded-[20px] border border-slate-200/70 surface-hero-green shadow-sm">
             <div class="grid gap-6 px-6 py-7 lg:grid-cols-[1.2fr_0.8fr] lg:px-8">
                 <div class="space-y-4">
                     <div class="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700 ring-1 ring-inset ring-emerald-100">
@@ -27,7 +27,7 @@
                     </div>
                 </div>
 
-                <div class="rounded-[2rem] border border-emerald-200/80 bg-white/95 p-5 shadow-sm">
+                <div class="rounded-[20px] border border-emerald-200/80 bg-white/95 p-5 shadow-sm">
                     <div class="flex items-start justify-between gap-4">
                         <div>
                             <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{{ $connectionStatus['label'] }}</p>
@@ -50,7 +50,7 @@
         </section>
 
         @if ($openSetupRequest)
-            <section class="rounded-[2rem] border border-amber-200/80 bg-amber-50/60 p-6 shadow-sm">
+            <section class="rounded-[20px] border border-amber-200/80 bg-amber-50/60 p-6 shadow-sm">
                 <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div>
                         <div class="text-sm font-semibold uppercase tracking-[0.16em] text-amber-700">Configuracion asistida pendiente</div>
@@ -77,7 +77,7 @@
         </section>
 
         <section class="grid gap-6 xl:grid-cols-[1fr_0.9fr]">
-            <div class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-emerald-500 bg-white p-6 shadow-sm">
+            <div class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                 <div class="flex items-center justify-between gap-3">
                     <div>
                         <h2 class="text-lg font-semibold text-brand-navy">Chequeos de salud</h2>
@@ -102,7 +102,7 @@
                 </div>
             </div>
 
-            <div class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-brand-primary surface-tint-blue p-6 shadow-sm">
+            <div class="rounded-[20px] border border-slate-200/70 surface-tint-blue p-6 shadow-sm">
                 <div class="flex items-center justify-between gap-3">
                     <div>
                         <h2 class="text-lg font-semibold text-brand-navy">Cronología demo</h2>
@@ -129,7 +129,7 @@
         </section>
 
         <section class="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-            <div class="rounded-[2rem] border border-slate-200/70 bg-white p-6 shadow-sm">
+            <div class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                 <div class="flex items-center justify-between gap-3">
                     <div>
                         <h2 class="text-lg font-semibold text-brand-navy">Interpretación rápida</h2>
@@ -157,7 +157,7 @@
                 </div>
             </div>
 
-            <div class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-emerald-500 bg-white p-6 shadow-sm">
+            <div class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                 <div class="flex items-center justify-between gap-3">
                     <div>
                         <h2 class="text-lg font-semibold text-brand-navy">Lo que viene</h2>

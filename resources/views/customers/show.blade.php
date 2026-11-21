@@ -43,28 +43,28 @@
         </section>
 
         <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-            <div class="rounded-[24px] border border-slate-200/70 bg-white p-5 shadow-sm">
+            <div class="rounded-[20px] border border-slate-200/70 bg-white p-5 shadow-sm">
                 <div class="text-sm font-medium text-slate-500">Cliente</div>
                 <div class="mt-2 text-xl font-semibold text-brand-navy">{{ $displayName }}</div>
                 <div class="mt-1 text-sm text-slate-600">{{ $customer->phone ?? 'Sin teléfono' }}</div>
             </div>
 
-            <div class="rounded-[24px] border border-slate-200/70 bg-white p-5 shadow-sm">
+            <div class="rounded-[20px] border border-slate-200/70 bg-white p-5 shadow-sm">
                 <div class="text-sm font-medium text-slate-500">Total de pedidos</div>
                 <div class="mt-2 text-3xl font-semibold tracking-tight text-brand-navy">{{ $customer->orders_count }}</div>
             </div>
 
-            <div class="rounded-[24px] border border-slate-200/70 bg-white p-5 shadow-sm">
+            <div class="rounded-[20px] border border-slate-200/70 bg-white p-5 shadow-sm">
                 <div class="text-sm font-medium text-slate-500">Identidades</div>
                 <div class="mt-2 text-3xl font-semibold tracking-tight text-brand-navy">{{ $customer->customer_identities_count }}</div>
             </div>
 
-            <div class="rounded-[24px] border border-slate-200/70 bg-white p-5 shadow-sm">
+            <div class="rounded-[20px] border border-slate-200/70 bg-white p-5 shadow-sm">
                 <div class="text-sm font-medium text-slate-500">Última actividad</div>
                 <div class="mt-2 text-lg font-semibold text-brand-navy">{{ $latestActivityAt?->format('d/m/Y H:i') ?? 'Sin actividad' }}</div>
             </div>
 
-            <div class="rounded-[24px] border border-slate-200/70 bg-white p-5 shadow-sm">
+            <div class="rounded-[20px] border border-slate-200/70 bg-white p-5 shadow-sm">
                 <div class="text-sm font-medium text-slate-500">Posibles duplicados</div>
                 <div class="mt-2 text-3xl font-semibold tracking-tight text-brand-navy">{{ $possibleDuplicateOrdersCount }}</div>
             </div>

@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="space-y-8">
-        <section class="overflow-hidden rounded-[2rem] border border-slate-200/70 surface-hero-sky shadow-sm">
+        <section class="overflow-hidden rounded-[20px] border border-slate-200/70 surface-hero-sky shadow-sm">
             <div class="grid gap-6 px-6 py-8 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
                 <div class="space-y-4">
                     <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary ring-1 ring-inset ring-blue-100">
@@ -88,7 +88,7 @@
         </section>
 
         <section class="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-            <div id="connection" class="rounded-[2rem] border border-slate-200/70 bg-white p-6 shadow-sm">
+            <div id="connection" class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                 <div class="flex items-center justify-between gap-4">
                     <div>
                         <h2 class="text-lg font-semibold text-brand-navy">Configuration</h2>
@@ -156,7 +156,7 @@
                 </div>
             </div>
 
-            <div id="health" class="rounded-[2rem] border border-slate-200/70 surface-tint-green p-6 shadow-sm">
+            <div id="health" class="rounded-[20px] border border-slate-200/70 surface-tint-green p-6 shadow-sm">
                 <div class="flex items-center justify-between gap-4">
                     <div>
                         <h2 class="text-lg font-semibold text-brand-navy">Health</h2>
@@ -206,7 +206,7 @@
         </section>
 
         <section class="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-            <div class="rounded-[2rem] border border-slate-200/70 bg-white p-6 shadow-sm">
+            <div class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                 <div class="flex items-center justify-between gap-4">
                     <div>
                         <h2 class="text-lg font-semibold text-brand-navy">Capabilities</h2>
@@ -229,7 +229,7 @@
                 </div>
             </div>
 
-            <div class="rounded-[2rem] border border-slate-200/70 bg-white p-6 shadow-sm">
+            <div class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                 <div class="flex items-center justify-between gap-4">
                     <div>
                         <h2 class="text-lg font-semibold text-brand-navy">Webhook & Activity</h2>

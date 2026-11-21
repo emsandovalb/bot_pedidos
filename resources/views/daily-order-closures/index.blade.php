@@ -31,7 +31,7 @@
         @if ($closures->isNotEmpty())
             <div class="grid gap-5 xl:grid-cols-2">
                 @foreach ($closures as $closure)
-                    <article class="group overflow-hidden rounded-3xl border border-slate-200/80 border-l-4 border-l-emerald-500 bg-white shadow-card transition hover:-translate-y-0.5 hover:shadow-raised">
+                    <article class="group overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-card transition hover:-translate-y-0.5 hover:shadow-raised">
                         <div class="border-b border-slate-200/70 bg-gradient-to-r from-slate-50 to-white px-5 py-4 sm:px-6">
                             <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                                 <div>

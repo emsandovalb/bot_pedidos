@@ -23,7 +23,7 @@
             </div>
         @endif
 
-        <section class="overflow-hidden rounded-[2rem] border border-slate-200/80 surface-hero shadow-sm">
+        <section class="overflow-hidden rounded-[20px] border border-slate-200/80 surface-hero shadow-sm">
             <div class="grid gap-6 px-6 py-7 lg:grid-cols-[1.2fr_0.8fr] lg:px-8">
                 <div class="space-y-4">
                     <div class="inline-flex rounded-full bg-brand-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-brand-primary ring-1 ring-inset ring-blue-100">
@@ -78,7 +78,7 @@
         </section>
 
         @if ($productItems->isEmpty())
-            <section class="rounded-[2rem] border border-dashed border-blue-200 bg-blue-50/70 px-6 py-16 text-center shadow-sm">
+            <section class="rounded-[20px] border border-dashed border-blue-200 bg-blue-50/70 px-6 py-16 text-center shadow-sm">
                 <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-brand-primary/10 text-4xl text-brand-primary ring-1 ring-inset ring-blue-100">
                     📦
                 </div>
@@ -114,7 +114,7 @@
                             $aliasPreview = $aliases->take(3);
                         @endphp
 
-                        <article class="flex h-full flex-col rounded-[1.75rem] border border-slate-200/80 border-l-4 border-l-brand-primary bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+                        <article class="flex h-full flex-col rounded-[20px] border border-slate-200/80 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-lg">
                             <div class="flex items-start justify-between gap-4">
                                 <div class="min-w-0">
                                     <h3 class="truncate text-lg font-semibold text-brand-navy">{{ $product->name }}</h3>

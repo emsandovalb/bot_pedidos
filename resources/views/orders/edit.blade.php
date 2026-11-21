@@ -57,7 +57,7 @@
                     @csrf
                     @method('PATCH')
 
-                    <section class="rounded-[24px] border border-slate-200/80 bg-white p-6 shadow-sm">
+                    <section class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                         <div class="flex items-center justify-between gap-3">
                             <h2 class="text-base font-semibold text-brand-navy">Notas del pedido</h2>
                             <span class="text-xs font-medium uppercase tracking-wide text-slate-500">Campo editable</span>
@@ -78,7 +78,7 @@
                         </div>
 
                         @forelse ($order->orderItems as $item)
-                            <section class="rounded-[24px] border border-slate-200/80 bg-white p-6 shadow-sm">
+                            <section class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                                 <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                                     <div class="min-w-0 flex-1">
                                         <div class="flex flex-wrap items-center gap-2">
@@ -172,7 +172,7 @@
                                 </div>
                             </section>
                         @empty
-                            <div class="rounded-[24px] border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-500 shadow-sm">
+                            <div class="rounded-[20px] border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-500 shadow-sm">
                                 No hay items disponibles en este pedido.
                             </div>
                         @endforelse
@@ -190,7 +190,7 @@
             </div>
 
             <div class="space-y-6">
-                <section class="rounded-[24px] border border-slate-200/80 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <h2 class="text-base font-semibold text-brand-navy">Resumen</h2>
                     <dl class="mt-4 space-y-3 text-sm text-slate-700">
                         <div class="flex items-center justify-between gap-4 rounded-2xl bg-slate-50 px-4 py-3">
@@ -212,7 +212,7 @@
                     </dl>
                 </section>
 
-                <section class="rounded-[24px] border border-slate-200/80 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <h2 class="text-base font-semibold text-brand-navy">Información del catálogo</h2>
                     <p class="mt-2 text-sm leading-6 text-slate-600">Si un item ya está vinculado a un producto, aquí tienes el contexto sin necesidad de cambiar la selección manualmente.</p>
                     <div class="mt-4 space-y-3">
@@ -235,7 +235,7 @@
                     </div>
                 </section>
 
-                <section class="rounded-[24px] border border-slate-200/80 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <h2 class="text-base font-semibold text-brand-navy">Mensaje original</h2>
                     <div class="mt-3 whitespace-pre-wrap rounded-2xl border border-slate-200/80 bg-slate-50 p-4 text-sm leading-6 text-slate-800">
                         {{ $order->raw_message_text ?? '—' }}

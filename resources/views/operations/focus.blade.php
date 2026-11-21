@@ -10,7 +10,7 @@
         <div class="pointer-events-none absolute inset-0 -z-10 surface-page"></div>
 
         <div class="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
-            <section class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-6 shadow-card backdrop-blur">
+            <section class="rounded-[20px] border border-slate-200/80 bg-white/90 p-6 shadow-card backdrop-blur">
                 <div class="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
                     <div class="max-w-3xl">
                         <div class="inline-flex items-center rounded-full bg-brand-primary/10 px-3 py-1 text-xs font-semibold tracking-[0.18em] text-brand-primary ring-1 ring-inset ring-brand-primary/10">
@@ -39,19 +39,19 @@
                 </div>
 
                 <div class="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                    <article class="rounded-[1.5rem] border border-blue-200 bg-blue-50/70 p-4 shadow-sm">
+                    <article class="rounded-2xl border border-blue-200 bg-blue-50/70 p-4 shadow-sm">
                         <div class="text-xs font-semibold uppercase tracking-[0.18em] text-blue-700">Pedidos para hoy</div>
                         <div class="mt-2 text-3xl font-semibold text-brand-navy" x-text="summary.orders_today"></div>
                     </article>
-                    <article class="rounded-[1.5rem] border border-rose-200 bg-rose-50/70 p-4 shadow-sm">
+                    <article class="rounded-2xl border border-rose-200 bg-rose-50/70 p-4 shadow-sm">
                         <div class="text-xs font-semibold uppercase tracking-[0.18em] text-rose-700">Urgentes</div>
                         <div class="mt-2 text-3xl font-semibold text-brand-navy" x-text="summary.urgent_orders"></div>
                     </article>
-                    <article class="rounded-[1.5rem] border border-emerald-200 bg-emerald-50/70 p-4 shadow-sm">
+                    <article class="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 shadow-sm">
                         <div class="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">Entregas</div>
                         <div class="mt-2 text-3xl font-semibold text-brand-navy" x-text="summary.deliveries"></div>
                     </article>
-                    <article class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 shadow-sm">
+                    <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
                         <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Retiros</div>
                         <div class="mt-2 text-3xl font-semibold text-brand-navy" x-text="summary.pickups"></div>
                     </article>
@@ -59,7 +59,7 @@
             </section>
 
             <template x-if="!workspaceOpen && recommendedOrder">
-                <section class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-6 shadow-card backdrop-blur" data-focus-recommended>
+                <section class="rounded-[20px] border border-slate-200/80 bg-white/90 p-6 shadow-card backdrop-blur" data-focus-recommended>
                     <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                         <div class="max-w-3xl">
                             <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Tu siguiente pedido</div>
@@ -78,7 +78,7 @@
                     </div>
 
                     <div class="mt-6 grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.9fr)]">
-                        <div class="rounded-[1.75rem] border border-slate-200 surface-soft p-5">
+                        <div class="rounded-[20px] border border-slate-200 surface-soft p-5">
                             <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Qué preparar</div>
                             <div class="mt-4 space-y-3">
                                 <template x-for="line in recommendedOrder.item_lines" :key="line.id ?? line.text">
@@ -92,19 +92,19 @@
                         </div>
 
                         <div class="space-y-3">
-                            <div class="rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-sm">
+                            <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                                 <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Entrega</div>
                                 <div class="mt-2 text-xl font-semibold text-brand-navy" x-text="recommendedOrder.delivery_label"></div>
                             </div>
-                            <div class="rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-sm">
+                            <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                                 <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Pago</div>
                                 <div class="mt-2 text-xl font-semibold text-brand-navy" x-text="recommendedOrder.payment_label"></div>
                             </div>
-                            <div class="rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-sm">
+                            <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                                 <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Para cuándo</div>
                                 <div class="mt-2 text-xl font-semibold text-brand-navy" x-text="recommendedOrder.commitment_label"></div>
                             </div>
-                            <div class="rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-sm">
+                            <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                                 <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Prioridad</div>
                                 <div class="mt-2 text-xl font-semibold text-brand-navy" x-text="recommendedOrder.priority_label"></div>
                             </div>
@@ -120,8 +120,8 @@
             </template>
 
             <template x-if="!workspaceOpen && !recommendedOrder">
-                <section class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-6 shadow-card backdrop-blur" data-focus-empty>
-                    <div class="rounded-[1.75rem] border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center">
+                <section class="rounded-[20px] border border-slate-200/80 bg-white/90 p-6 shadow-card backdrop-blur" data-focus-empty>
+                    <div class="rounded-[20px] border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center">
                         <div class="text-3xl font-semibold tracking-tight text-brand-navy">Excelente.</div>
                         <p class="mt-2 text-lg text-slate-600">No quedan pedidos pendientes.</p>
 
@@ -157,7 +157,7 @@
             x-show="workspaceOpen"
             x-cloak
             x-transition.opacity.duration.250ms
-            class="rounded-[2rem] border border-slate-200/80 bg-white/95 shadow-card backdrop-blur"
+            class="rounded-[20px] border border-slate-200/80 bg-white/95 shadow-card backdrop-blur"
             data-focus-inline-workspace
             data-focus-inline-review
         >
@@ -181,23 +181,23 @@
 
                 <main class="flex-1 overflow-y-auto px-5 py-6 sm:px-6">
                     <template x-if="workspaceLoading">
-                        <div class="rounded-[2rem] border border-slate-200 bg-slate-50 px-6 py-10 text-center text-sm text-slate-500">
+                        <div class="rounded-[20px] border border-slate-200 bg-slate-50 px-6 py-10 text-center text-sm text-slate-500">
                             Cargando pedido...
                         </div>
                     </template>
 
                     <template x-if="workspaceError">
-                        <div class="rounded-[2rem] border border-rose-200 bg-rose-50 px-6 py-6 text-sm text-rose-800" x-text="workspaceError"></div>
+                        <div class="rounded-[20px] border border-rose-200 bg-rose-50 px-6 py-6 text-sm text-rose-800" x-text="workspaceError"></div>
                     </template>
 
                     <template x-if="currentWorkspaceOrder && !workspaceLoading">
                         <div class="grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,0.86fr)]">
                             <section class="space-y-6">
                                 <template x-if="workspaceNotice">
-                                    <div class="rounded-[1.75rem] border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-medium text-emerald-900" x-text="workspaceNotice"></div>
+                                    <div class="rounded-[20px] border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-medium text-emerald-900" x-text="workspaceNotice"></div>
                                 </template>
 
-                                <div class="rounded-[2rem] border border-slate-200 surface-soft p-6 shadow-sm">
+                                <div class="rounded-[20px] border border-slate-200 surface-soft p-6 shadow-sm">
                                     <div class="flex items-start justify-between gap-4">
                                         <div>
                                             <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Qué preparar</div>
@@ -231,7 +231,7 @@
                                 </div>
 
                                 <template x-if="currentStatus === 'preparing'">
-                                    <div class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
+                                    <div class="rounded-[20px] border border-slate-200 bg-white p-6 shadow-sm">
                                         <div class="flex items-start justify-between gap-4">
                                             <div>
                                                 <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Preparación</div>
@@ -283,7 +283,7 @@
                                 </template>
 
                                 <div class="grid gap-6 lg:grid-cols-2">
-                                    <div class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
+                                    <div class="rounded-[20px] border border-slate-200 bg-white p-6 shadow-sm">
                                         <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Para cuándo</div>
                                         <h3 class="mt-2 text-2xl font-semibold text-brand-navy" x-text="currentWorkspaceOrder?.commitment_display?.label ?? currentWorkspaceOrder?.commitment_label ?? orderCommitmentLabel(currentWorkspaceOrder)"></h3>
                                         <div class="mt-5 grid gap-3 sm:grid-cols-3">
@@ -302,7 +302,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
+                                    <div class="rounded-[20px] border border-slate-200 bg-white p-6 shadow-sm">
                                         <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Entrega</div>
                                         <h3 class="mt-2 text-2xl font-semibold text-brand-navy" x-text="orderDeliveryLabel(currentWorkspaceOrder)"></h3>
                                         <div class="mt-4 rounded-2xl border border-slate-100 bg-slate-50 p-4">
@@ -313,7 +313,7 @@
                                 </div>
 
                                 <div class="grid gap-6 lg:grid-cols-2">
-                                    <div class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
+                                    <div class="rounded-[20px] border border-slate-200 bg-white p-6 shadow-sm">
                                         <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Pago</div>
                                         <h3 class="mt-2 text-2xl font-semibold text-brand-navy" x-text="orderPaymentLabel(currentWorkspaceOrder)"></h3>
                                         <div class="mt-4 rounded-2xl border border-slate-100 bg-slate-50 p-4">
@@ -322,7 +322,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
+                                    <div class="rounded-[20px] border border-slate-200 bg-white p-6 shadow-sm">
                                         <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Cliente</div>
                                         <h3 class="mt-2 text-2xl font-semibold text-brand-navy" x-text="currentWorkspaceOrder?.customer_name"></h3>
                                         <div class="mt-4 grid gap-3 sm:grid-cols-2">
@@ -345,7 +345,7 @@
                                 </div>
 
                                 <template x-if="currentStatus === 'dispatched' || completionVisible">
-                                    <div class="rounded-[2rem] border border-emerald-200 bg-emerald-50 p-6 shadow-sm" data-focus-success x-transition.opacity.duration.200ms>
+                                    <div class="rounded-[20px] border border-emerald-200 bg-emerald-50 p-6 shadow-sm" data-focus-success x-transition.opacity.duration.200ms>
                                         <div class="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">Excelente.</div>
                                         <h3 class="mt-2 text-2xl font-semibold text-emerald-950">Este pedido ya quedó listo.</h3>
                                         <p class="mt-3 text-sm leading-6 text-emerald-900">
@@ -354,7 +354,7 @@
                                     </div>
                                 </template>
 
-                                <details class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
+                                <details class="rounded-[20px] border border-slate-200 bg-white p-6 shadow-sm">
                                     <summary class="cursor-pointer list-none text-sm font-semibold text-brand-primary">
                                         Información secundaria
                                     </summary>
@@ -378,7 +378,7 @@
                             </section>
 
                             <aside class="space-y-6">
-                                <div class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
+                                <div class="rounded-[20px] border border-slate-200 bg-white p-6 shadow-sm">
                                     <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Acción principal</div>
 
                                     <template x-if="currentStatus !== 'dispatched' && !completionVisible">

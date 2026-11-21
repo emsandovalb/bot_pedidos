@@ -100,23 +100,23 @@
                 </div>
 
                 <div class="grid gap-3 border-t border-slate-200/70 px-5 py-5 sm:px-8 lg:grid-cols-5">
-                    <div class="rounded-[24px] border border-rose-200 bg-rose-50/70 p-4 shadow-sm">
+                    <div class="rounded-[20px] border border-rose-200 bg-rose-50/70 p-4 shadow-sm">
                         <div class="text-xs font-semibold uppercase tracking-[0.18em] text-rose-700">Urgent orders</div>
                         <div class="mt-2 text-3xl font-semibold text-brand-navy" x-text="todaySummary.urgent"></div>
                     </div>
-                    <div class="rounded-[24px] border border-blue-200 bg-blue-50/70 p-4 shadow-sm">
+                    <div class="rounded-[20px] border border-blue-200 bg-blue-50/70 p-4 shadow-sm">
                         <div class="text-xs font-semibold uppercase tracking-[0.18em] text-blue-700">Orders today</div>
                         <div class="mt-2 text-3xl font-semibold text-brand-navy" x-text="todaySummary.today"></div>
                     </div>
-                    <div class="rounded-[24px] border border-emerald-200 bg-emerald-50/70 p-4 shadow-sm">
+                    <div class="rounded-[20px] border border-emerald-200 bg-emerald-50/70 p-4 shadow-sm">
                         <div class="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">Deliveries</div>
                         <div class="mt-2 text-3xl font-semibold text-brand-navy" x-text="todaySummary.deliveries"></div>
                     </div>
-                    <div class="rounded-[24px] border border-slate-200 bg-slate-50 p-4 shadow-sm">
+                    <div class="rounded-[20px] border border-slate-200 bg-slate-50 p-4 shadow-sm">
                         <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Pickups</div>
                         <div class="mt-2 text-3xl font-semibold text-brand-navy" x-text="todaySummary.pickups"></div>
                     </div>
-                    <div class="rounded-[24px] border border-orange-200 bg-orange-50/70 p-4 shadow-sm">
+                    <div class="rounded-[20px] border border-orange-200 bg-orange-50/70 p-4 shadow-sm">
                         <div class="text-xs font-semibold uppercase tracking-[0.18em] text-orange-700">Overdue</div>
                         <div class="mt-2 text-3xl font-semibold text-brand-navy" x-text="todaySummary.overdue"></div>
                     </div>
@@ -287,7 +287,7 @@
                                 <template x-for="order in group.cards" :key="order.id">
                                     <button
                                         type="button"
-                                        class="group rounded-[24px] border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                                        class="group rounded-[20px] border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
                                         @click="openDrawer(order)"
                                     >
                                         <div class="flex items-start justify-between gap-3">
@@ -340,7 +340,7 @@
 
                 <div class="mt-6">
                     <template x-if="completedCards.length === 0">
-                        <div class="rounded-[24px] border border-dashed border-slate-300 bg-slate-50 px-6 py-8 text-center text-sm text-slate-500">
+                        <div class="rounded-[20px] border border-dashed border-slate-300 bg-slate-50 px-6 py-8 text-center text-sm text-slate-500">
                             No completed orders yet.
                         </div>
                     </template>
@@ -349,7 +349,7 @@
                         <template x-for="order in completedCards" :key="order.id">
                             <button
                                 type="button"
-                                class="rounded-[24px] border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                                class="rounded-[20px] border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
                                 @click="openDrawer(order)"
                             >
                                 <div class="flex items-start justify-between gap-3">

@@ -63,7 +63,7 @@
         @endif
 
         @if ($order->possibleDuplicateOf)
-            <div class="rounded-[24px] border border-amber-200 bg-amber-50 p-5 shadow-sm">
+            <div class="rounded-[20px] border border-amber-200 bg-amber-50 p-5 shadow-sm">
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                         <div class="text-sm font-semibold uppercase tracking-wide text-amber-800">Posible pedido duplicado</div>
@@ -89,7 +89,7 @@
 
         <div class="grid gap-6 xl:grid-cols-3">
             <div class="space-y-6 xl:col-span-2">
-                <section class="rounded-[24px] border border-slate-200/80 border-l-4 border-l-brand-primary bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <h2 class="text-base font-semibold text-brand-navy">Mensaje original</h2>
                         <span class="text-xs font-medium uppercase tracking-wide text-slate-500">Texto crudo recibido</span>
@@ -99,7 +99,7 @@
                     </div>
                 </section>
 
-                <section class="rounded-[24px] border border-slate-200/80 border-l-4 border-l-slate-300 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <h2 class="text-base font-semibold text-brand-navy">Cliente y sucursal</h2>
                         <span class="text-xs font-medium uppercase tracking-wide text-slate-500">Contexto operativo</span>
@@ -161,7 +161,7 @@
                     @endif
                 </section>
 
-                <section class="rounded-[24px] border border-slate-200/80 border-l-4 border-l-emerald-500 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <h2 class="text-base font-semibold text-brand-navy">Items detectados</h2>
                         <span class="text-xs font-medium uppercase tracking-wide text-slate-500">{{ $detectedItems->count() }} item(s)</span>
@@ -237,7 +237,7 @@
                     </div>
                 </section>
 
-                <section class="rounded-[24px] border border-slate-200/80 border-l-4 border-l-emerald-500 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <h2 class="text-base font-semibold text-brand-navy">Productos reconocidos</h2>
                         <span class="text-xs font-medium uppercase tracking-wide text-slate-500">{{ $recognizedItems->count() }} coincidencia(s)</span>
@@ -271,7 +271,7 @@
                     </div>
                 </section>
 
-                <section class="rounded-[24px] border border-slate-200/80 border-l-4 border-l-slate-300 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <h2 class="text-base font-semibold text-brand-navy">Notas</h2>
                         <span class="text-xs font-medium uppercase tracking-wide text-slate-500">Observaciones internas</span>
@@ -283,7 +283,7 @@
             </div>
 
             <div class="space-y-6">
-                <section class="rounded-[24px] border border-slate-200/80 border-l-4 border-l-brand-primary bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <h2 class="text-base font-semibold text-brand-navy">Acciones disponibles</h2>
                     <p class="mt-2 text-sm leading-6 text-slate-600">
                         Ejecuta el siguiente paso operativo sin salir de la ficha del pedido.
@@ -355,7 +355,7 @@
                     </div>
                 </section>
 
-                <section class="rounded-[24px] border border-slate-200/80 border-l-4 border-l-slate-300 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <h2 class="text-base font-semibold text-brand-navy">Línea de tiempo</h2>
                     <div class="mt-4 space-y-3">
                         @forelse ($timelineEntries as $history)
@@ -381,7 +381,7 @@
                         @endforelse
                     </div>
                 </section>
-                <section class="rounded-[24px] border border-slate-200/80 border-l-4 border-l-blue-500 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <h2 class="text-base font-semibold text-brand-navy">Historial de notificaciones</h2>
                         <span class="text-xs font-medium uppercase tracking-wide text-slate-500">{{ $notificationLogs->count() }} evento(s)</span>

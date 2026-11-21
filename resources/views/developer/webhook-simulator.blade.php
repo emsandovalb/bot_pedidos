@@ -4,7 +4,7 @@
         x-data="developerToolkit(@js($formState), @js($examples), @js($providerSpecs))"
         x-init="init()"
     >
-        <section class="overflow-hidden rounded-[2rem] border border-slate-200/80 surface-hero shadow-sm">
+        <section class="overflow-hidden rounded-[20px] border border-slate-200/80 surface-hero shadow-sm">
             <div class="p-6 sm:p-8">
                 <div class="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
                     <div class="max-w-3xl">
@@ -34,7 +34,7 @@
                 </div>
 
                 @if ($result)
-                    <div class="mt-6 rounded-[1.75rem] border border-emerald-200 bg-emerald-50 px-5 py-4 text-emerald-950 shadow-sm">
+                    <div class="mt-6 rounded-[20px] border border-emerald-200 bg-emerald-50 px-5 py-4 text-emerald-950 shadow-sm">
                         <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                             <div class="max-w-2xl">
                                 <div class="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700">Result</div>
@@ -136,7 +136,7 @@
 
         <div class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
             <div class="space-y-6">
-                <section class="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                         <div>
                             <h2 class="text-xl font-semibold text-brand-navy">Custom Ingestion Playground</h2>
@@ -209,7 +209,7 @@
                             Instagram is a placeholder only. The preview still renders a local stub, but no operational ingestion is available yet.
                         </div>
 
-                        <details class="group rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4" open>
+                        <details class="group rounded-2xl border border-slate-200 bg-slate-50 p-4" open>
                             <summary class="cursor-pointer list-none text-sm font-semibold text-slate-700">
                                 Payload preview
                                 <span class="ml-2 rounded-full bg-slate-100 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-slate-500" x-text="form.payload_source === 'preview' ? 'Used as-is' : 'Generated from the form'"></span>
@@ -219,7 +219,7 @@
                                 x-model="form.payload_preview"
                                 @input="form.payload_source = 'preview'"
                                 rows="24"
-                                class="mt-4 w-full rounded-[1.5rem] border-slate-300 bg-slate-950 px-4 py-4 font-mono text-sm text-slate-100 shadow-sm focus:border-brand-primary focus:ring-brand-primary"
+                                class="mt-4 w-full rounded-2xl border-slate-300 bg-slate-950 px-4 py-4 font-mono text-sm text-slate-100 shadow-sm focus:border-brand-primary focus:ring-brand-primary"
                             ></textarea>
                         </details>
 
@@ -234,7 +234,7 @@
                     </form>
                 </section>
 
-                <section class="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                         <div>
                             <h2 class="text-xl font-semibold text-brand-navy">Business Scenarios</h2>
@@ -250,7 +250,7 @@
 
                     <div class="mt-6 grid gap-4 lg:grid-cols-2">
                         @foreach ($businessScenarios as $scenario)
-                            <form method="POST" action="{{ route('developer.webhook-simulator.generate') }}" class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 shadow-sm">
+                            <form method="POST" action="{{ route('developer.webhook-simulator.generate') }}" class="rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
                                 @csrf
                                 <input type="hidden" name="action" value="business_scenario">
                                 <input type="hidden" name="scenario" value="{{ $scenario['key'] }}">
@@ -289,7 +289,7 @@
                 </section>
 
                 <section class="grid gap-6 lg:grid-cols-2">
-                    <div class="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm">
+                    <div class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                         <div class="flex items-start justify-between gap-4">
                             <div>
                                 <h2 class="text-xl font-semibold text-brand-navy">Create Custom Customer Message</h2>
@@ -337,7 +337,7 @@
 
                             <label class="block">
                                 <span class="text-sm font-semibold text-slate-700">Message</span>
-                                <textarea name="message" rows="4" class="mt-2 w-full rounded-[1.5rem] border-slate-300 bg-white px-4 py-3 text-sm shadow-sm focus:border-brand-primary focus:ring-brand-primary" placeholder="Ocupo 20 bloques para manana temprano. Yo paso por ellos. Pago por SINPE."></textarea>
+                                <textarea name="message" rows="4" class="mt-2 w-full rounded-2xl border-slate-300 bg-white px-4 py-3 text-sm shadow-sm focus:border-brand-primary focus:ring-brand-primary" placeholder="Ocupo 20 bloques para manana temprano. Yo paso por ellos. Pago por SINPE."></textarea>
                             </label>
 
                             <button type="submit" class="inline-flex items-center justify-center rounded-2xl bg-brand-primary px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-700">
@@ -347,7 +347,7 @@
                     </div>
 
                     <div class="space-y-6">
-                        <div class="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm">
+                        <div class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                             <h2 class="text-xl font-semibold text-brand-navy">Random Message Generator</h2>
                             <p class="mt-1 text-sm text-slate-600">Generate mixed realistic messages for products, delivery, pickup, dates, payments and urgency.</p>
 
@@ -364,7 +364,7 @@
                             </form>
                         </div>
 
-                        <div class="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm">
+                        <div class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                             <h2 class="text-xl font-semibold text-brand-navy">Simulate Business Day</h2>
                             <p class="mt-1 text-sm text-slate-600">Replay a timed sequence that naturally updates the live queue and operations agenda.</p>
 
@@ -383,7 +383,7 @@
                     </div>
                 </section>
 
-                <section class="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <h2 class="text-xl font-semibold text-brand-navy">Reset</h2>
                     <p class="mt-1 text-sm text-slate-600">Clear only generated simulation data. Real customers and real operations data stay untouched.</p>
 
@@ -408,7 +408,7 @@
                     </div>
                 </section>
 
-                <section class="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                         <div>
                             <h2 class="text-xl font-semibold text-brand-navy">Legacy Scenario Generator</h2>
@@ -424,7 +424,7 @@
 
                     <div class="mt-6 grid gap-4 lg:grid-cols-2">
                         @foreach ($scenarios as $key => $scenario)
-                            <form method="POST" action="{{ $key === 'ferreteria_pequena' ? route('developer.toolkit.scenarios.small-hardware-store') : route('developer.webhook-simulator.generate') }}" class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 shadow-sm">
+                            <form method="POST" action="{{ $key === 'ferreteria_pequena' ? route('developer.toolkit.scenarios.small-hardware-store') : route('developer.webhook-simulator.generate') }}" class="rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
                                 @csrf
                                 <input type="hidden" name="action" value="scenario">
                                 <input type="hidden" name="scenario" value="{{ $key }}">
@@ -485,7 +485,7 @@
                     </div>
                 </section>
 
-                <section class="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                         <div>
                             <h2 class="text-xl font-semibold text-brand-navy">Legacy Quick Generators</h2>
@@ -511,7 +511,7 @@
                 </section>
 
                 <section class="grid gap-6 lg:grid-cols-2">
-                    <div class="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm">
+                    <div class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                         <h2 class="text-xl font-semibold text-brand-navy">Legacy Customer Generator</h2>
                         <p class="mt-1 text-sm text-slate-600">Generate customers only using random Costa Rican names and phone numbers.</p>
 
@@ -529,7 +529,7 @@
                         </form>
                     </div>
 
-                    <div class="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm">
+                    <div class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                         <h2 class="text-xl font-semibold text-brand-navy">Legacy Operational QA</h2>
                         <p class="mt-1 text-sm text-slate-600">Fast buttons for duplicate, VIP, parser failure, unknown product, busy day and empty inbox checks.</p>
 
@@ -550,7 +550,7 @@
                     </div>
                 </section>
 
-                <section class="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <h2 class="text-xl font-semibold text-brand-navy">Legacy Demo Reset</h2>
                     <p class="mt-1 text-sm text-slate-600">Deletes demo orders or customers only. Admin users and organizations remain untouched.</p>
 
@@ -586,7 +586,7 @@
             </div>
 
             <aside class="space-y-6">
-                <section class="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <h2 class="text-xl font-semibold text-brand-navy">Metrics</h2>
                     <div class="mt-5 grid gap-4 sm:grid-cols-2">
                         <div class="rounded-2xl bg-slate-50 px-4 py-3">
@@ -616,7 +616,7 @@
                     </div>
                 </section>
 
-                <section class="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <h2 class="text-xl font-semibold text-brand-navy">Business Metrics</h2>
                     <div class="mt-5 grid gap-4 sm:grid-cols-2">
                         <div class="rounded-2xl bg-slate-50 px-4 py-3">
@@ -670,7 +670,7 @@
                     </div>
                 </section>
 
-                <section class="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <h2 class="text-xl font-semibold text-brand-navy">Provider Details</h2>
                     <div class="mt-4 space-y-3">
                         <template x-for="item in activeSpec().examples" :key="item">
@@ -679,7 +679,7 @@
                     </div>
                 </section>
 
-                <section class="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <h2 class="text-xl font-semibold text-brand-navy">Connection</h2>
                     <dl class="mt-5 grid gap-4 sm:grid-cols-2">
                         <div class="rounded-2xl bg-slate-50 px-4 py-3">

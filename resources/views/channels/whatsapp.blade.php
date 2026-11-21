@@ -39,7 +39,7 @@
             </div>
         @endif
 
-        <section class="overflow-hidden rounded-[2rem] border border-slate-200/70 surface-hero-green shadow-sm">
+        <section class="overflow-hidden rounded-[20px] border border-slate-200/70 surface-hero-green shadow-sm">
             <div class="grid gap-6 px-6 py-7 lg:grid-cols-[1.2fr_0.8fr] lg:px-8">
                 <div class="space-y-5">
                     <div class="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700 ring-1 ring-inset ring-emerald-100">
@@ -82,7 +82,7 @@
             </div>
         </section>
 
-        <section class="rounded-[2rem] border border-slate-200/70 bg-white p-6 shadow-sm">
+        <section class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
             <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div>
                     <h2 class="text-lg font-semibold text-brand-navy">Progreso del onboarding</h2>
@@ -126,7 +126,7 @@
             @csrf
 
             <div class="space-y-6">
-                <section class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-emerald-500 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <div>
                             <h2 class="text-lg font-semibold text-brand-navy">Requisitos</h2>
@@ -147,7 +147,7 @@
                     </div>
                 </section>
 
-                <section class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-brand-primary bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <div>
                             <h2 class="text-lg font-semibold text-brand-navy">Numero del negocio</h2>
@@ -208,7 +208,7 @@
                     </div>
                 </section>
 
-                <section class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-emerald-500 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <div>
                             <h2 class="text-lg font-semibold text-brand-navy">Acceso a Meta/Facebook</h2>
@@ -242,7 +242,7 @@
                     </div>
                 </section>
 
-                <section class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-emerald-500 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <div>
                             <h2 class="text-lg font-semibold text-brand-navy">Onboarding asistido</h2>
@@ -283,7 +283,7 @@
             </div>
 
             <aside class="space-y-6">
-                <section class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-emerald-500 surface-tint-green p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/70 surface-tint-green p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <div>
                             <h2 class="text-lg font-semibold text-brand-navy">Resumen de preparacion</h2>
@@ -324,7 +324,7 @@
                     </div>
                 </section>
 
-                <section class="rounded-[2rem] border border-slate-200/70 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <div>
                             <h2 class="text-lg font-semibold text-brand-navy">Checklist persistido</h2>
@@ -352,7 +352,7 @@
             </aside>
         </form>
 
-        <section class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-amber-500 surface-tint-amber p-6 shadow-sm">
+        <section class="rounded-[20px] border border-slate-200/70 surface-tint-amber p-6 shadow-sm">
             <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div>
                     <h2 class="text-lg font-semibold text-brand-navy">Solicitud asistida</h2>

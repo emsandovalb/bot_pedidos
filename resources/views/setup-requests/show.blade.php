@@ -7,7 +7,7 @@
             $currentStatus = old('status', $setupRequest->status);
         @endphp
 
-        <section class="overflow-hidden rounded-[2rem] border border-slate-200/70 surface-hero shadow-sm">
+        <section class="overflow-hidden rounded-[20px] border border-slate-200/70 surface-hero shadow-sm">
             <div class="grid gap-6 px-6 py-7 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
                 <div class="space-y-4">
                     <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary ring-1 ring-inset ring-blue-100">
@@ -21,7 +21,7 @@
                     </div>
                 </div>
 
-                <div class="rounded-[2rem] border border-slate-200/80 bg-white/95 p-5 shadow-sm">
+                <div class="rounded-[20px] border border-slate-200/80 bg-white/95 p-5 shadow-sm">
                     <div class="flex items-start justify-between gap-4">
                         <div>
                             <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Estado</p>
@@ -78,7 +78,7 @@
 
         <section class="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
             <div class="space-y-6">
-                <article class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-brand-primary bg-white p-6 shadow-sm">
+                <article class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <div>
                             <h2 class="text-lg font-semibold text-brand-navy">Notas</h2>
@@ -91,7 +91,7 @@
                     </div>
                 </article>
 
-                <article class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-emerald-500 bg-white p-6 shadow-sm">
+                <article class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <div>
                             <h2 class="text-lg font-semibold text-brand-navy">Timeline</h2>
@@ -123,7 +123,7 @@
                     @csrf
                     @method('PATCH')
 
-                    <article class="rounded-[2rem] border border-slate-200/70 bg-white p-6 shadow-sm">
+                    <article class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                         <div class="flex items-center justify-between gap-3">
                             <div>
                                 <h2 class="text-lg font-semibold text-brand-navy">Acciones</h2>
@@ -178,7 +178,7 @@
                 </form>
                 @endcan
 
-                <article class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-amber-500 surface-tint-amber p-6 shadow-sm">
+                <article class="rounded-[20px] border border-slate-200/70 surface-tint-amber p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <div>
                             <h2 class="text-lg font-semibold text-brand-navy">Lectura rapida</h2>

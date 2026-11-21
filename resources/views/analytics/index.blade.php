@@ -19,7 +19,7 @@
     @endphp
 
     <div class="space-y-10">
-        <section class="rounded-[2rem] border border-slate-200/70 surface-hero p-6 shadow-sm sm:p-8">
+        <section class="rounded-[20px] border border-slate-200/70 surface-hero p-6 shadow-sm sm:p-8">
             <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                 <div class="max-w-3xl">
                     <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary ring-1 ring-inset ring-blue-100">
@@ -53,40 +53,16 @@
             </div>
         </section>
 
-        <section class="grid gap-6 md:grid-cols-2 xl:grid-cols-5">
-            <article class="rounded-2xl border border-brand-primary/15 border-l-4 border-l-brand-primary bg-white p-5 shadow-sm">
-                <div class="text-sm font-medium text-slate-500">Pedidos hoy</div>
-                <div class="mt-3 text-3xl font-semibold tracking-tight text-brand-navy">{{ $ordersTodayCount }}</div>
-                <div class="mt-1 text-sm text-slate-600">Pedidos creados durante el día</div>
-            </article>
-
-            <article class="rounded-2xl border border-brand-primary/15 border-l-4 border-l-brand-primary bg-white p-5 shadow-sm">
-                <div class="text-sm font-medium text-slate-500">Pedidos últimos 7 días</div>
-                <div class="mt-3 text-3xl font-semibold tracking-tight text-brand-navy">{{ $ordersLast7DaysCount }}</div>
-                <div class="mt-1 text-sm text-slate-600">Volumen semanal visible</div>
-            </article>
-
-            <article class="rounded-2xl border border-brand-primary/15 border-l-4 border-l-brand-primary bg-white p-5 shadow-sm">
-                <div class="text-sm font-medium text-slate-500">Pedidos este mes</div>
-                <div class="mt-3 text-3xl font-semibold tracking-tight text-brand-navy">{{ $ordersThisMonthCount }}</div>
-                <div class="mt-1 text-sm text-slate-600">Acumulado mensual</div>
-            </article>
-
-            <article class="rounded-2xl border border-emerald-200/70 border-l-4 border-l-emerald-500 bg-white p-5 shadow-sm">
-                <div class="text-sm font-medium text-slate-500">Despachados este mes</div>
-                <div class="mt-3 text-3xl font-semibold tracking-tight text-brand-navy">{{ $dispatchedThisMonthCount }}</div>
-                <div class="mt-1 text-sm text-slate-600">Pedidos ya entregados</div>
-            </article>
-
-            <article class="rounded-2xl border border-amber-200/70 border-l-4 border-l-amber-500 bg-white p-5 shadow-sm">
-                <div class="text-sm font-medium text-slate-500">Pendientes de revisión</div>
-                <div class="mt-3 text-3xl font-semibold tracking-tight text-brand-navy">{{ $pendingReviewCount }}</div>
-                <div class="mt-1 text-sm text-slate-600">Esperando validación manual</div>
-            </article>
+        <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+            <x-stat-card label="Pedidos hoy" :value="$ordersTodayCount" hint="Pedidos creados durante el día" icon="list" tone="blue" />
+            <x-stat-card label="Pedidos últimos 7 días" :value="$ordersLast7DaysCount" hint="Volumen semanal visible" icon="chart" tone="blue" />
+            <x-stat-card label="Pedidos este mes" :value="$ordersThisMonthCount" hint="Acumulado mensual" icon="calendar" tone="violet" />
+            <x-stat-card label="Despachados este mes" :value="$dispatchedThisMonthCount" hint="Pedidos ya entregados" icon="truck" tone="green" />
+            <x-stat-card label="Pendientes de revisión" :value="$pendingReviewCount" hint="Esperando validación manual" icon="review" tone="amber" />
         </section>
 
         <section class="grid gap-8 xl:grid-cols-[1.35fr_0.9fr]">
-            <div class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-brand-primary bg-white p-6 shadow-sm">
+            <div class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                 <div class="flex items-center justify-between gap-3">
                     <div>
                         <h2 class="text-lg font-semibold text-brand-navy">Pedidos por estado</h2>
@@ -111,7 +87,7 @@
                 </div>
             </div>
 
-            <div class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-emerald-500 bg-white p-6 shadow-sm">
+            <div class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                 <div class="flex items-center justify-between gap-3">
                     <div>
                         <h2 class="text-lg font-semibold text-brand-navy">Clasificación automática</h2>
@@ -158,7 +134,7 @@
         </section>
 
         <section class="grid gap-8 xl:grid-cols-2">
-            <div class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-brand-primary bg-white p-6 shadow-sm">
+            <div class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                 <div class="flex items-center justify-between gap-3">
                     <div>
                         <h2 class="text-lg font-semibold text-brand-navy">Productos más solicitados</h2>
@@ -189,7 +165,7 @@
                 </div>
             </div>
 
-            <div class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-emerald-500 bg-white p-6 shadow-sm">
+            <div class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                 <div class="flex items-center justify-between gap-3">
                     <div>
                         <h2 class="text-lg font-semibold text-brand-navy">Clientes frecuentes</h2>
@@ -224,7 +200,7 @@
             </div>
         </section>
 
-        <section class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-brand-primary bg-white p-6 shadow-sm">
+        <section class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
             <div class="flex items-center justify-between gap-3">
                 <div>
                     <h2 class="text-lg font-semibold text-brand-navy">Actividad reciente</h2>

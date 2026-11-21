@@ -52,22 +52,22 @@
         </section>
 
         <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <div class="rounded-[24px] border border-slate-200/70 bg-white p-5 shadow-sm">
+            <div class="rounded-[20px] border border-slate-200/70 bg-white p-5 shadow-sm">
                 <div class="text-sm font-medium text-slate-500">Clientes registrados</div>
                 <div class="mt-2 text-3xl font-semibold tracking-tight text-brand-navy">{{ $registeredCustomersCount }}</div>
             </div>
 
-            <div class="rounded-[24px] border border-slate-200/70 bg-white p-5 shadow-sm">
+            <div class="rounded-[20px] border border-slate-200/70 bg-white p-5 shadow-sm">
                 <div class="text-sm font-medium text-slate-500">Clientes con múltiples canales</div>
                 <div class="mt-2 text-3xl font-semibold tracking-tight text-brand-navy">{{ $multiChannelCustomersCount }}</div>
             </div>
 
-            <div class="rounded-[24px] border border-slate-200/70 bg-white p-5 shadow-sm">
+            <div class="rounded-[20px] border border-slate-200/70 bg-white p-5 shadow-sm">
                 <div class="text-sm font-medium text-slate-500">Clientes activos hoy</div>
                 <div class="mt-2 text-3xl font-semibold tracking-tight text-brand-navy">{{ $activeTodayCount }}</div>
             </div>
 
-            <div class="rounded-[24px] border border-slate-200/70 bg-white p-5 shadow-sm">
+            <div class="rounded-[20px] border border-slate-200/70 bg-white p-5 shadow-sm">
                 <div class="text-sm font-medium text-slate-500">Identidades registradas</div>
                 <div class="mt-2 text-3xl font-semibold tracking-tight text-brand-navy">{{ $registeredIdentitiesCount }}</div>
             </div>
@@ -160,7 +160,7 @@
             @endforelse
         </section>
 
-        <div class="rounded-[24px] border border-slate-200/70 bg-white p-4 shadow-sm sm:p-5">
+        <div class="rounded-[20px] border border-slate-200/70 bg-white p-4 shadow-sm sm:p-5">
             {{ $customers->links() }}
         </div>
     </div>

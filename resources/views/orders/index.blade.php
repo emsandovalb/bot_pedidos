@@ -57,7 +57,7 @@
             </div>
         </div>
 
-        <div class="rounded-[24px] border border-slate-200/70 bg-white p-4 shadow-sm sm:p-5">
+        <div class="rounded-[20px] border border-slate-200/70 bg-white p-4 shadow-sm sm:p-5">
             <div class="flex flex-wrap gap-2">
                 @foreach ($statusFilters as $statusValue => $label)
                     @php
@@ -85,7 +85,6 @@
                 @endphp
 
                 <article class="overflow-hidden rounded-[28px] border border-slate-200/80 bg-white shadow-card transition hover:-translate-y-0.5 hover:shadow-raised {{ $isPending ? 'ring-1 ring-amber-100' : '' }}">
-                    <div class="h-1 {{ $isPending ? 'bg-amber-500' : 'bg-gradient-to-r from-brand-primary to-emerald-500' }}"></div>
 
                     <div class="p-5 sm:p-6">
                         <div class="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
@@ -142,7 +141,7 @@
                                 @endif
 
                                 <div class="grid gap-3 sm:grid-cols-2">
-                                    <div class="rounded-2xl border border-slate-200/80 border-l-4 border-l-brand-primary bg-white p-4">
+                                    <div class="rounded-2xl border border-slate-200/80 bg-white p-4">
                                         <div class="flex items-center justify-between gap-3">
                                             <div class="text-sm font-semibold text-brand-navy">Reconocimiento de productos</div>
                                             @if ($hasRecognizedProducts)
@@ -164,7 +163,7 @@
                                         </p>
                                     </div>
 
-                                    <div class="rounded-2xl border border-slate-200/80 border-l-4 border-l-slate-300 bg-white p-4">
+                                    <div class="rounded-2xl border border-slate-200/80 bg-white p-4">
                                         <div class="text-sm font-semibold text-brand-navy">Mensaje original</div>
                                         <p class="mt-2 text-sm leading-6 text-slate-600">{{ $rawPreview }}</p>
                                     </div>
@@ -192,7 +191,7 @@
             @endforelse
         </div>
 
-        <div class="rounded-[24px] border border-slate-200/70 bg-white p-4 shadow-sm sm:p-5">
+        <div class="rounded-[20px] border border-slate-200/70 bg-white p-4 shadow-sm sm:p-5">
             {{ $orders->links() }}
         </div>
     </div>

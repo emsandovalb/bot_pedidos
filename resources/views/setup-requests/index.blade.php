@@ -5,7 +5,7 @@
             $statusClasses = $statusClasses ?? [];
         @endphp
 
-        <section class="overflow-hidden rounded-[2rem] border border-slate-200/70 surface-hero-amber shadow-sm">
+        <section class="overflow-hidden rounded-[20px] border border-slate-200/70 surface-hero-amber shadow-sm">
             <div class="grid gap-6 px-6 py-7 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
                 <div class="space-y-4">
                     <div class="inline-flex items-center rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 ring-1 ring-inset ring-amber-100">
@@ -57,7 +57,7 @@
             @endforeach
         </section>
 
-        <section class="rounded-[2rem] border border-slate-200/70 bg-white p-6 shadow-sm">
+        <section class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
             <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div>
                     <h2 class="text-lg font-semibold text-brand-navy">Solicitudes</h2>
@@ -70,7 +70,7 @@
                 @endcan
             </div>
 
-            <div class="mt-6 overflow-hidden rounded-[1.75rem] border border-slate-200/70">
+            <div class="mt-6 overflow-hidden rounded-[20px] border border-slate-200/70">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
                         <thead class="bg-slate-50 text-xs uppercase tracking-[0.16em] text-slate-500">

@@ -18,7 +18,7 @@
             </div>
         @endif
 
-        <section class="overflow-hidden rounded-[2rem] border border-slate-200/70 surface-hero-sky shadow-sm">
+        <section class="overflow-hidden rounded-[20px] border border-slate-200/70 surface-hero-sky shadow-sm">
             <div class="grid gap-6 px-6 py-8 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
                 <div class="space-y-5">
                     <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary ring-1 ring-inset ring-blue-100">
@@ -75,7 +75,7 @@
             @csrf
 
             <div class="space-y-6">
-                <section class="rounded-[2rem] border border-slate-200/70 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-4">
                         <div>
                             <h2 class="text-lg font-semibold text-brand-navy">Application</h2>
@@ -100,7 +100,7 @@
                     </div>
                 </section>
 
-                <section class="rounded-[2rem] border border-slate-200/70 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                     <div>
                         <h2 class="text-lg font-semibold text-brand-navy">Business</h2>
                         <p class="mt-1 text-sm text-slate-500">Keep the business identity attached to this WhatsApp channel.</p>
@@ -139,7 +139,7 @@
                     </div>
                 </section>
 
-                <section class="rounded-[2rem] border border-slate-200/70 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                     <div>
                         <h2 class="text-lg font-semibold text-brand-navy">API</h2>
                         <p class="mt-1 text-sm text-slate-500">Version and token values are stored encrypted when applicable.</p>
@@ -173,7 +173,7 @@
             </div>
 
             <aside class="space-y-6">
-                <section class="rounded-[2rem] border border-slate-200/70 surface-tint-green p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/70 surface-tint-green p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <div>
                             <h2 class="text-lg font-semibold text-brand-navy">Validation</h2>
@@ -218,7 +218,7 @@
                     @endif
                 </section>
 
-                <section class="rounded-[2rem] border border-slate-200/70 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <div>
                             <h2 class="text-lg font-semibold text-brand-navy">Security</h2>
@@ -243,7 +243,7 @@
                     </div>
                 </section>
 
-                <section class="rounded-[2rem] border border-slate-200/70 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <div>
                             <h2 class="text-lg font-semibold text-brand-navy">Actions</h2>
