@@ -233,7 +233,7 @@
                                     <span class="ml-2 text-xs font-medium text-amber-600">(parcial: falta precio en algún producto)</span>
                                 @endif
                             @else
-                                <span class="text-slate-400">Sin precio en el catálogo</span>
+                                <span class="text-slate-500">Sin precio en el catálogo</span>
                             @endif
                         </span>
                     </div>

@@ -27,10 +27,10 @@ class ChannelProviderLabels
     public function providerDescription(string $provider): string
     {
         return match ($provider) {
-            'telegram' => 'Telegram is live and exposes the real lifecycle surface.',
-            'whatsapp' => 'WhatsApp is locally configured and waiting for Meta verification.',
-            'instagram' => 'Coming soon. The provider shell is ready, but Meta integration is not.',
-            default => 'Proveedor sin descripcion registrada.',
+            'telegram' => 'Telegram ya recibe pedidos de verdad.',
+            'whatsapp' => 'WhatsApp está configurado aquí y espera la verificación de Meta.',
+            'instagram' => 'Próximamente. El canal está preparado, pero falta la integración con Meta.',
+            default => 'Canal sin descripción registrada.',
         };
     }
 
@@ -40,10 +40,10 @@ class ChannelProviderLabels
             'label' => $this->providerLabel($provider),
             'status' => $this->providerStatusLabel($status),
             'description' => match ($provider) {
-                'telegram' => 'Telegram runs on the real messaging provider lifecycle.',
-                'whatsapp' => 'WhatsApp now exposes local readiness and keeps Meta verification as the next step.',
-                'instagram' => 'Instagram is reserved as a future provider in the same lifecycle.',
-                default => 'Lifecycle surface available for this provider.',
+                'telegram' => 'Telegram está conectado y recibe mensajes.',
+                'whatsapp' => 'WhatsApp está listo de este lado; el siguiente paso es la verificación de Meta.',
+                'instagram' => 'Instagram se sumará más adelante y funcionará igual que los demás canales.',
+                default => 'Este canal se maneja igual que los demás.',
             },
         ];
     }

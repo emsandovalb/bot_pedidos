@@ -36,13 +36,13 @@
                     <div class="flex items-center justify-between gap-2">
                         <div>
                             <b class="font-display text-lg font-extrabold tracking-tight">Pedido #29</b>
-                            <span class="block text-xs font-semibold text-[#6d7f98]">Cliente Auditoría · Central Branch</span>
+                            <span class="block text-xs font-semibold text-[#5b6b82]">Cliente Auditoría · Central Branch</span>
                         </div>
                         <span class="whitespace-nowrap rounded-full bg-[#fff3e6] px-2.5 py-0.5 text-[0.7rem] font-bold text-[#b45309]">Por revisar</span>
                     </div>
                     <div class="flex justify-between border-t border-[#e6ecf3] pt-2 text-sm text-[#56677b]"><span>Martillo 903</span><b class="text-[#0c1d3c]">× 2</b></div>
                     <div class="flex justify-between border-t border-[#e6ecf3] pt-2 text-sm text-[#56677b]"><span>Saco de cemento</span><b class="text-[#0c1d3c]">× 3</b></div>
-                    <div class="flex items-center justify-between text-xs font-semibold text-[#6d7f98]">
+                    <div class="flex items-center justify-between text-xs font-semibold text-[#5b6b82]">
                         <span>Detectado en 2 s</span>
                         <span class="text-[#16804a]">✓ Listo para confirmar</span>
                     </div>

@@ -19,15 +19,15 @@
 
                     <div class="grid gap-3 sm:grid-cols-3">
                         <div class="rounded-3xl border border-white/80 bg-white/85 px-4 py-3 shadow-sm backdrop-blur">
-                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Provider</div>
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Provider</div>
                             <div class="mt-1 text-lg font-semibold text-brand-navy" x-text="providerLabel()"></div>
                         </div>
                         <div class="rounded-3xl border border-white/80 bg-white/85 px-4 py-3 shadow-sm backdrop-blur">
-                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Phone Number ID</div>
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Phone Number ID</div>
                             <div class="mt-1 text-lg font-semibold text-brand-navy">{{ $connection->provider_phone_number_id }}</div>
                         </div>
                         <div class="rounded-3xl border border-white/80 bg-white/85 px-4 py-3 shadow-sm backdrop-blur">
-                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Mode</div>
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Mode</div>
                             <div class="mt-1 text-lg font-semibold text-brand-navy">Local / Debug</div>
                         </div>
                     </div>
@@ -55,62 +55,62 @@
 
                         <div class="grid gap-3 sm:grid-cols-2 xl:w-[640px] xl:grid-cols-3">
                             <div class="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
-                                <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Orders</div>
+                                <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Orders</div>
                                 <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $result['orders_created'] ?? $result['generated_orders'] ?? $result['processed_count'] ?? 0 }}</div>
                             </div>
                             <div class="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
-                                <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Customers</div>
+                                <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Customers</div>
                                 <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $result['customers_created'] ?? $result['generated_customers'] ?? 0 }}</div>
                             </div>
                             <div class="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
-                                <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">WhatsApp</div>
+                                <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">WhatsApp</div>
                                 <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $result['whatsapp_orders'] ?? $result['whatsapp_count'] ?? 0 }}</div>
                             </div>
                             <div class="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
-                                <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Telegram</div>
+                                <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Telegram</div>
                                 <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $result['telegram_orders'] ?? $result['telegram_count'] ?? 0 }}</div>
                             </div>
                             <div class="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
-                                <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Duplicates</div>
+                                <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Duplicates</div>
                                 <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $result['duplicate_orders'] ?? $result['duplicate_count'] ?? $result['ignored_count'] ?? 0 }}</div>
                             </div>
                             <div class="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
-                                <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">VIP / recurrent</div>
+                                <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">VIP / recurrent</div>
                                 <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $result['vip_customers'] ?? $result['vip_count'] ?? 0 }}</div>
                             </div>
                         </div>
                         @if (! empty($result['metrics']) && is_array($result['metrics']))
                             <div class="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                                 <div class="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
-                                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Customers</div>
+                                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Customers</div>
                                     <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $result['metrics']['customers'] ?? 0 }}</div>
                                 </div>
                                 <div class="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
-                                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Delivery / Pickup</div>
+                                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Delivery / Pickup</div>
                                     <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ ($result['metrics']['delivery'] ?? 0) }} / {{ ($result['metrics']['pickup'] ?? 0) }}</div>
                                 </div>
                                 <div class="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
-                                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Today / Tomorrow</div>
+                                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Today / Tomorrow</div>
                                     <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ ($result['metrics']['today'] ?? 0) }} / {{ ($result['metrics']['tomorrow'] ?? 0) }}</div>
                                 </div>
                                 <div class="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
-                                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Urgent / Duplicates</div>
+                                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Urgent / Duplicates</div>
                                     <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ ($result['metrics']['urgent'] ?? 0) }} / {{ ($result['metrics']['duplicates'] ?? 0) }}</div>
                                 </div>
                                 <div class="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
-                                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Avg parser confidence</div>
+                                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Avg parser confidence</div>
                                     <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $result['metrics']['average_parser_confidence'] !== null ? number_format((float) $result['metrics']['average_parser_confidence'], 2) : '—' }}</div>
                                 </div>
                                 <div class="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
-                                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Avg priority score</div>
+                                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Avg priority score</div>
                                     <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $result['metrics']['average_priority_score'] !== null ? number_format((float) $result['metrics']['average_priority_score'], 2) : '—' }}</div>
                                 </div>
                                 <div class="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
-                                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Avg SLA</div>
+                                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Avg SLA</div>
                                     <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $result['metrics']['average_sla'] !== null ? number_format((float) $result['metrics']['average_sla'], 2) : '—' }}</div>
                                 </div>
                                 <div class="rounded-2xl bg-white/80 px-4 py-3 shadow-sm">
-                                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Execution time</div>
+                                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Execution time</div>
                                     <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $result['execution_ms'] ?? 0 }} ms</div>
                                 </div>
                             </div>
@@ -267,19 +267,19 @@
 
                                 <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2">
                                     <div class="rounded-2xl bg-white px-4 py-3">
-                                        <dt class="text-xs uppercase tracking-[0.18em] text-slate-400">Customers</dt>
+                                        <dt class="text-xs uppercase tracking-[0.18em] text-slate-500">Customers</dt>
                                         <dd class="mt-1 font-semibold text-brand-navy">{{ $scenario['customers'] }}</dd>
                                     </div>
                                     <div class="rounded-2xl bg-white px-4 py-3">
-                                        <dt class="text-xs uppercase tracking-[0.18em] text-slate-400">Orders</dt>
+                                        <dt class="text-xs uppercase tracking-[0.18em] text-slate-500">Orders</dt>
                                         <dd class="mt-1 font-semibold text-brand-navy">{{ $scenario['orders'] }}</dd>
                                     </div>
                                     <div class="rounded-2xl bg-white px-4 py-3">
-                                        <dt class="text-xs uppercase tracking-[0.18em] text-slate-400">WhatsApp</dt>
+                                        <dt class="text-xs uppercase tracking-[0.18em] text-slate-500">WhatsApp</dt>
                                         <dd class="mt-1 font-semibold text-brand-navy">{{ $scenario['provider_mix']['whatsapp'] ?? 0 }}</dd>
                                     </div>
                                     <div class="rounded-2xl bg-white px-4 py-3">
-                                        <dt class="text-xs uppercase tracking-[0.18em] text-slate-400">Telegram</dt>
+                                        <dt class="text-xs uppercase tracking-[0.18em] text-slate-500">Telegram</dt>
                                         <dd class="mt-1 font-semibold text-brand-navy">{{ $scenario['provider_mix']['telegram'] ?? 0 }}</dd>
                                     </div>
                                 </dl>
@@ -444,25 +444,25 @@
 
                                 <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2">
                                     <div class="rounded-2xl bg-white px-4 py-3">
-                                        <dt class="text-xs uppercase tracking-[0.18em] text-slate-400">Customers</dt>
+                                        <dt class="text-xs uppercase tracking-[0.18em] text-slate-500">Customers</dt>
                                         <dd class="mt-1 font-semibold text-brand-navy">{{ $scenario['customers'] }}</dd>
                                     </div>
                                     <div class="rounded-2xl bg-white px-4 py-3">
-                                        <dt class="text-xs uppercase tracking-[0.18em] text-slate-400">Orders</dt>
+                                        <dt class="text-xs uppercase tracking-[0.18em] text-slate-500">Orders</dt>
                                         <dd class="mt-1 font-semibold text-brand-navy">{{ $scenario['orders'] }}</dd>
                                     </div>
                                     <div class="rounded-2xl bg-white px-4 py-3">
-                                        <dt class="text-xs uppercase tracking-[0.18em] text-slate-400">VIP</dt>
+                                        <dt class="text-xs uppercase tracking-[0.18em] text-slate-500">VIP</dt>
                                         <dd class="mt-1 font-semibold text-brand-navy">{{ $scenario['vip'] }}</dd>
                                     </div>
                                     <div class="rounded-2xl bg-white px-4 py-3">
-                                        <dt class="text-xs uppercase tracking-[0.18em] text-slate-400">Duplicates</dt>
+                                        <dt class="text-xs uppercase tracking-[0.18em] text-slate-500">Duplicates</dt>
                                         <dd class="mt-1 font-semibold text-brand-navy">{{ $scenario['duplicates'] }}</dd>
                                     </div>
                                 </dl>
 
                                 <div class="mt-4 rounded-2xl bg-white px-4 py-3 text-sm text-slate-600">
-                                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Channels</div>
+                                    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Channels</div>
                                     <div class="mt-1">{{ implode(' / ', array_map(fn ($provider, $count) => ucfirst($provider) . ' ' . $count, array_keys($scenario['provider_mix'] ?? []), array_values($scenario['provider_mix'] ?? []))) }}</div>
                                 </div>
 
@@ -590,27 +590,27 @@
                     <h2 class="text-xl font-semibold text-brand-navy">Metrics</h2>
                     <div class="mt-5 grid gap-4 sm:grid-cols-2">
                         <div class="rounded-2xl bg-slate-50 px-4 py-3">
-                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Generated customers</div>
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Generated customers</div>
                             <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $metrics['generated_customers'] ?? 0 }}</div>
                         </div>
                         <div class="rounded-2xl bg-slate-50 px-4 py-3">
-                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Generated orders</div>
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Generated orders</div>
                             <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $metrics['generated_orders'] ?? 0 }}</div>
                         </div>
                         <div class="rounded-2xl bg-slate-50 px-4 py-3">
-                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">WhatsApp</div>
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">WhatsApp</div>
                             <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $metrics['whatsapp'] ?? 0 }}</div>
                         </div>
                         <div class="rounded-2xl bg-slate-50 px-4 py-3">
-                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Telegram</div>
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Telegram</div>
                             <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $metrics['telegram'] ?? 0 }}</div>
                         </div>
                         <div class="rounded-2xl bg-slate-50 px-4 py-3">
-                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">VIP</div>
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">VIP</div>
                             <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $metrics['vip'] ?? 0 }}</div>
                         </div>
                         <div class="rounded-2xl bg-slate-50 px-4 py-3">
-                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Duplicates</div>
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Duplicates</div>
                             <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $metrics['duplicates'] ?? 0 }}</div>
                         </div>
                     </div>
@@ -620,51 +620,51 @@
                     <h2 class="text-xl font-semibold text-brand-navy">Business Metrics</h2>
                     <div class="mt-5 grid gap-4 sm:grid-cols-2">
                         <div class="rounded-2xl bg-slate-50 px-4 py-3">
-                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Customers</div>
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Customers</div>
                             <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $businessMetrics['customers'] ?? 0 }}</div>
                         </div>
                         <div class="rounded-2xl bg-slate-50 px-4 py-3">
-                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Orders</div>
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Orders</div>
                             <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $businessMetrics['orders'] ?? 0 }}</div>
                         </div>
                         <div class="rounded-2xl bg-slate-50 px-4 py-3">
-                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Delivery</div>
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Delivery</div>
                             <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $businessMetrics['delivery'] ?? 0 }}</div>
                         </div>
                         <div class="rounded-2xl bg-slate-50 px-4 py-3">
-                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Pickup</div>
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Pickup</div>
                             <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $businessMetrics['pickup'] ?? 0 }}</div>
                         </div>
                         <div class="rounded-2xl bg-slate-50 px-4 py-3">
-                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Today</div>
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Today</div>
                             <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $businessMetrics['today'] ?? 0 }}</div>
                         </div>
                         <div class="rounded-2xl bg-slate-50 px-4 py-3">
-                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Tomorrow</div>
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Tomorrow</div>
                             <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $businessMetrics['tomorrow'] ?? 0 }}</div>
                         </div>
                         <div class="rounded-2xl bg-slate-50 px-4 py-3">
-                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Urgent</div>
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Urgent</div>
                             <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $businessMetrics['urgent'] ?? 0 }}</div>
                         </div>
                         <div class="rounded-2xl bg-slate-50 px-4 py-3">
-                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">VIP</div>
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">VIP</div>
                             <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $businessMetrics['vip'] ?? 0 }}</div>
                         </div>
                         <div class="rounded-2xl bg-slate-50 px-4 py-3">
-                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Duplicates</div>
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Duplicates</div>
                             <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $businessMetrics['duplicates'] ?? 0 }}</div>
                         </div>
                         <div class="rounded-2xl bg-slate-50 px-4 py-3">
-                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Avg parser confidence</div>
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Avg parser confidence</div>
                             <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $businessMetrics['average_parser_confidence'] !== null ? number_format((float) $businessMetrics['average_parser_confidence'], 2) : '—' }}</div>
                         </div>
                         <div class="rounded-2xl bg-slate-50 px-4 py-3">
-                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Avg priority score</div>
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Avg priority score</div>
                             <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $businessMetrics['average_priority_score'] !== null ? number_format((float) $businessMetrics['average_priority_score'], 2) : '—' }}</div>
                         </div>
                         <div class="rounded-2xl bg-slate-50 px-4 py-3">
-                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Avg SLA</div>
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Avg SLA</div>
                             <div class="mt-1 text-2xl font-semibold text-brand-navy">{{ $businessMetrics['average_sla'] !== null ? number_format((float) $businessMetrics['average_sla'], 2) : '—' }}</div>
                         </div>
                     </div>
@@ -683,19 +683,19 @@
                     <h2 class="text-xl font-semibold text-brand-navy">Connection</h2>
                     <dl class="mt-5 grid gap-4 sm:grid-cols-2">
                         <div class="rounded-2xl bg-slate-50 px-4 py-3">
-                            <dt class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Status</dt>
+                            <dt class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Status</dt>
                             <dd class="mt-1 text-sm font-medium text-brand-navy">{{ $connection->status }}</dd>
                         </div>
                         <div class="rounded-2xl bg-slate-50 px-4 py-3">
-                            <dt class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Provider status</dt>
+                            <dt class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Provider status</dt>
                             <dd class="mt-1 text-sm font-medium text-brand-navy">{{ $connection->provider_status ?? 'draft' }}</dd>
                         </div>
                         <div class="rounded-2xl bg-slate-50 px-4 py-3">
-                            <dt class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Organization</dt>
+                            <dt class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Organization</dt>
                             <dd class="mt-1 text-sm font-medium text-brand-navy">{{ $connection->organization_id }}</dd>
                         </div>
                         <div class="rounded-2xl bg-slate-50 px-4 py-3">
-                            <dt class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Channel</dt>
+                            <dt class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Channel</dt>
                             <dd class="mt-1 text-sm font-medium text-brand-navy">{{ $connection->channel }}</dd>
                         </div>
                     </dl>

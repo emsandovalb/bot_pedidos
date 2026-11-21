@@ -84,7 +84,7 @@
                             </div>
                         </div>
                         <div class="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-right">
-                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Estado</div>
+                            <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Estado</div>
                             <div class="mt-1 text-sm font-semibold text-brand-navy">{{ $card['health_label'] }}</div>
                             <div class="mt-1 inline-flex rounded-full px-2 py-0.5 text-[0.7rem] font-semibold uppercase tracking-[0.12em] {{ $badgeBg }}">
                                 {{ \Illuminate\Support\Str::headline($card['webhook_status']) }}

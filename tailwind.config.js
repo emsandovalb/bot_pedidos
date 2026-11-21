@@ -60,6 +60,12 @@ const themed = {
     violet: violetDark,
 };
 
+// En claro, el gris de textos secundarios (slate-500) apenas no llegaba a 4.5:1 sobre slate-50: un poco más oscuro.
+const lightOverrides = {
+    'slate-500': '#5b6779',
+    'gray-500': '#5b6779',
+};
+
 const channel = (name) => `rgb(var(--tw-c-${name}) / <alpha-value>)`;
 
 const themedColors = Object.fromEntries(
@@ -91,7 +97,7 @@ const themeVariables = plugin(({ addBase }) => {
 
     for (const [family, darkShades] of Object.entries(themed)) {
         for (const shade of shades) {
-            light[`--tw-c-${family}-${shade}`] = hexToChannels(defaultColors[family][shade]);
+            light[`--tw-c-${family}-${shade}`] = hexToChannels(lightOverrides[`${family}-${shade}`] ?? defaultColors[family][shade]);
 
             if (darkShades[shade]) {
                 dark[`--tw-c-${family}-${shade}`] = hexToChannels(darkShades[shade]);

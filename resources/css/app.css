@@ -38,15 +38,16 @@
 
         /* Benditio: su verde, el del logo. */
         --benditio: #00a262;
+        --benditio-text: #0b7a4d; /* el verde de la marca como texto: más oscuro para leerse sobre fondo claro */
 
         /* Textos */
         --text: #0c1d3c;
         --text-2: #33455b;
         --text-3: #56677b;
-        --text-muted: #6d7f98;
+        --text-muted: #5b6b82; /* OriA usa #6d7f98; aquí más oscuro para llegar a 4.5:1 sobre --page */
         --text-subtle: #9aa7b8;
         --text-inverse: #ffffff;
-        --text-brand: #2861f4;
+        --text-brand: #1f52d8; /* azul de marca como texto: un paso más oscuro que --brand */
 
         /* Bordes */
         --line: #e6ecf3;
@@ -79,13 +80,14 @@
         --warning-tint: #46321d;
         --danger-tint: #421f1c;
         --benditio: #3fd394;
+        --benditio-text: #3fd394;
 
         --text: #d3dae7;
         --text-2: #bfccdb;
         --text-3: #b3bdca;
         --text-muted: #a5b0c0;
         --text-subtle: #919fb1;
-        --text-brand: #638df8;
+        --text-brand: #7a9cf9; /* un poco más claro que el de OriA para llegar a 4.5:1 sobre fondos azulados */
 
         --line: #324a67;
         --line-strong: #354d6d;
@@ -157,7 +159,7 @@
     }
 
     .brand-btn-primary {
-        @apply inline-flex items-center justify-center rounded-[9px] px-4 py-2.5 text-sm font-bold text-white transition;
+        @apply inline-flex items-center justify-center whitespace-nowrap rounded-[9px] px-4 py-2.5 text-sm font-bold text-white transition;
         background: var(--brand);
         box-shadow: 0 12px 24px -16px rgba(40, 97, 244, 0.72);
     }
@@ -167,7 +169,7 @@
     }
 
     .brand-btn-secondary {
-        @apply inline-flex items-center justify-center rounded-[9px] border px-4 py-2.5 text-sm font-bold transition;
+        @apply inline-flex items-center justify-center whitespace-nowrap rounded-[9px] border px-4 py-2.5 text-sm font-bold transition;
         border-color: var(--line-strong);
         background: var(--card);
         color: var(--text-3);
@@ -180,7 +182,7 @@
 
     .brand-btn-danger {
         @apply inline-flex items-center justify-center rounded-[9px] px-4 py-2.5 text-sm font-bold text-white transition;
-        background: var(--danger);
+        background: #d92d20;
         box-shadow: 0 12px 24px -16px rgba(240, 68, 56, 0.7);
     }
 
@@ -326,7 +328,7 @@
     */
     .page-eyebrow {
         @apply text-xs font-extrabold uppercase tracking-[0.16em];
-        color: var(--benditio);
+        color: var(--benditio-text);
     }
 
     .page-title {
@@ -466,10 +468,10 @@
     background-image: var(--hero-gradient);
 }
 
-/* En oscuro, el azul de marca como texto usa el tono claro de OriA (--text-brand) para que se lea sobre fondo oscuro. */
-[data-theme="dark"] .text-brand-primary,
-[data-theme="dark"] .hover\:text-brand-primary:hover,
-[data-theme="dark"] .group:hover .group-hover\:text-brand-primary {
+/* El azul de marca como texto usa --text-brand: más oscuro en claro y más claro en oscuro, para que siempre se lea. */
+.text-brand-primary,
+.hover\:text-brand-primary:hover,
+.group:hover .group-hover\:text-brand-primary {
     color: var(--text-brand);
 }
 
