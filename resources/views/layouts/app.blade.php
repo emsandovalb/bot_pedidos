@@ -7,8 +7,7 @@
 
         <title>{{ config('app.name', 'Benditio') }}</title>
 
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=poppins:400,500,600,700,800&display=swap" rel="stylesheet" />
+        @include('layouts.partials.theme-head')
 
         @php
             $hasFrontendAssets = file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot'));
@@ -19,7 +18,7 @@
     </head>
     <body class="font-sans antialiased text-slate-900">
         <div x-data="{ sidebarOpen: false }" class="brand-shell min-h-screen">
-            <div class="absolute inset-x-0 top-0 h-64 bg-[radial-gradient(circle_at_top,rgba(20,110,219,0.16),transparent_68%)]"></div>
+            <div class="absolute inset-x-0 top-0 h-64 bg-[radial-gradient(circle_at_top,rgba(40,97,244,0.12),transparent_68%)] dark:hidden"></div>
             <div class="relative flex min-h-screen">
                 <div
                     x-show="sidebarOpen"
@@ -253,6 +252,24 @@
                                 </div>
                             </div>
 
+                            <div class="flex items-center gap-3">
+                                <button
+                                    type="button"
+                                    class="theme-toggle"
+                                    x-data="themeToggle"
+                                    @click="toggle()"
+                                    :aria-label="label"
+                                    :title="label"
+                                    aria-label="Cambiar entre modo claro y oscuro"
+                                >
+                                    <svg x-show="!dark" viewBox="0 0 24 24" fill="none" class="h-5 w-5" aria-hidden="true">
+                                        <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <svg x-show="dark" x-cloak viewBox="0 0 24 24" fill="none" class="h-5 w-5" aria-hidden="true">
+                                        <path d="M12 4V2m0 20v-2m8-8h2M2 12h2m13.7-5.7 1.4-1.4M4.9 19.1l1.4-1.4m0-11.4L4.9 4.9m14.2 14.2-1.4-1.4M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </button>
+
                             <div class="hidden items-center gap-3 sm:flex">
                                 <div class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 shadow-sm">
                                     {{ now()->format('M d, Y') }}
@@ -260,6 +277,7 @@
                                 <a href="{{ route('operations.index') }}" class="brand-btn-primary">
                                     Pedidos pendientes
                                 </a>
+                            </div>
                             </div>
                         </div>
                     </header>

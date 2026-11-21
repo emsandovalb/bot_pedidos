@@ -7,8 +7,7 @@
 
         <title>{{ config('app.name', 'Benditio') }}</title>
 
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=poppins:400,500,600,700,800&display=swap" rel="stylesheet" />
+        @include('layouts.partials.theme-head')
 
         @php($hasFrontendAssets = file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @if ($hasFrontendAssets)
