@@ -38,10 +38,14 @@ class OrderController extends Controller
         Order::STATUS_REJECTED,
     ];
 
+    private const ORDER_CHANNELS = ['whatsapp', 'telegram', 'instagram'];
+
     public function index(Request $request): View
     {
         $filters = $request->validate([
             'status' => ['nullable', Rule::in(self::ORDER_STATUSES)],
+            'channel' => ['nullable', Rule::in(self::ORDER_CHANNELS)],
+            'q' => ['nullable', 'string', 'max:100'],
         ]);
 
         $query = $this->scopedQuery()
@@ -51,6 +55,42 @@ class OrderController extends Controller
             ])
             ->orderByDesc('created_at');
 
+        if (! empty($filters['channel'])) {
+            $query->where('source_channel', $filters['channel']);
+        }
+
+        // A customer's name or phone, or an order number ("#31" or "31").
+        $search = trim((string) ($filters['q'] ?? ''));
+        if ($search !== '') {
+            $orderNumber = ltrim($search, '#');
+            $digits = preg_replace('/\D+/', '', $search) ?? '';
+            $query->where(function ($query) use ($search, $digits, $orderNumber): void {
+                $query->whereHas('customer', function ($customer) use ($search, $digits): void {
+                    $customer->where('name', 'like', '%'.$search.'%');
+
+                    // Only a search with digits looks at phones (an empty pattern would match them all).
+                    if (strlen($digits) >= 4) {
+                        $customer->orWhere('phone', 'like', '%'.$digits.'%');
+                    }
+                });
+
+                if (ctype_digit($orderNumber)) {
+                    $query->orWhere('id', (int) $orderNumber);
+                }
+            });
+        }
+
+        // Count per status for the filter tabs, with the channel and search already chosen.
+        $statusCounts = (clone $query)
+            ->toBase()
+            ->reorder()
+            ->select('status')
+            ->selectRaw('count(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status')
+            ->map(fn ($total): int => (int) $total)
+            ->all();
+
         if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
@@ -59,6 +99,8 @@ class OrderController extends Controller
             'orders' => $query->paginate(25)->withQueryString(),
             'filters' => $filters,
             'statusOptions' => self::ORDER_STATUSES,
+            'channelOptions' => self::ORDER_CHANNELS,
+            'statusCounts' => $statusCounts,
         ]);
     }
 
@@ -621,14 +663,14 @@ class OrderController extends Controller
     private function statusTone(string $status): string
     {
         return match ($status) {
-            Order::STATUS_PENDING_REVIEW => 'bg-amber-50 text-amber-800 ring-1 ring-amber-100',
-            Order::STATUS_CONFIRMED => 'bg-blue-50 text-blue-800 ring-1 ring-blue-100',
-            Order::STATUS_PREPARING => 'bg-violet-50 text-violet-800 ring-1 ring-violet-100',
-            Order::STATUS_READY_FOR_DISPATCH => 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100',
-            Order::STATUS_DISPATCHED => 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
-            Order::STATUS_CANCELLED => 'bg-red-50 text-red-800 ring-1 ring-red-100',
-            Order::STATUS_REJECTED => 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
-            default => 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
+            Order::STATUS_PENDING_REVIEW => 'bg-amber-50 text-amber-800',
+            Order::STATUS_CONFIRMED => 'bg-blue-50 text-blue-800',
+            Order::STATUS_PREPARING => 'bg-violet-50 text-violet-800',
+            Order::STATUS_READY_FOR_DISPATCH => 'bg-emerald-50 text-emerald-800',
+            Order::STATUS_DISPATCHED => 'bg-slate-100 text-slate-700',
+            Order::STATUS_CANCELLED => 'bg-red-50 text-red-800',
+            Order::STATUS_REJECTED => 'bg-slate-100 text-slate-700',
+            default => 'bg-slate-100 text-slate-700',
         };
     }
 }

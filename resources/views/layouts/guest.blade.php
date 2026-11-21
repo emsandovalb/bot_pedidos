@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" style="min-height:100%;background:#08162b;">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,17 +7,27 @@
 
         <title>{{ config('app.name', 'Benditio') }}</title>
 
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=poppins:400,500,600,700,800&display=swap" rel="stylesheet" />
+        @include('layouts.partials.theme-head')
 
         @php($hasFrontendAssets = file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @if ($hasFrontendAssets)
             @vite(['resources/css/app.css', 'resources/js/app.js'])
         @endif
     </head>
-    <body class="overflow-x-hidden font-sans antialiased text-slate-900" style="margin:0;min-height:100vh;background:#08162b;">
-        <main class="min-h-screen overflow-x-hidden bg-[linear-gradient(180deg,#f8fafc_0%,#eef4ff_55%,#f8fafc_100%)]" style="min-height:100vh;background:#08162b;">
+    <body class="min-h-screen overflow-x-hidden font-sans antialiased text-slate-900">
+        @isset($fullPage)
+            {{-- La página arma su propia pantalla completa (inicio de sesión). --}}
             {{ $slot }}
-        </main>
+        @else
+            {{-- Recuperar contraseña, verificar correo, etc.: una tarjeta centrada con el logo arriba. --}}
+            <main class="surface-page flex min-h-screen flex-col items-center justify-center px-4 py-10">
+                <a href="{{ url('/') }}" class="mb-6">
+                    <x-application-logo class="h-14 w-auto" />
+                </a>
+                <div class="brand-card w-full max-w-md p-6 sm:p-8">
+                    {{ $slot }}
+                </div>
+            </main>
+        @endisset
     </body>
 </html>

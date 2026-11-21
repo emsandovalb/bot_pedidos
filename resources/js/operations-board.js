@@ -76,14 +76,14 @@ function timeWindowLabel(order) {
 
     const match = String(order.commitment_time ?? '').match(/^(\d{2}):/);
     if (!match) {
-        return 'Tomorrow';
+        return 'Mañana';
     }
 
     const hour = Number(match[1]);
-    if (hour < 10) return 'Morning';
-    if (hour < 13) return 'Afternoon';
-    if (hour < 18) return 'Evening';
-    return 'Tomorrow';
+    if (hour < 10) return 'Temprano';
+    if (hour < 13) return 'Mañana';
+    if (hour < 18) return 'Tarde';
+    return 'Noche';
 }
 
 function isUrgentOrder(order) {
@@ -135,8 +135,8 @@ function buildChannelPill(order) {
         label: CHANNEL_LABELS[key] ?? (order.channel ?? 'Sin canal'),
         glyph: key === 'telegram' ? 'TG' : (key === 'whatsapp' ? 'WA' : 'CH'),
         tone: key === 'telegram'
-            ? 'bg-sky-50 text-sky-800 ring-1 ring-sky-100'
-            : 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100',
+            ? 'bg-sky-50 text-sky-800'
+            : 'bg-emerald-50 text-emerald-800',
     };
 }
 
@@ -227,13 +227,25 @@ function buildItemLines(items) {
     });
 }
 
-function buildWorkflow(orderId, status, ordersBaseUrl) {
+function buildWorkflow(orderId, status, ordersBaseUrl, canConfirm = true) {
     const base = `${ordersBaseUrl}/${orderId}`;
 
     switch (status) {
         case 'pending_review':
+            // Products still to resolve: the order is reviewed on its page before it can be confirmed.
+            if (!canConfirm) {
+                return {
+                    label: 'Revisar',
+                    key: 'review',
+                    method: 'GET',
+                    url: base,
+                    style: 'primary',
+                    requires_confirmation: false,
+                };
+            }
+
             return {
-                label: 'Prepare',
+                label: 'Confirmar',
                 key: 'confirm',
                 method: 'POST',
                 url: `${base}/confirm`,
@@ -242,7 +254,7 @@ function buildWorkflow(orderId, status, ordersBaseUrl) {
             };
         case 'confirmed':
             return {
-                label: 'Prepare',
+                label: 'Preparar',
                 key: 'prepare',
                 method: 'POST',
                 url: `${base}/prepare`,
@@ -251,7 +263,7 @@ function buildWorkflow(orderId, status, ordersBaseUrl) {
             };
         case 'preparing':
             return {
-                label: 'Ready',
+                label: 'Listo',
                 key: 'ready',
                 method: 'POST',
                 url: `${base}/ready-for-dispatch`,
@@ -260,7 +272,7 @@ function buildWorkflow(orderId, status, ordersBaseUrl) {
             };
         case 'ready_for_dispatch':
             return {
-                label: 'Dispatch',
+                label: 'Despachar',
                 key: 'dispatch',
                 method: 'POST',
                 url: `${base}/dispatch`,
@@ -269,7 +281,7 @@ function buildWorkflow(orderId, status, ordersBaseUrl) {
             };
         case 'dispatched':
             return {
-                label: 'Complete',
+                label: 'Ver historial',
                 key: 'view_history',
                 method: 'GET',
                 url: base,
@@ -278,7 +290,7 @@ function buildWorkflow(orderId, status, ordersBaseUrl) {
             };
         default:
             return {
-                label: 'Cancel',
+                label: 'Cancelar',
                 key: 'cancel',
                 method: 'POST',
                 url: `${base}/cancel`,
@@ -307,13 +319,14 @@ function normalizeOrderDetails(orderDetails) {
 
 function normalizeOrder(order, ordersBaseUrl) {
     const normalizedId = Number(order?.id ?? 0);
-    const workflow = buildWorkflow(normalizedId, order?.status ?? 'pending_review', ordersBaseUrl);
+    const workflow = buildWorkflow(normalizedId, order?.status ?? 'pending_review', ordersBaseUrl, order?.can_confirm !== false);
 
         return {
             id: normalizedId,
             status: order?.status ?? 'pending_review',
+        can_confirm: order?.can_confirm !== false,
         status_label: order?.status_label ?? String(order?.status ?? 'pending review').replaceAll('_', ' '),
-        status_tone: order?.status_tone ?? 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
+        status_tone: order?.status_tone ?? 'bg-slate-100 text-slate-700',
         channel: order?.channel ?? 'Sin canal',
         channel_key: order?.channel_key ?? '',
         customer_name: order?.customer_name ?? 'Sin cliente',
@@ -392,7 +405,7 @@ function normalizeOrder(order, ordersBaseUrl) {
             phone: order?.customer_phone ?? 'Sin telefono',
             total_orders: 0,
             favorite_products: [],
-            favorite_channel: { name: 'Unknown', percentage: 0 },
+            favorite_channel: { name: 'Sin dato', percentage: 0 },
             last_order: null,
             segment: 'Inactive',
             open_notifications: 0,
@@ -416,26 +429,26 @@ function statusTerminalMessage(status) {
 
 function statusLabel(status) {
     return ({
-        pending_review: 'New',
-        confirmed: 'Confirmed',
-        preparing: 'Preparing',
-        ready_for_dispatch: 'Ready',
-        dispatched: 'Completed',
-        cancelled: 'Cancelled',
-        rejected: 'Rejected',
+        pending_review: 'Por revisar',
+        confirmed: 'Confirmado',
+        preparing: 'Preparando',
+        ready_for_dispatch: 'Listo para despacho',
+        dispatched: 'Despachado',
+        cancelled: 'Cancelado',
+        rejected: 'Rechazado',
     })[status] ?? String(status ?? '').replaceAll('_', ' ');
 }
 
 function statusTone(status) {
     return ({
-        pending_review: 'bg-amber-50 text-amber-800 ring-1 ring-amber-100',
-        confirmed: 'bg-blue-50 text-blue-800 ring-1 ring-blue-100',
-        preparing: 'bg-violet-50 text-violet-800 ring-1 ring-violet-100',
-        ready_for_dispatch: 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100',
-        dispatched: 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
-        cancelled: 'bg-red-50 text-red-800 ring-1 ring-red-100',
-        rejected: 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
-    })[status] ?? 'bg-slate-100 text-slate-700 ring-1 ring-slate-200';
+        pending_review: 'bg-amber-50 text-amber-800',
+        confirmed: 'bg-blue-50 text-blue-800',
+        preparing: 'bg-violet-50 text-violet-800',
+        ready_for_dispatch: 'bg-emerald-50 text-emerald-800',
+        dispatched: 'bg-slate-100 text-slate-700',
+        cancelled: 'bg-red-50 text-red-800',
+        rejected: 'bg-slate-100 text-slate-700',
+    })[status] ?? 'bg-slate-100 text-slate-700';
 }
 
 export function createOperationsColumn(column) {
@@ -481,9 +494,9 @@ export function createOperationsBoard(config = {}) {
         liveQueue: null,
         liveConnection: {
             state: 'live',
-            label: 'Live',
+            label: 'En vivo',
             tone: 'green',
-            description: 'Connected',
+            description: 'Conectado',
         },
         liveToast: {
             visible: false,
@@ -501,6 +514,8 @@ export function createOperationsBoard(config = {}) {
         },
         toastTimer: null,
         operatorName: config.operatorName ?? 'Carlos',
+        // A read-only user sees the board without the buttons that change an order.
+        canManage: config.canManage ?? true,
         csrfToken: document.querySelector('meta[name="csrf-token"]')?.content ?? '',
         submittingActionKey: null,
         soundMuted: localStorage.getItem('benditio.operations.live-queue.muted') === '1',
@@ -556,7 +571,13 @@ export function createOperationsBoard(config = {}) {
         },
 
         get queueSections() {
-            const sections = this.queueData.sections ?? [];
+            // Queue cards carry the order's items; the card shows them as lines ("2 x Tubos PVC").
+            const withLines = (card) => ({ ...card, item_lines: card.item_lines ?? buildItemLines(card.items ?? []) });
+            const sections = (this.queueData.sections ?? []).map((section) => ({
+                ...section,
+                ...(Array.isArray(section.cards) ? { cards: section.cards.map(withLines) } : {}),
+                ...(Array.isArray(section.groups) ? { groups: section.groups.map((group) => ({ ...group, cards: (group.cards ?? []).map(withLines) })) } : {}),
+            }));
 
             return sections.map((section) => {
                 if (section.key === 'do_now') {
@@ -613,9 +634,9 @@ export function createOperationsBoard(config = {}) {
 
         get greetingLabel() {
             const hour = this.referenceDate().getHours();
-            if (hour < 12) return 'Good Morning';
-            if (hour < 18) return 'Good Afternoon';
-            return 'Good Evening';
+            if (hour < 12) return 'Buenos días,';
+            if (hour < 18) return 'Buenas tardes,';
+            return 'Buenas noches,';
         },
 
         get todaySummary() {
@@ -635,7 +656,7 @@ export function createOperationsBoard(config = {}) {
         },
 
         formatHeaderDate(date) {
-            const label = new Intl.DateTimeFormat('en-US', {
+            const label = new Intl.DateTimeFormat('es-CR', {
                 weekday: 'long',
                 month: 'long',
                 day: 'numeric',
@@ -657,11 +678,11 @@ export function createOperationsBoard(config = {}) {
         },
 
         workflowLabel(order) {
-            return buildWorkflow(order.id, order.status, this.ordersBaseUrl).label;
+            return buildWorkflow(order.id, order.status, this.ordersBaseUrl, order.can_confirm !== false).label;
         },
 
         workflowAction(order) {
-            const action = buildWorkflow(order.id, order.status, this.ordersBaseUrl);
+            const action = buildWorkflow(order.id, order.status, this.ordersBaseUrl, order.can_confirm !== false);
             return {
                 key: action.key,
                 label: action.label,
@@ -808,9 +829,9 @@ export function createOperationsBoard(config = {}) {
 
             this.liveToast = {
                 visible: true,
-                title: 'New order received',
+                title: 'Llegó un pedido nuevo',
                 customer: order.customer_name ?? 'Sin cliente',
-                elapsed: 'A few seconds ago',
+                elapsed: 'Hace unos segundos',
             };
 
             if (this.liveToastTimer !== null) {
@@ -876,7 +897,7 @@ export function createOperationsBoard(config = {}) {
                 });
 
                 if (!response.ok) {
-                    throw new Error('Snapshot unavailable');
+                    throw new Error('No se pudo cargar el pedido');
                 }
 
                 const payload = await response.json();
@@ -891,7 +912,7 @@ export function createOperationsBoard(config = {}) {
                 this.updateSelectedOrderInOrders(normalized);
                 this.syncDraftItems();
             } catch (error) {
-                this.drawerError = 'Unable to load order details.';
+                this.drawerError = 'No se pudo cargar el detalle del pedido.';
             } finally {
                 if (requestId === this.snapshotRequestId) {
                     this.drawerLoading = false;
@@ -941,8 +962,8 @@ export function createOperationsBoard(config = {}) {
 
                 if (!response.ok) {
                     const message = response.status === 422
-                        ? 'This action is no longer available.'
-                        : payload?.message ?? 'Unable to complete the action.';
+                        ? 'Esta acción ya no está disponible.'
+                        : payload?.message ?? 'No se pudo completar la acción.';
 
                     this.showToast(message, 'error');
                     return;
@@ -953,10 +974,10 @@ export function createOperationsBoard(config = {}) {
                     this.updateSelectedOrderFromResponse(payload.order);
                 }
 
-                this.showToast(payload?.message ?? 'Order updated.', 'success');
+                this.showToast(payload?.message ?? 'Pedido actualizado.', 'success');
                 void this.liveQueue?.refresh();
             } catch (error) {
-                this.showToast('Unable to complete the action.', 'error');
+                this.showToast('No se pudo completar la acción.', 'error');
             } finally {
                 this.submittingActionKey = null;
             }
@@ -1168,20 +1189,20 @@ export function createOperationsBoard(config = {}) {
 
         agendaDeliveryLabel(order) {
             return ({
-                pickup: 'Pickup',
-                delivery: 'Delivery',
+                pickup: 'Retiro',
+                delivery: 'Entrega',
                 express: 'Express',
-                third_party: 'Third party',
-            })[String(order.delivery_method ?? '')] ?? 'No delivery';
+                third_party: 'Terceros',
+            })[String(order.delivery_method ?? '')] ?? 'Entrega por confirmar';
         },
 
         agendaPaymentLabel(order) {
             return ({
                 sinpe: 'SINPE',
-                cash: 'Cash',
-                card: 'Card',
-                transfer: 'Transfer',
-            })[String(order.payment_method ?? '')] ?? 'No payment';
+                cash: 'Efectivo',
+                card: 'Tarjeta',
+                transfer: 'Transferencia',
+            })[String(order.payment_method ?? '')] ?? 'Pago por confirmar';
         },
 
         agendaTimeWindowLabel(order) {
@@ -1196,11 +1217,11 @@ export function createOperationsBoard(config = {}) {
             const risk = String(order.risk_level ?? '');
 
             return ({
-                critical: 'SLA expired',
+                critical: 'Atrasado',
                 high: order.remaining_sla_minutes !== null && order.remaining_sla_minutes !== undefined
-                    ? `Due in ${Number(order.remaining_sla_minutes)} min`
-                    : 'High risk',
-                medium: 'Medium',
+                    ? `Vence en ${Number(order.remaining_sla_minutes)} min`
+                    : 'Riesgo alto',
+                medium: 'Medio',
                 low: 'Normal',
             })[risk] ?? 'Normal';
         },
@@ -1209,36 +1230,36 @@ export function createOperationsBoard(config = {}) {
             const risk = String(order.risk_level ?? '');
 
             return ({
-                critical: 'bg-rose-50 text-rose-800 ring-1 ring-rose-100',
-                high: 'bg-orange-50 text-orange-800 ring-1 ring-orange-100',
-                medium: 'bg-amber-50 text-amber-800 ring-1 ring-amber-100',
-                low: 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
-            })[risk] ?? 'bg-slate-100 text-slate-700 ring-1 ring-slate-200';
+                critical: 'bg-rose-50 text-rose-800',
+                high: 'bg-orange-50 text-orange-800',
+                medium: 'bg-amber-50 text-amber-800',
+                low: 'bg-slate-100 text-slate-700',
+            })[risk] ?? 'bg-slate-100 text-slate-700';
         },
 
         agendaPriorityTone(order) {
             if (String(order.risk_level ?? '') === 'critical' || String(order.risk_level ?? '') === 'high') {
-                return 'bg-amber-50 text-amber-800 ring-1 ring-amber-100';
+                return 'bg-amber-50 text-amber-800';
             }
 
             if (String(order.priority_level ?? '') === 'urgent') {
-                return 'bg-orange-50 text-orange-800 ring-1 ring-orange-100';
+                return 'bg-orange-50 text-orange-800';
             }
 
             if (String(order.priority_level ?? '') === 'low') {
-                return 'bg-slate-100 text-slate-700 ring-1 ring-slate-200';
+                return 'bg-slate-100 text-slate-700';
             }
 
-            return 'bg-blue-50 text-blue-800 ring-1 ring-blue-100';
+            return 'bg-blue-50 text-blue-800';
         },
 
         agendaPriorityLabel(order) {
             if (String(order.risk_level ?? '') === 'critical' || String(order.risk_level ?? '') === 'high') {
-                return 'Urgent';
+                return 'Urgente';
             }
 
             if (String(order.priority_level ?? '') === 'low') {
-                return 'Low';
+                return 'Baja';
             }
 
             return 'Normal';
@@ -1254,10 +1275,10 @@ export function createOperationsBoard(config = {}) {
                 this.agendaPaymentLabel(order),
                 this.agendaTimeWindowLabel(order),
                 order.vip ? 'VIP' : null,
-                order.duplicate ? 'Duplicate' : null,
+                order.duplicate ? 'Duplicado' : null,
             ];
 
-            return labels.filter((label) => label && label !== 'No delivery' && label !== 'No payment' && label !== 'Sin fecha confirmada');
+            return labels.filter((label) => label && label !== 'Entrega por confirmar' && label !== 'Pago por confirmar' && label !== 'Sin fecha confirmada');
         },
 
         cardAccentClass(order) {
@@ -1276,15 +1297,15 @@ export function createOperationsBoard(config = {}) {
 
         formatLongDate(date) {
             if (!date) {
-                return 'No date';
+                return 'Sin fecha';
             }
 
             const parsed = date instanceof Date ? date : new Date(date);
             if (Number.isNaN(parsed.getTime())) {
-                return 'No date';
+                return 'Sin fecha';
             }
 
-            return new Intl.DateTimeFormat('en-US', {
+            return new Intl.DateTimeFormat('es-CR', {
                 weekday: 'long',
                 month: 'long',
                 day: 'numeric',
@@ -1294,12 +1315,12 @@ export function createOperationsBoard(config = {}) {
 
         elapsedLabel(date) {
             if (!date) {
-                return 'No date';
+                return 'Sin fecha';
             }
 
             const parsed = date instanceof Date ? date : new Date(date);
             if (Number.isNaN(parsed.getTime())) {
-                return 'No date';
+                return 'Sin fecha';
             }
 
             const minutes = (Date.now() - parsed.getTime()) / 60000;

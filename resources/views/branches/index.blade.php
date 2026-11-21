@@ -2,9 +2,8 @@
     <div class="space-y-6">
         <div class="flex items-start justify-between gap-4">
             <div>
-                <div class="brand-badge bg-brand-primary/10 text-brand-primary">Sucursales</div>
-                <h1 class="mt-3 text-3xl font-semibold tracking-tight text-brand-navy">Sucursales</h1>
-                <p class="mt-1 text-sm text-slate-600">Sucursales visibles para tu ambito actual.</p>
+                <h1 class="page-title mt-1">Sucursales</h1>
+                <p class="page-subtitle mt-2">Sucursales visibles para tu ambito actual.</p>
             </div>
             <a href="{{ route('daily-order-closures.index') }}" class="brand-btn-secondary">
                 Cierres diarios

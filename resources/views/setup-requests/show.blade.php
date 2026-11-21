@@ -2,26 +2,24 @@
     <div class="space-y-8">
         @php
             $statusLabel = $statusLabels[$setupRequest->status] ?? $setupRequest->status;
-            $statusClass = $statusClasses[$setupRequest->status] ?? 'bg-slate-100 text-slate-700 ring-1 ring-slate-200';
+            $statusClass = $statusClasses[$setupRequest->status] ?? 'bg-slate-100 text-slate-700';
             $currentAssigneeId = old('assigned_to', $setupRequest->assigned_to);
             $currentStatus = old('status', $setupRequest->status);
         @endphp
 
-        <section class="overflow-hidden rounded-[2rem] border border-slate-200/70 bg-[linear-gradient(135deg,rgba(20,110,219,0.12),rgba(245,158,11,0.10)_46%,rgba(255,255,255,1)_84%)] shadow-sm">
-            <div class="grid gap-6 px-6 py-7 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
+        <section class="page-intro">
+            <div class="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
                 <div class="space-y-4">
-                    <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary ring-1 ring-inset ring-blue-100">
-                        Configuracion WhatsApp
-                    </div>
+                    <p class="page-eyebrow">Configuración de WhatsApp</p>
                     <div class="space-y-3">
-                        <h1 class="text-3xl font-semibold tracking-tight text-brand-navy sm:text-4xl">Configuracion WhatsApp</h1>
-                        <p class="max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+                        <h1 class="page-title mt-1">Configuracion WhatsApp</h1>
+                        <p class="page-subtitle mt-2">
                             Gestion operativa de una solicitud asistida para preparar el canal sin tocar la integracion final.
                         </p>
                     </div>
                 </div>
 
-                <div class="rounded-[2rem] border border-slate-200/80 bg-white/95 p-5 shadow-sm">
+                <div class="rounded-[20px] border border-slate-200/80 bg-white/95 p-5 shadow-sm">
                     <div class="flex items-start justify-between gap-4">
                         <div>
                             <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Estado</p>
@@ -78,7 +76,7 @@
 
         <section class="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
             <div class="space-y-6">
-                <article class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-brand-primary bg-white p-6 shadow-sm">
+                <article class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <div>
                             <h2 class="text-lg font-semibold text-brand-navy">Notas</h2>
@@ -91,7 +89,7 @@
                     </div>
                 </article>
 
-                <article class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-emerald-500 bg-white p-6 shadow-sm">
+                <article class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <div>
                             <h2 class="text-lg font-semibold text-brand-navy">Timeline</h2>
@@ -123,7 +121,7 @@
                     @csrf
                     @method('PATCH')
 
-                    <article class="rounded-[2rem] border border-slate-200/70 bg-white p-6 shadow-sm">
+                    <article class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                         <div class="flex items-center justify-between gap-3">
                             <div>
                                 <h2 class="text-lg font-semibold text-brand-navy">Acciones</h2>
@@ -178,7 +176,7 @@
                 </form>
                 @endcan
 
-                <article class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-amber-500 bg-[linear-gradient(180deg,rgba(245,158,11,0.08),rgba(255,255,255,1)_72%)] p-6 shadow-sm">
+                <article class="rounded-[20px] border border-slate-200/70 surface-tint-amber p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <div>
                             <h2 class="text-lg font-semibold text-brand-navy">Lectura rapida</h2>

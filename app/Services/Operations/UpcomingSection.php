@@ -7,14 +7,21 @@ use Illuminate\Support\Collection;
 
 class UpcomingSection
 {
+    /** Group titles as the board shows them; the keys stay stable for the page's code. */
+    private const GROUP_LABELS = [
+        'Morning' => 'Temprano',
+        'Afternoon' => 'Tarde',
+        'Evening' => 'Noche',
+        'Tomorrow' => 'Mañana y después',
+    ];
+
     /**
      * @param  Collection<int, AgendaCard>  $cards
      */
     public function __construct(
         private readonly Collection $cards,
         private readonly ?CarbonInterface $referenceTime = null,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array{key:string,label:string,empty_message:string,groups:array<int, array{key:string,label:string,cards:array<int, array<string, mixed>>}>}
@@ -52,15 +59,15 @@ class UpcomingSection
 
             $groups[] = [
                 'key' => strtolower(str_replace(' ', '_', $label)),
-                'label' => $label,
+                'label' => self::GROUP_LABELS[$label],
                 'cards' => $buckets[$label],
             ];
         }
 
         return [
             'key' => 'next',
-            'label' => 'NEXT',
-            'empty_message' => 'No upcoming work.',
+            'label' => 'DESPUÉS',
+            'empty_message' => 'Nada pendiente.',
             'groups' => $groups,
         ];
     }
@@ -80,10 +87,10 @@ class UpcomingSection
             return 'Tomorrow';
         }
 
-        return match ((string) ($card['time_window_label'] ?? 'Anytime')) {
-            'Morning' => 'Morning',
-            'Before Noon', 'Afternoon' => 'Afternoon',
-            'Evening' => 'Evening',
+        return match ((string) ($card['time_window_label'] ?? '')) {
+            'Temprano' => 'Morning',
+            'Antes del mediodía', 'Tarde' => 'Afternoon',
+            'Noche' => 'Evening',
             default => 'Tomorrow',
         };
     }

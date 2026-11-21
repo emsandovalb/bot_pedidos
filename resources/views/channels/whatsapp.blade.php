@@ -39,17 +39,15 @@
             </div>
         @endif
 
-        <section class="overflow-hidden rounded-[2rem] border border-slate-200/70 bg-[linear-gradient(135deg,rgba(22,163,74,0.14),rgba(20,110,219,0.08)_46%,rgba(255,255,255,1)_84%)] shadow-sm">
-            <div class="grid gap-6 px-6 py-7 lg:grid-cols-[1.2fr_0.8fr] lg:px-8">
+        <section class="page-intro">
+            <div class="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
                 <div class="space-y-5">
-                    <div class="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700 ring-1 ring-inset ring-emerald-100">
-                        Configuracion de WhatsApp Business
-                    </div>
+                    <p class="page-eyebrow">Configuración de WhatsApp Business</p>
                     <div class="max-w-3xl space-y-3">
-                        <h1 class="text-3xl font-semibold tracking-tight text-brand-navy sm:text-4xl">
+                        <h1 class="page-title mt-1">
                             Onboarding real para dejar listo el canal
                         </h1>
-                        <p class="max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+                        <p class="page-subtitle mt-2">
                             Completa el checklist, registra el numero y deja guardada la preparacion del negocio en
                             <span class="font-semibold text-brand-navy">ChannelConnection.metadata_json</span> sin tocar la integracion de Meta todavia.
                         </p>
@@ -82,19 +80,19 @@
             </div>
         </section>
 
-        <section class="rounded-[2rem] border border-slate-200/70 bg-white p-6 shadow-sm">
+        <section class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
             <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div>
                     <h2 class="text-lg font-semibold text-brand-navy">Progreso del onboarding</h2>
                     <p class="mt-1 text-sm text-slate-500">Cada paso refleja el estado actual del setup antes de integrar Meta.</p>
                 </div>
-                <div class="rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-100">
+                <div class="rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700">
                     {{ $requiredCompleted }}/{{ $requiredTotal }} requisitos completados
                 </div>
             </div>
 
             <div class="mt-6 h-3 overflow-hidden rounded-full bg-slate-100">
-                <div class="h-full rounded-full bg-[linear-gradient(90deg,#16a34a,#146edb)] transition-all" style="width: {{ $readinessPercentage }}%"></div>
+                <div class="h-full rounded-full bar-brand transition-all" style="width: {{ $readinessPercentage }}%"></div>
             </div>
 
             <div class="mt-6 grid gap-3 md:grid-cols-5">
@@ -126,7 +124,7 @@
             @csrf
 
             <div class="space-y-6">
-                <section class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-emerald-500 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <div>
                             <h2 class="text-lg font-semibold text-brand-navy">Requisitos</h2>
@@ -147,7 +145,7 @@
                     </div>
                 </section>
 
-                <section class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-brand-primary bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <div>
                             <h2 class="text-lg font-semibold text-brand-navy">Numero del negocio</h2>
@@ -208,7 +206,7 @@
                     </div>
                 </section>
 
-                <section class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-emerald-500 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <div>
                             <h2 class="text-lg font-semibold text-brand-navy">Acceso a Meta/Facebook</h2>
@@ -242,7 +240,7 @@
                     </div>
                 </section>
 
-                <section class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-emerald-500 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <div>
                             <h2 class="text-lg font-semibold text-brand-navy">Onboarding asistido</h2>
@@ -283,7 +281,7 @@
             </div>
 
             <aside class="space-y-6">
-                <section class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-emerald-500 bg-[linear-gradient(180deg,rgba(16,185,129,0.08),rgba(255,255,255,1)_74%)] p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/70 surface-tint-green p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <div>
                             <h2 class="text-lg font-semibold text-brand-navy">Resumen de preparacion</h2>
@@ -324,7 +322,7 @@
                     </div>
                 </section>
 
-                <section class="rounded-[2rem] border border-slate-200/70 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <div>
                             <h2 class="text-lg font-semibold text-brand-navy">Checklist persistido</h2>
@@ -342,7 +340,7 @@
                         ] as $key => $label)
                             <div class="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3">
                                 <span class="text-sm font-medium text-slate-700">{{ $label }}</span>
-                                <span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold {{ $requiredItems[$key] ? 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-100' : 'bg-slate-100 text-slate-500' }}">
+                                <span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold {{ $requiredItems[$key] ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500' }}">
                                     {{ $requiredItems[$key] ? 'Si' : 'No' }}
                                 </span>
                             </div>
@@ -352,13 +350,13 @@
             </aside>
         </form>
 
-        <section class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-amber-500 bg-[linear-gradient(180deg,rgba(245,158,11,0.08),rgba(255,255,255,1)_74%)] p-6 shadow-sm">
+        <section class="rounded-[20px] border border-slate-200/70 surface-tint-amber p-6 shadow-sm">
             <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div>
                     <h2 class="text-lg font-semibold text-brand-navy">Solicitud asistida</h2>
                     <p class="mt-1 text-sm text-slate-500">Cuando el negocio necesita apoyo, Benditio puede abrir una solicitud operativa para el equipo.</p>
                 </div>
-                <div class="inline-flex items-center rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 ring-1 ring-inset ring-amber-100">
+                <div class="inline-flex items-center rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">
                     Flujo operativo
                 </div>
             </div>
@@ -374,7 +372,7 @@
 
                 <div class="rounded-3xl border border-amber-200 bg-white p-5">
                     <div class="flex items-start gap-4">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-100">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-700">
                             <svg viewBox="0 0 24 24" fill="none" class="h-6 w-6" aria-hidden="true">
                                 <path d="M12 2v10m0 0 4-4m-4 4-4-4M4 20h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>

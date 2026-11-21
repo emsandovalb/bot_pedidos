@@ -7,17 +7,15 @@
 
 <x-app-layout>
     <div class="space-y-8">
-        <section class="overflow-hidden rounded-[2rem] border border-slate-200/70 bg-[linear-gradient(135deg,rgba(20,110,219,0.10),rgba(22,163,74,0.08)_42%,rgba(255,255,255,1)_84%)] shadow-sm">
-            <div class="relative px-6 py-7 lg:px-8">
+        <section class="page-intro">
+            <div class="relative">
                 <div class="max-w-4xl space-y-4">
-                    <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary ring-1 ring-inset ring-blue-100">
-                        Configuración
-                    </div>
+                    <p class="page-eyebrow">Configuración</p>
                     <div class="space-y-3">
-                        <h1 class="text-3xl font-semibold tracking-tight text-brand-navy sm:text-4xl">
+                        <h1 class="page-title mt-1">
                             Configuración de notificaciones
                         </h1>
-                        <p class="max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
+                        <p class="page-subtitle mt-2">
                             Define qué eventos envían mensajes automáticos a tus clientes.
                         </p>
                         <p class="max-w-3xl text-sm leading-6 text-slate-600">
@@ -42,10 +40,10 @@
                     $channelSettings = $settingsByChannel[$channel] ?? [];
                 @endphp
 
-                <section class="rounded-[2rem] border border-slate-200/70 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                     <div class="flex flex-col gap-3 border-b border-slate-200/80 pb-5 lg:flex-row lg:items-start lg:justify-between">
                         <div class="space-y-2">
-                            <div class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] {{ $channel === 'whatsapp' ? 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-100' : 'bg-slate-100 text-slate-600 ring-1 ring-inset ring-slate-200' }}">
+                            <div class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] {{ $channel === 'whatsapp' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">
                                 {{ $channelLabels[$channel] }}
                             </div>
                             <h2 class="text-xl font-semibold text-brand-navy">{{ $channelLabels[$channel] }}</h2>

@@ -14,15 +14,12 @@
             </div>
         @endif
 
-        <section class="overflow-hidden rounded-[2rem] border border-slate-200/80 bg-gradient-to-br from-white via-slate-50 to-blue-50/50 shadow-sm">
-            <div class="grid gap-6 px-6 py-7 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
+        <section class="page-intro">
+            <div class="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
                 <div class="space-y-4">
-                    <div class="inline-flex rounded-full bg-brand-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-brand-primary">
-                        Editar producto
-                    </div>
                     <div class="max-w-3xl space-y-3">
-                        <h1 class="text-3xl font-semibold tracking-tight text-brand-navy sm:text-4xl">Editar producto</h1>
-                        <p class="max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+                        <h1 class="page-title mt-1">Editar producto</h1>
+                        <p class="page-subtitle mt-2">
                             Actualiza la ficha del producto, revisa sus alias y confirma como lo reconocera Benditio.
                         </p>
                     </div>
@@ -55,7 +52,7 @@
         </section>
 
         <div class="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-            <div class="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm">
+            <div class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                 <form method="POST" action="{{ route('products.update', $product) }}" class="space-y-6">
                     @csrf
                     @method('PATCH')
@@ -73,7 +70,7 @@
             </div>
 
             <aside class="space-y-6">
-                <div class="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm">
+                <div class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Alias</p>
                     <h2 class="mt-2 text-xl font-semibold text-brand-navy">Gestiona el reconocimiento</h2>
                     <p class="mt-2 text-sm leading-6 text-slate-600">
@@ -108,7 +105,7 @@
                     </form>
                 </div>
 
-                <div class="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm">
+                <div class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <div class="flex items-start justify-between gap-4">
                         <div>
                             <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Seccion de alias</p>
@@ -147,7 +144,7 @@
                     </div>
                 </div>
 
-                <div class="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm">
+                <div class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Vista previa de reconocimiento</p>
                     <h2 class="mt-2 text-xl font-semibold text-brand-navy">El bot reconocera:</h2>
                     <div class="mt-5 flex flex-wrap gap-2">

@@ -1,13 +1,13 @@
 <x-app-layout>
     @php
         $statusBadgeClasses = [
-            \App\Models\Order::STATUS_PENDING_REVIEW => 'bg-amber-50 text-amber-800 ring-1 ring-amber-100',
-            \App\Models\Order::STATUS_CONFIRMED => 'bg-blue-50 text-blue-800 ring-1 ring-blue-100',
-            \App\Models\Order::STATUS_PREPARING => 'bg-violet-50 text-violet-800 ring-1 ring-violet-100',
-            \App\Models\Order::STATUS_READY_FOR_DISPATCH => 'bg-sky-50 text-sky-800 ring-1 ring-sky-100',
-            \App\Models\Order::STATUS_DISPATCHED => 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100',
-            \App\Models\Order::STATUS_CANCELLED => 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
-            \App\Models\Order::STATUS_REJECTED => 'bg-rose-50 text-rose-800 ring-1 ring-rose-100',
+            \App\Models\Order::STATUS_PENDING_REVIEW => 'bg-amber-50 text-amber-800',
+            \App\Models\Order::STATUS_CONFIRMED => 'bg-blue-50 text-blue-800',
+            \App\Models\Order::STATUS_PREPARING => 'bg-violet-50 text-violet-800',
+            \App\Models\Order::STATUS_READY_FOR_DISPATCH => 'bg-sky-50 text-sky-800',
+            \App\Models\Order::STATUS_DISPATCHED => 'bg-emerald-50 text-emerald-800',
+            \App\Models\Order::STATUS_CANCELLED => 'bg-slate-100 text-slate-700',
+            \App\Models\Order::STATUS_REJECTED => 'bg-rose-50 text-rose-800',
         ];
 
         $statusLabels = $statusLabels ?? [];
@@ -19,16 +19,14 @@
     @endphp
 
     <div class="space-y-10">
-        <section class="rounded-[2rem] border border-slate-200/70 bg-[linear-gradient(135deg,rgba(20,110,219,0.08),rgba(22,163,74,0.06)_40%,rgba(255,255,255,1)_82%)] p-6 shadow-sm sm:p-8">
+        <section class="page-intro">
             <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                 <div class="max-w-3xl">
-                    <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary ring-1 ring-inset ring-blue-100">
-                        Benditio analytics v1
-                    </div>
-                    <h1 class="mt-4 text-3xl font-semibold tracking-tight text-brand-navy sm:text-4xl">
+                    <p class="page-eyebrow">Analítica</p>
+                    <h1 class="page-title mt-1">
                         Lectura rápida de ventas, clasificación y seguimiento
                     </h1>
-                    <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+                    <p class="page-subtitle mt-2">
                         Vista operativa para entender el ritmo de pedidos, la calidad de la clasificación automática y la actividad reciente sin salir del panel.
                     </p>
                 </div>
@@ -53,40 +51,16 @@
             </div>
         </section>
 
-        <section class="grid gap-6 md:grid-cols-2 xl:grid-cols-5">
-            <article class="rounded-2xl border border-[#146EDB]/15 border-l-4 border-l-brand-primary bg-white p-5 shadow-sm">
-                <div class="text-sm font-medium text-slate-500">Pedidos hoy</div>
-                <div class="mt-3 text-3xl font-semibold tracking-tight text-brand-navy">{{ $ordersTodayCount }}</div>
-                <div class="mt-1 text-sm text-slate-600">Pedidos creados durante el día</div>
-            </article>
-
-            <article class="rounded-2xl border border-[#146EDB]/15 border-l-4 border-l-brand-primary bg-white p-5 shadow-sm">
-                <div class="text-sm font-medium text-slate-500">Pedidos últimos 7 días</div>
-                <div class="mt-3 text-3xl font-semibold tracking-tight text-brand-navy">{{ $ordersLast7DaysCount }}</div>
-                <div class="mt-1 text-sm text-slate-600">Volumen semanal visible</div>
-            </article>
-
-            <article class="rounded-2xl border border-[#146EDB]/15 border-l-4 border-l-brand-primary bg-white p-5 shadow-sm">
-                <div class="text-sm font-medium text-slate-500">Pedidos este mes</div>
-                <div class="mt-3 text-3xl font-semibold tracking-tight text-brand-navy">{{ $ordersThisMonthCount }}</div>
-                <div class="mt-1 text-sm text-slate-600">Acumulado mensual</div>
-            </article>
-
-            <article class="rounded-2xl border border-emerald-200/70 border-l-4 border-l-emerald-500 bg-white p-5 shadow-sm">
-                <div class="text-sm font-medium text-slate-500">Despachados este mes</div>
-                <div class="mt-3 text-3xl font-semibold tracking-tight text-brand-navy">{{ $dispatchedThisMonthCount }}</div>
-                <div class="mt-1 text-sm text-slate-600">Pedidos ya entregados</div>
-            </article>
-
-            <article class="rounded-2xl border border-amber-200/70 border-l-4 border-l-amber-500 bg-white p-5 shadow-sm">
-                <div class="text-sm font-medium text-slate-500">Pendientes de revisión</div>
-                <div class="mt-3 text-3xl font-semibold tracking-tight text-brand-navy">{{ $pendingReviewCount }}</div>
-                <div class="mt-1 text-sm text-slate-600">Esperando validación manual</div>
-            </article>
+        <section class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-5">
+            <x-stat-card label="Pedidos hoy" :value="$ordersTodayCount" hint="Pedidos creados durante el día" icon="list" tone="blue" />
+            <x-stat-card label="Pedidos últimos 7 días" :value="$ordersLast7DaysCount" hint="Volumen semanal visible" icon="chart" tone="blue" />
+            <x-stat-card label="Pedidos este mes" :value="$ordersThisMonthCount" hint="Acumulado mensual" icon="calendar" tone="violet" />
+            <x-stat-card label="Despachados este mes" :value="$dispatchedThisMonthCount" hint="Pedidos ya entregados" icon="truck" tone="green" />
+            <x-stat-card label="Pendientes de revisión" :value="$pendingReviewCount" hint="Esperando validación manual" icon="review" tone="amber" class="col-span-2 md:col-span-1" />
         </section>
 
         <section class="grid gap-8 xl:grid-cols-[1.35fr_0.9fr]">
-            <div class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-brand-primary bg-white p-6 shadow-sm">
+            <div class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                 <div class="flex items-center justify-between gap-3">
                     <div>
                         <h2 class="text-lg font-semibold text-brand-navy">Pedidos por estado</h2>
@@ -111,7 +85,7 @@
                 </div>
             </div>
 
-            <div class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-emerald-500 bg-white p-6 shadow-sm">
+            <div class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                 <div class="flex items-center justify-between gap-3">
                     <div>
                         <h2 class="text-lg font-semibold text-brand-navy">Clasificación automática</h2>
@@ -126,7 +100,7 @@
                                 <div class="text-sm font-medium text-slate-500">Ítems totales</div>
                                 <div class="mt-1 text-2xl font-semibold tracking-tight text-brand-navy">{{ $totalOrderItems }}</div>
                             </div>
-                            <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-brand-primary ring-1 ring-inset ring-blue-100">#</div>
+                            <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-brand-primary">#</div>
                         </div>
                     </div>
 
@@ -147,7 +121,7 @@
                             <div class="text-2xl font-semibold tracking-tight text-brand-navy">{{ $classificationPercentage }}%</div>
                         </div>
                         <div class="mt-3 h-3 overflow-hidden rounded-full bg-slate-100">
-                            <div class="h-full rounded-full bg-gradient-to-r from-[#146EDB] to-emerald-500" style="width: {{ $classificationPercentage }}%"></div>
+                            <div class="h-full rounded-full bg-gradient-to-r from-brand-primary to-emerald-500" style="width: {{ $classificationPercentage }}%"></div>
                         </div>
                         <p class="mt-3 text-sm text-slate-500">
                             {{ $classificationPercentage }}% de los ítems visibles ya quedaron asociados a un producto.
@@ -158,7 +132,7 @@
         </section>
 
         <section class="grid gap-8 xl:grid-cols-2">
-            <div class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-brand-primary bg-white p-6 shadow-sm">
+            <div class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                 <div class="flex items-center justify-between gap-3">
                     <div>
                         <h2 class="text-lg font-semibold text-brand-navy">Productos más solicitados</h2>
@@ -189,7 +163,7 @@
                 </div>
             </div>
 
-            <div class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-emerald-500 bg-white p-6 shadow-sm">
+            <div class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                 <div class="flex items-center justify-between gap-3">
                     <div>
                         <h2 class="text-lg font-semibold text-brand-navy">Clientes frecuentes</h2>
@@ -224,13 +198,13 @@
             </div>
         </section>
 
-        <section class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-brand-primary bg-white p-6 shadow-sm">
+        <section class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
             <div class="flex items-center justify-between gap-3">
                 <div>
                     <h2 class="text-lg font-semibold text-brand-navy">Actividad reciente</h2>
                     <p class="mt-1 text-sm text-slate-500">Últimos 10 pedidos visibles en la operación.</p>
                 </div>
-                <a href="{{ route('orders.index') }}" class="text-sm font-medium text-[#146EDB] transition hover:text-[#146EDB]/80">
+                <a href="{{ route('orders.index') }}" class="text-sm font-medium text-brand-primary transition hover:text-brand-primary/80">
                     Ver todos
                 </a>
             </div>

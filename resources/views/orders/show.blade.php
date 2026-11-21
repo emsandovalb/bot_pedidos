@@ -12,13 +12,13 @@
             ];
 
             $statusBadgeClasses = [
-                \App\Models\Order::STATUS_PENDING_REVIEW => 'bg-amber-50 text-amber-800 ring-1 ring-amber-100',
-                \App\Models\Order::STATUS_CONFIRMED => 'bg-blue-50 text-blue-800 ring-1 ring-blue-100',
-                \App\Models\Order::STATUS_PREPARING => 'bg-violet-50 text-violet-800 ring-1 ring-violet-100',
-                \App\Models\Order::STATUS_READY_FOR_DISPATCH => 'bg-green-50 text-green-800 ring-1 ring-green-100',
-                \App\Models\Order::STATUS_DISPATCHED => 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100',
-                \App\Models\Order::STATUS_CANCELLED => 'bg-red-50 text-red-800 ring-1 ring-red-100',
-                \App\Models\Order::STATUS_REJECTED => 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
+                \App\Models\Order::STATUS_PENDING_REVIEW => 'bg-amber-50 text-amber-800',
+                \App\Models\Order::STATUS_CONFIRMED => 'bg-blue-50 text-blue-800',
+                \App\Models\Order::STATUS_PREPARING => 'bg-violet-50 text-violet-800',
+                \App\Models\Order::STATUS_READY_FOR_DISPATCH => 'bg-green-50 text-green-800',
+                \App\Models\Order::STATUS_DISPATCHED => 'bg-emerald-50 text-emerald-800',
+                \App\Models\Order::STATUS_CANCELLED => 'bg-red-50 text-red-800',
+                \App\Models\Order::STATUS_REJECTED => 'bg-slate-100 text-slate-700',
             ];
 
             $timelineEntries = $order->orderStatusHistories;
@@ -27,16 +27,16 @@
             $detectedItems = $order->orderItems;
         @endphp
 
-        <div class="overflow-hidden rounded-[28px] border border-slate-200/70 bg-[linear-gradient(135deg,rgba(20,110,219,0.08),rgba(22,163,74,0.05)_40%,rgba(255,255,255,1)_80%)] shadow-[0_18px_50px_-28px_rgba(15,23,42,0.45)]">
-            <div class="flex flex-col gap-5 p-6 sm:p-8 lg:flex-row lg:items-end lg:justify-between">
+        <div class="page-intro">
+            <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
                 <div class="max-w-3xl">
-                    <div class="text-sm font-medium uppercase tracking-wide text-slate-500">Pedido #{{ $order->id }}</div>
-                    <h1 class="mt-2 text-3xl font-semibold tracking-tight text-brand-navy sm:text-4xl">Pedido #{{ $order->id }}</h1>
+                    <p class="page-eyebrow">Pedido #{{ $order->id }}</p>
+                    <h1 class="page-title mt-1">Pedido #{{ $order->id }}</h1>
                     <div class="mt-4 flex flex-wrap items-center gap-3">
-                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $statusBadgeClasses[$order->status] ?? 'bg-slate-100 text-slate-700 ring-1 ring-slate-200' }}">
+                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $statusBadgeClasses[$order->status] ?? 'bg-slate-100 text-slate-700' }}">
                             {{ $statusLabels[$order->status] ?? str_replace('_', ' ', $order->status) }}
                         </span>
-                        <span class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-brand-primary ring-1 ring-blue-100">
+                        <span class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-brand-primary">
                             {{ $order->source_channel ?? 'Canal no definido' }}
                         </span>
                         <span class="text-sm text-slate-600">
@@ -46,12 +46,14 @@
                 </div>
 
                 <div class="flex flex-wrap items-center gap-3">
-                    <a href="{{ route('orders.index') }}" class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50">
+                    <a href="{{ route('orders.index') }}" class="brand-btn-secondary">
                         Volver a pedidos
                     </a>
-                    <a href="{{ route('orders.edit', $order) }}" class="inline-flex items-center justify-center rounded-2xl bg-brand-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-700">
-                        Editar pedido
-                    </a>
+                    @can('update', $order)
+                        <a href="{{ route('orders.edit', $order) }}" class="brand-btn-primary">
+                            Editar pedido
+                        </a>
+                    @endcan
                 </div>
             </div>
         </div>
@@ -63,7 +65,7 @@
         @endif
 
         @if ($order->possibleDuplicateOf)
-            <div class="rounded-[24px] border border-amber-200 bg-amber-50 p-5 shadow-sm">
+            <div class="rounded-[20px] border border-amber-200 bg-amber-50 p-5 shadow-sm">
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                         <div class="text-sm font-semibold uppercase tracking-wide text-amber-800">Posible pedido duplicado</div>
@@ -89,7 +91,7 @@
 
         <div class="grid gap-6 xl:grid-cols-3">
             <div class="space-y-6 xl:col-span-2">
-                <section class="rounded-[24px] border border-slate-200/80 border-l-4 border-l-brand-primary bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <h2 class="text-base font-semibold text-brand-navy">Mensaje original</h2>
                         <span class="text-xs font-medium uppercase tracking-wide text-slate-500">Texto crudo recibido</span>
@@ -99,7 +101,7 @@
                     </div>
                 </section>
 
-                <section class="rounded-[24px] border border-slate-200/80 border-l-4 border-l-slate-300 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <h2 class="text-base font-semibold text-brand-navy">Cliente y sucursal</h2>
                         <span class="text-xs font-medium uppercase tracking-wide text-slate-500">Contexto operativo</span>
@@ -161,7 +163,7 @@
                     @endif
                 </section>
 
-                <section class="rounded-[24px] border border-slate-200/80 border-l-4 border-l-emerald-500 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <h2 class="text-base font-semibold text-brand-navy">Items detectados</h2>
                         <span class="text-xs font-medium uppercase tracking-wide text-slate-500">{{ $detectedItems->count() }} item(s)</span>
@@ -209,7 +211,7 @@
                                     </div>
 
                                     <div class="flex flex-wrap gap-2">
-                                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $item->product !== null ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100' : 'bg-slate-100 text-slate-700 ring-1 ring-slate-200' }}">
+                                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $item->product !== null ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-700' }}">
                                             {{ $item->product !== null ? 'Producto reconocido' : 'Sin producto asociado' }}
                                         </span>
                                     </div>
@@ -231,13 +233,13 @@
                                     <span class="ml-2 text-xs font-medium text-amber-600">(parcial: falta precio en algún producto)</span>
                                 @endif
                             @else
-                                <span class="text-slate-400">Sin precio en el catálogo</span>
+                                <span class="text-slate-500">Sin precio en el catálogo</span>
                             @endif
                         </span>
                     </div>
                 </section>
 
-                <section class="rounded-[24px] border border-slate-200/80 border-l-4 border-l-emerald-500 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <h2 class="text-base font-semibold text-brand-navy">Productos reconocidos</h2>
                         <span class="text-xs font-medium uppercase tracking-wide text-slate-500">{{ $recognizedItems->count() }} coincidencia(s)</span>
@@ -271,7 +273,7 @@
                     </div>
                 </section>
 
-                <section class="rounded-[24px] border border-slate-200/80 border-l-4 border-l-slate-300 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <h2 class="text-base font-semibold text-brand-navy">Notas</h2>
                         <span class="text-xs font-medium uppercase tracking-wide text-slate-500">Observaciones internas</span>
@@ -283,13 +285,17 @@
             </div>
 
             <div class="space-y-6">
-                <section class="rounded-[24px] border border-slate-200/80 border-l-4 border-l-brand-primary bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <h2 class="text-base font-semibold text-brand-navy">Acciones disponibles</h2>
                     <p class="mt-2 text-sm leading-6 text-slate-600">
                         Ejecuta el siguiente paso operativo sin salir de la ficha del pedido.
                     </p>
                     <div class="mt-4 flex flex-col gap-3">
-                        @if ($order->status === \App\Models\Order::STATUS_PENDING_REVIEW)
+                        @if (auth()->user()->cannot('update', $order))
+                            <div class="rounded-2xl border border-slate-200/80 bg-slate-50 p-4 text-sm leading-6 text-slate-600">
+                                Tu usuario es de solo lectura: podés ver el pedido, pero no cambiarlo.
+                            </div>
+                        @elseif ($order->status === \App\Models\Order::STATUS_PENDING_REVIEW)
                             <form method="POST" action="{{ route('orders.confirm', $order) }}">
                                 @csrf
                                 <button type="submit" class="inline-flex w-full items-center justify-center rounded-2xl bg-brand-primary px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-700">
@@ -355,7 +361,7 @@
                     </div>
                 </section>
 
-                <section class="rounded-[24px] border border-slate-200/80 border-l-4 border-l-slate-300 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <h2 class="text-base font-semibold text-brand-navy">Línea de tiempo</h2>
                     <div class="mt-4 space-y-3">
                         @forelse ($timelineEntries as $history)
@@ -381,7 +387,7 @@
                         @endforelse
                     </div>
                 </section>
-                <section class="rounded-[24px] border border-slate-200/80 border-l-4 border-l-blue-500 bg-white p-6 shadow-sm">
+                <section class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <h2 class="text-base font-semibold text-brand-navy">Historial de notificaciones</h2>
                         <span class="text-xs font-medium uppercase tracking-wide text-slate-500">{{ $notificationLogs->count() }} evento(s)</span>

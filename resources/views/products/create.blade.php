@@ -6,15 +6,12 @@
             </div>
         @endif
 
-        <section class="overflow-hidden rounded-[2rem] border border-slate-200/80 bg-gradient-to-br from-white via-slate-50 to-blue-50/50 shadow-sm">
-            <div class="grid gap-6 px-6 py-7 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
+        <section class="page-intro">
+            <div class="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
                 <div class="space-y-4">
-                    <div class="inline-flex rounded-full bg-brand-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-brand-primary">
-                        Nuevo producto
-                    </div>
                     <div class="max-w-3xl space-y-3">
-                        <h1 class="text-3xl font-semibold tracking-tight text-brand-navy sm:text-4xl">Nuevo producto</h1>
-                        <p class="max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+                        <h1 class="page-title mt-1">Nuevo producto</h1>
+                        <p class="page-subtitle mt-2">
                             Agrega productos para que Benditio pueda reconocerlos en los mensajes.
                         </p>
                     </div>
@@ -41,7 +38,7 @@
         </section>
 
         <div class="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-            <div class="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm">
+            <div class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                 <form method="POST" action="{{ route('products.store') }}" class="space-y-6">
                     @csrf
                     @include('products._form', ['product' => $product, 'branches' => $branches])
@@ -58,7 +55,7 @@
             </div>
 
             <aside class="space-y-6">
-                <div class="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm">
+                <div class="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-sm">
                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Reconocimiento</p>
                     <h2 class="mt-2 text-xl font-semibold text-brand-navy">Como lo vera Benditio</h2>
                     <p class="mt-2 text-sm leading-6 text-slate-600">
@@ -75,7 +72,7 @@
                     </div>
                 </div>
 
-                <div class="rounded-[2rem] border border-slate-200/80 bg-gradient-to-br from-brand-navy to-slate-900 p-6 text-white shadow-sm">
+                <div class="rounded-[20px] border border-slate-200/80 bg-gradient-to-br from-brand-navy to-slate-900 p-6 text-white shadow-sm">
                     <p class="text-xs font-semibold uppercase tracking-[0.2em] text-white/70">Estado</p>
                     <h2 class="mt-2 text-xl font-semibold">Activo desde el inicio</h2>
                     <p class="mt-2 text-sm leading-6 text-white/75">

@@ -4,6 +4,7 @@ import Alpine from 'alpinejs';
 import { LiveQueue } from './live-queue';
 import { createOperationsFocus } from './operations-focus';
 import { createOperationsBoard, createOperationsCard, createOperationsColumn } from './operations-board';
+import { themeToggle } from './theme';
 
 window.Alpine = Alpine;
 
@@ -27,7 +28,7 @@ window.operationsCenter = (config) => ({
     liveQueue: null,
     liveConnection: {
         state: 'live',
-        label: 'Live',
+        label: 'En vivo',
         tone: 'green',
         description: 'Conectado',
     },
@@ -396,5 +397,7 @@ window.operationsFocus = createOperationsFocus;
 window.operationsColumn = createOperationsColumn;
 window.operationsCard = createOperationsCard;
 window.operationsCenter = createOperationsBoard;
+
+Alpine.data('themeToggle', themeToggle);
 
 Alpine.start();

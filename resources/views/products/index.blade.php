@@ -23,15 +23,12 @@
             </div>
         @endif
 
-        <section class="overflow-hidden rounded-[2rem] border border-slate-200/80 bg-[linear-gradient(135deg,rgba(20,110,219,0.08),rgba(22,163,74,0.06)_40%,rgba(255,255,255,1)_82%)] shadow-sm">
-            <div class="grid gap-6 px-6 py-7 lg:grid-cols-[1.2fr_0.8fr] lg:px-8">
+        <section class="page-intro">
+            <div class="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
                 <div class="space-y-4">
-                    <div class="inline-flex rounded-full bg-brand-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-brand-primary ring-1 ring-inset ring-blue-100">
-                        Catálogo de productos
-                    </div>
                     <div class="max-w-3xl space-y-3">
-                        <h1 class="text-3xl font-semibold tracking-tight text-brand-navy sm:text-4xl">Catálogo de productos</h1>
-                        <p class="max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+                        <h1 class="page-title mt-1">Catálogo de productos</h1>
+                        <p class="page-subtitle mt-2">
                             Administra los productos que Benditio puede reconocer automáticamente.
                         </p>
                     </div>
@@ -78,7 +75,7 @@
         </section>
 
         @if ($productItems->isEmpty())
-            <section class="rounded-[2rem] border border-dashed border-blue-200 bg-blue-50/70 px-6 py-16 text-center shadow-sm">
+            <section class="rounded-[20px] border border-dashed border-blue-200 bg-blue-50/70 px-6 py-16 text-center shadow-sm">
                 <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-brand-primary/10 text-4xl text-brand-primary ring-1 ring-inset ring-blue-100">
                     📦
                 </div>
@@ -114,7 +111,7 @@
                             $aliasPreview = $aliases->take(3);
                         @endphp
 
-                        <article class="flex h-full flex-col rounded-[1.75rem] border border-slate-200/80 border-l-4 border-l-brand-primary bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+                        <article class="flex h-full flex-col rounded-[20px] border border-slate-200/80 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-lg">
                             <div class="flex items-start justify-between gap-4">
                                 <div class="min-w-0">
                                     <h3 class="truncate text-lg font-semibold text-brand-navy">{{ $product->name }}</h3>
@@ -122,15 +119,15 @@
                                         <span class="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
                                             SKU: {{ $product->sku ?? 'Sin SKU' }}
                                         </span>
-                                        <span class="inline-flex rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-brand-primary ring-1 ring-inset ring-blue-100">
+                                        <span class="inline-flex rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-brand-primary">
                                             Unidad: {{ $product->unit_label ?? 'Sin unidad' }}
                                         </span>
-                                        <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium {{ $product->price !== null ? 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-100' : 'bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-100' }}">
+                                        <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium {{ $product->price !== null ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">
                                             {{ $product->price !== null ? 'Precio: '.number_format((float) $product->price, 2) : 'Sin precio' }}
                                         </span>
                                     </div>
                                 </div>
-                                <span class="inline-flex shrink-0 rounded-full px-3 py-1 text-xs font-semibold {{ $product->is_active ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100' : 'bg-slate-100 text-slate-600 ring-1 ring-slate-200' }}">
+                                <span class="inline-flex shrink-0 rounded-full px-3 py-1 text-xs font-semibold {{ $product->is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">
                                     {{ $product->is_active ? 'Activo' : 'Inactivo' }}
                                 </span>
                             </div>

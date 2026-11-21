@@ -1,16 +1,14 @@
 <x-app-layout>
     <div class="space-y-8">
-        <section class="overflow-hidden rounded-[2rem] border border-slate-200/70 bg-[linear-gradient(135deg,rgba(16,185,129,0.12),rgba(20,110,219,0.07)_40%,rgba(255,255,255,1)_82%)] shadow-sm">
-            <div class="grid gap-6 px-6 py-7 lg:grid-cols-[1.2fr_0.8fr] lg:px-8">
+        <section class="page-intro">
+            <div class="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
                 <div class="space-y-4">
-                    <div class="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700 ring-1 ring-inset ring-emerald-100">
-                        Estado de WhatsApp
-                    </div>
+                    <p class="page-eyebrow">Estado de WhatsApp</p>
                     <div class="max-w-3xl space-y-3">
-                        <h1 class="text-3xl font-semibold tracking-tight text-brand-navy sm:text-4xl">
+                        <h1 class="page-title mt-1">
                             Dashboard de salud y actividad del canal
                         </h1>
-                        <p class="max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+                        <p class="page-subtitle mt-2">
                             Vista ejecutiva para revisar conexión, mensajes en espera y el rendimiento esperado del canal principal.
                         </p>
                     </div>
@@ -27,14 +25,14 @@
                     </div>
                 </div>
 
-                <div class="rounded-[2rem] border border-emerald-200/80 bg-white/95 p-5 shadow-sm">
+                <div class="rounded-[20px] border border-emerald-200/80 bg-white/95 p-5 shadow-sm">
                     <div class="flex items-start justify-between gap-4">
                         <div>
                             <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{{ $connectionStatus['label'] }}</p>
                             <p class="mt-2 text-3xl font-semibold tracking-tight text-brand-navy">{{ $connectionStatus['value'] }}</p>
                             <p class="mt-2 text-sm leading-6 text-slate-600">{{ $connectionStatus['description'] }}</p>
                         </div>
-                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-100">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">
                             <svg viewBox="0 0 24 24" fill="none" class="h-6 w-6" aria-hidden="true">
                                 <path d="M9 12l2 2 4-4M20 12a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
@@ -50,7 +48,7 @@
         </section>
 
         @if ($openSetupRequest)
-            <section class="rounded-[2rem] border border-amber-200/80 bg-amber-50/60 p-6 shadow-sm">
+            <section class="rounded-[20px] border border-amber-200/80 bg-amber-50/60 p-6 shadow-sm">
                 <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div>
                         <div class="text-sm font-semibold uppercase tracking-[0.16em] text-amber-700">Configuracion asistida pendiente</div>
@@ -77,7 +75,7 @@
         </section>
 
         <section class="grid gap-6 xl:grid-cols-[1fr_0.9fr]">
-            <div class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-emerald-500 bg-white p-6 shadow-sm">
+            <div class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                 <div class="flex items-center justify-between gap-3">
                     <div>
                         <h2 class="text-lg font-semibold text-brand-navy">Chequeos de salud</h2>
@@ -93,7 +91,7 @@
                                     <div class="text-sm font-semibold text-brand-navy">{{ $check['title'] }}</div>
                                     <p class="mt-2 text-sm leading-6 text-slate-600">{{ $check['detail'] }}</p>
                                 </div>
-                                <span class="rounded-full {{ $check['state'] === 'Ok' ? 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-100' : ($check['state'] === 'Pendiente' ? 'bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-100' : 'bg-slate-100 text-slate-600') }} px-3 py-1 text-xs font-semibold">
+                                <span class="rounded-full {{ $check['state'] === 'Ok' ? 'bg-emerald-50 text-emerald-700' : ($check['state'] === 'Pendiente' ? 'bg-amber-50 text-amber-700' : 'bg-slate-100 text-slate-600') }} px-3 py-1 text-xs font-semibold">
                                     {{ $check['state'] }}
                                 </span>
                             </div>
@@ -102,7 +100,7 @@
                 </div>
             </div>
 
-            <div class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-brand-primary bg-[linear-gradient(180deg,rgba(20,110,219,0.07),rgba(255,255,255,1)_74%)] p-6 shadow-sm">
+            <div class="rounded-[20px] border border-slate-200/70 surface-tint-blue p-6 shadow-sm">
                 <div class="flex items-center justify-between gap-3">
                     <div>
                         <h2 class="text-lg font-semibold text-brand-navy">Cronología demo</h2>
@@ -129,7 +127,7 @@
         </section>
 
         <section class="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-            <div class="rounded-[2rem] border border-slate-200/70 bg-white p-6 shadow-sm">
+            <div class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                 <div class="flex items-center justify-between gap-3">
                     <div>
                         <h2 class="text-lg font-semibold text-brand-navy">Interpretación rápida</h2>
@@ -157,7 +155,7 @@
                 </div>
             </div>
 
-            <div class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-emerald-500 bg-white p-6 shadow-sm">
+            <div class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
                 <div class="flex items-center justify-between gap-3">
                     <div>
                         <h2 class="text-lg font-semibold text-brand-navy">Lo que viene</h2>

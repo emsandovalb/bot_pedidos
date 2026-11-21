@@ -11,7 +11,7 @@
     </head>
     <body class="min-h-screen bg-white text-slate-900">
         <div class="relative overflow-hidden">
-            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(20,110,219,0.10),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(22,163,74,0.10),transparent_30%),linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)]"></div>
+            <div class="absolute inset-0 surface-page"></div>
 
             <div class="relative mx-auto flex min-h-screen max-w-6xl items-center px-6 py-16">
                 <div class="grid w-full gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">

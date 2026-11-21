@@ -1,14 +1,12 @@
 <x-app-layout>
     <div class="space-y-8">
-        <section class="overflow-hidden rounded-[2rem] border border-slate-200/70 bg-[linear-gradient(135deg,rgba(20,110,219,0.10),rgba(22,163,74,0.08)_42%,rgba(255,255,255,1)_84%)] shadow-sm">
-            <div class="relative px-6 py-7 lg:px-8">
+        <section class="page-intro">
+            <div class="relative">
                 <div class="max-w-4xl space-y-4">
-                    <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary ring-1 ring-inset ring-blue-100">
-                        Configuración
-                    </div>
+                    <p class="page-eyebrow">Configuración</p>
                     <div class="space-y-3">
-                        <h1 class="text-3xl font-semibold tracking-tight text-brand-navy sm:text-4xl">Oria · Pago de servicios</h1>
-                        <p class="max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
+                        <h1 class="page-title mt-1">Oria · Pago de servicios</h1>
+                        <p class="page-subtitle mt-2">
                             Conecta {{ $organization->name }} con su cuenta de Oria. Con el plan Plus, el menú muestra
                             <span class="font-semibold text-brand-navy">Pagar servicios</span> y abre Oria sin volver a iniciar sesión.
                         </p>
@@ -29,7 +27,7 @@
             </div>
         @endif
 
-        <section class="rounded-[2rem] border border-slate-200/70 bg-white p-6 shadow-sm">
+        <section class="rounded-[20px] border border-slate-200/70 bg-white p-6 shadow-sm">
             @if (! $configured && ! $connection)
                 <h2 class="text-xl font-semibold text-brand-navy">Oria no está configurada</h2>
                 <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-600">

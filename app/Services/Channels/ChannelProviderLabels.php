@@ -27,10 +27,10 @@ class ChannelProviderLabels
     public function providerDescription(string $provider): string
     {
         return match ($provider) {
-            'telegram' => 'Telegram is live and exposes the real lifecycle surface.',
-            'whatsapp' => 'WhatsApp is locally configured and waiting for Meta verification.',
-            'instagram' => 'Coming soon. The provider shell is ready, but Meta integration is not.',
-            default => 'Proveedor sin descripcion registrada.',
+            'telegram' => 'Telegram ya recibe pedidos de verdad.',
+            'whatsapp' => 'WhatsApp está configurado aquí y espera la verificación de Meta.',
+            'instagram' => 'Próximamente. El canal está preparado, pero falta la integración con Meta.',
+            default => 'Canal sin descripción registrada.',
         };
     }
 
@@ -40,10 +40,10 @@ class ChannelProviderLabels
             'label' => $this->providerLabel($provider),
             'status' => $this->providerStatusLabel($status),
             'description' => match ($provider) {
-                'telegram' => 'Telegram runs on the real messaging provider lifecycle.',
-                'whatsapp' => 'WhatsApp now exposes local readiness and keeps Meta verification as the next step.',
-                'instagram' => 'Instagram is reserved as a future provider in the same lifecycle.',
-                default => 'Lifecycle surface available for this provider.',
+                'telegram' => 'Telegram está conectado y recibe mensajes.',
+                'whatsapp' => 'WhatsApp está listo de este lado; el siguiente paso es la verificación de Meta.',
+                'instagram' => 'Instagram se sumará más adelante y funcionará igual que los demás canales.',
+                default => 'Este canal se maneja igual que los demás.',
             },
         ];
     }
@@ -70,26 +70,26 @@ class ChannelProviderLabels
     {
         return match ($status) {
             'healthy', 'connected' => 'Activo',
-            'ready' => 'Ready',
-            'coming_soon' => 'Coming Soon',
-            'warning' => 'Warning',
-            'disconnected' => 'Disconnected',
-            'expired' => 'Expired',
-            default => 'Unknown',
+            'ready' => 'Listo',
+            'coming_soon' => 'Próximamente',
+            'warning' => 'Con alertas',
+            'disconnected' => 'Desconectado',
+            'expired' => 'Vencido',
+            default => 'Sin dato',
         };
     }
 
     public function healthLabel(string $status): string
     {
         return match ($status) {
-            'healthy' => 'Healthy',
-            'connected' => 'Connected',
-            'ready' => 'Ready',
-            'coming_soon' => 'Coming Soon',
-            'warning' => 'Warning',
-            'disconnected' => 'Disconnected',
-            'expired' => 'Expired',
-            default => 'Unknown',
+            'healthy' => 'Funcionando',
+            'connected' => 'Conectado',
+            'ready' => 'Listo',
+            'coming_soon' => 'Próximamente',
+            'warning' => 'Con alertas',
+            'disconnected' => 'Desconectado',
+            'expired' => 'Vencido',
+            default => 'Sin dato',
         };
     }
 
@@ -111,11 +111,11 @@ class ChannelProviderLabels
     public function capabilityPreview(array $capabilities): array
     {
         return collect([
-            'send_messages' => 'Send',
-            'receive_messages' => 'Receive',
-            'buttons' => 'Buttons',
-            'templates' => 'Templates',
-            'catalog' => 'Catalog',
+            'send_messages' => 'Enviar',
+            'receive_messages' => 'Recibir',
+            'buttons' => 'Botones',
+            'templates' => 'Plantillas',
+            'catalog' => 'Catálogo',
         ])
             ->filter(fn (string $label, string $key): bool => (bool) ($capabilities[$key] ?? false))
             ->values()
@@ -129,28 +129,28 @@ class ChannelProviderLabels
     public function capabilityItems(array $capabilities): array
     {
         $labels = [
-            'receive_messages' => 'Receive Messages',
-            'send_messages' => 'Send Messages',
-            'images' => 'Images',
-            'files' => 'Files',
+            'receive_messages' => 'Recibir mensajes',
+            'send_messages' => 'Enviar mensajes',
+            'images' => 'Imágenes',
+            'files' => 'Archivos',
             'audio' => 'Audio',
             'video' => 'Video',
-            'templates' => 'Templates',
-            'catalog' => 'Catalog',
-            'reactions' => 'Reactions',
-            'buttons' => 'Buttons',
-            'location' => 'Location',
-            'contacts' => 'Contacts',
-            'send_images' => 'Images',
-            'send_documents' => 'Files',
+            'templates' => 'Plantillas',
+            'catalog' => 'Catálogo',
+            'reactions' => 'Reacciones',
+            'buttons' => 'Botones',
+            'location' => 'Ubicación',
+            'contacts' => 'Contactos',
+            'send_images' => 'Imágenes',
+            'send_documents' => 'Archivos',
             'send_audio' => 'Audio',
             'send_video' => 'Video',
-            'interactive_buttons' => 'Interactive Buttons',
-            'typing_indicator' => 'Typing Indicator',
-            'delivery_receipts' => 'Delivery Receipts',
-            'read_receipts' => 'Read Receipts',
-            'voice_notes' => 'Voice Notes',
-            'reaction_support' => 'Reaction Support',
+            'interactive_buttons' => 'Botones interactivos',
+            'typing_indicator' => 'Indicador de escritura',
+            'delivery_receipts' => 'Confirmación de entrega',
+            'read_receipts' => 'Confirmación de lectura',
+            'voice_notes' => 'Notas de voz',
+            'reaction_support' => 'Reacciones',
         ];
 
         return collect($labels)
@@ -169,13 +169,13 @@ class ChannelProviderLabels
     {
         return [
             'title' => $provider === 'instagram'
-                ? 'Coming Soon'
-                : 'Future Ready',
+                ? 'Próximamente'
+                : 'Listo para crecer',
             'description' => match ($provider) {
-                'telegram' => 'Telegram is live. New providers can reuse this lifecycle immediately.',
-                'whatsapp' => 'WhatsApp configuration is ready locally and now waits for Meta verification.',
-                'instagram' => 'Instagram is reserved and ready to plug into the same provider interface.',
-                default => 'This provider uses the shared lifecycle surface.',
+                'telegram' => 'Telegram ya recibe pedidos.',
+                'whatsapp' => 'WhatsApp está configurado y espera la verificación de Meta.',
+                'instagram' => 'Instagram llegará pronto.',
+                default => 'Este canal se maneja como los demás.',
             },
             'status' => $this->providerStatusLabel($status),
         ];
@@ -188,12 +188,12 @@ class ChannelProviderLabels
     {
         return [
             [
-                'label' => 'View Details',
+                'label' => 'Ver detalle',
                 'href' => route('channels.show', $provider),
                 'style' => 'primary',
             ],
             [
-                'label' => 'Configure',
+                'label' => 'Configurar',
                 'href' => $provider === 'whatsapp' ? route('channels.whatsapp.configuration') : route('channels.show', $provider).'#connection',
                 'style' => 'secondary',
             ],

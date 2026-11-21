@@ -4,7 +4,7 @@
 @endphp
 
 <div class="space-y-6">
-    <section class="rounded-[1.75rem] border border-slate-200/80 bg-slate-50/80 p-5 shadow-sm">
+    <section class="rounded-[20px] border border-slate-200/80 bg-slate-50/80 p-5 shadow-sm">
         <div class="flex items-start justify-between gap-4">
             <div>
                 <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Informacion basica</p>
@@ -58,7 +58,7 @@
         </div>
     </section>
 
-    <section class="rounded-[1.75rem] border border-slate-200/80 bg-white p-5 shadow-sm">
+    <section class="rounded-[20px] border border-slate-200/80 bg-white p-5 shadow-sm">
         <div class="flex items-start justify-between gap-4">
             <div>
                 <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Reconocimiento</p>
@@ -79,7 +79,7 @@
         </div>
     </section>
 
-    <section class="rounded-[1.75rem] border border-slate-200/80 bg-slate-50/80 p-5 shadow-sm">
+    <section class="rounded-[20px] border border-slate-200/80 bg-slate-50/80 p-5 shadow-sm">
         <div class="flex items-start justify-between gap-4">
             <div>
                 <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Estado</p>

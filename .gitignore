@@ -31,3 +31,6 @@ Thumbs.db
 /artifacts/pilot/runs/
 /playwright-report/
 /test-results/
+
+# Auditoría del entorno de muestra (playwright.showcase.config.js)
+/artifacts/showcase/

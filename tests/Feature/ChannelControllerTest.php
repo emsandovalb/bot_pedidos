@@ -21,7 +21,7 @@ class ChannelControllerTest extends TestCase
         $this->actingAs($user)
             ->get(route('channels.whatsapp'))
             ->assertOk()
-            ->assertSeeText('Configuracion de WhatsApp Business');
+            ->assertSeeText('Configuración de WhatsApp Business');
 
         $this->assertDatabaseCount('channel_connections', 1);
 

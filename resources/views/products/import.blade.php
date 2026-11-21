@@ -8,9 +8,8 @@
 
         <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div class="max-w-3xl">
-                <div class="brand-badge bg-brand-primary/10 text-brand-primary">Importar productos</div>
-                <h1 class="mt-3 text-3xl font-semibold tracking-tight text-brand-navy">Importar productos</h1>
-                <p class="mt-2 text-sm text-slate-600">
+                <h1 class="page-title mt-1">Importar productos</h1>
+                <p class="page-subtitle mt-2">
                     Pega una linea por producto. El importador actualiza productos y alias por nombre normalizado.
                 </p>
             </div>
