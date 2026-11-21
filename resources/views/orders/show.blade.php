@@ -27,7 +27,7 @@
             $detectedItems = $order->orderItems;
         @endphp
 
-        <div class="overflow-hidden rounded-[28px] border border-slate-200/70 bg-[linear-gradient(135deg,rgba(20,110,219,0.08),rgba(22,163,74,0.05)_40%,rgba(255,255,255,1)_80%)] shadow-[0_18px_50px_-28px_rgba(15,23,42,0.45)]">
+        <div class="overflow-hidden rounded-[28px] border border-slate-200/70 surface-hero shadow-card">
             <div class="flex flex-col gap-5 p-6 sm:p-8 lg:flex-row lg:items-end lg:justify-between">
                 <div class="max-w-3xl">
                     <div class="text-sm font-medium uppercase tracking-wide text-slate-500">Pedido #{{ $order->id }}</div>

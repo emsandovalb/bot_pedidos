@@ -7,10 +7,10 @@
         class="relative"
         data-focus-page
     >
-        <div class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,rgba(20,110,219,0.12),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(22,163,74,0.08),transparent_24%),linear-gradient(180deg,#f8fbff_0%,#ffffff_44%,#f8fafc_100%)]"></div>
+        <div class="pointer-events-none absolute inset-0 -z-10 surface-page"></div>
 
         <div class="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
-            <section class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-6 shadow-[0_18px_50px_-34px_rgba(15,23,42,0.32)] backdrop-blur">
+            <section class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-6 shadow-card backdrop-blur">
                 <div class="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
                     <div class="max-w-3xl">
                         <div class="inline-flex items-center rounded-full bg-brand-primary/10 px-3 py-1 text-xs font-semibold tracking-[0.18em] text-brand-primary ring-1 ring-inset ring-brand-primary/10">
@@ -59,7 +59,7 @@
             </section>
 
             <template x-if="!workspaceOpen && recommendedOrder">
-                <section class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-6 shadow-[0_18px_50px_-34px_rgba(15,23,42,0.32)] backdrop-blur" data-focus-recommended>
+                <section class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-6 shadow-card backdrop-blur" data-focus-recommended>
                     <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                         <div class="max-w-3xl">
                             <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Tu siguiente pedido</div>
@@ -78,7 +78,7 @@
                     </div>
 
                     <div class="mt-6 grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.9fr)]">
-                        <div class="rounded-[1.75rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-5">
+                        <div class="rounded-[1.75rem] border border-slate-200 surface-soft p-5">
                             <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Qué preparar</div>
                             <div class="mt-4 space-y-3">
                                 <template x-for="line in recommendedOrder.item_lines" :key="line.id ?? line.text">
@@ -120,7 +120,7 @@
             </template>
 
             <template x-if="!workspaceOpen && !recommendedOrder">
-                <section class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-6 shadow-[0_18px_50px_-34px_rgba(15,23,42,0.32)] backdrop-blur" data-focus-empty>
+                <section class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-6 shadow-card backdrop-blur" data-focus-empty>
                     <div class="rounded-[1.75rem] border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center">
                         <div class="text-3xl font-semibold tracking-tight text-brand-navy">Excelente.</div>
                         <p class="mt-2 text-lg text-slate-600">No quedan pedidos pendientes.</p>
@@ -146,7 +146,7 @@
             <div
                 x-show="toast.visible"
                 x-transition
-                class="rounded-2xl border p-4 shadow-[0_16px_32px_-18px_rgba(15,23,42,0.35)]"
+                class="rounded-2xl border p-4 shadow-soft"
                 :class="toast.type === 'error' ? 'border-rose-200 bg-rose-50 text-rose-900' : 'border-emerald-200 bg-white text-slate-900'"
             >
                 <div class="text-sm font-semibold" x-text="toast.message"></div>
@@ -157,7 +157,7 @@
             x-show="workspaceOpen"
             x-cloak
             x-transition.opacity.duration.250ms
-            class="rounded-[2rem] border border-slate-200/80 bg-white/95 shadow-[0_18px_50px_-34px_rgba(15,23,42,0.32)] backdrop-blur"
+            class="rounded-[2rem] border border-slate-200/80 bg-white/95 shadow-card backdrop-blur"
             data-focus-inline-workspace
             data-focus-inline-review
         >
@@ -197,7 +197,7 @@
                                     <div class="rounded-[1.75rem] border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-medium text-emerald-900" x-text="workspaceNotice"></div>
                                 </template>
 
-                                <div class="rounded-[2rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-6 shadow-sm">
+                                <div class="rounded-[2rem] border border-slate-200 surface-soft p-6 shadow-sm">
                                     <div class="flex items-start justify-between gap-4">
                                         <div>
                                             <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Qué preparar</div>

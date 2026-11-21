@@ -35,7 +35,7 @@
         x-on:keydown.escape.window="closeDrawer()"
         class="relative overflow-hidden"
     >
-        <div class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,rgba(20,110,219,0.12),transparent_28%),radial-gradient(circle_at_top_right,rgba(22,163,74,0.10),transparent_26%),linear-gradient(180deg,#f8fbff_0%,#ffffff_42%,#f8fafc_100%)]"></div>
+        <div class="pointer-events-none absolute inset-0 -z-10 surface-page"></div>
         <div class="pointer-events-none absolute left-[-8rem] top-24 -z-10 h-80 w-80 rounded-full bg-sky-200/30 blur-3xl"></div>
         <div class="pointer-events-none absolute right-[-6rem] top-44 -z-10 h-72 w-72 rounded-full bg-emerald-200/30 blur-3xl"></div>
 
@@ -51,7 +51,7 @@
             <div
                 x-show="liveToast.visible"
                 x-transition
-                class="rounded-2xl border border-emerald-200 bg-white p-4 shadow-[0_16px_32px_-18px_rgba(15,23,42,0.35)]"
+                class="rounded-2xl border border-emerald-200 bg-white p-4 shadow-soft"
             >
                 <div class="flex items-start gap-3">
                     <div class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">N</div>
@@ -65,7 +65,7 @@
         </div>
 
         <section class="mx-auto max-w-[1680px] px-4 py-4 sm:px-6 lg:px-8">
-            <div class="overflow-hidden rounded-[32px] border border-slate-200/70 bg-white/85 shadow-[0_24px_60px_-40px_rgba(15,23,42,0.38)] backdrop-blur">
+            <div class="overflow-hidden rounded-[32px] border border-slate-200/70 bg-white/85 shadow-raised backdrop-blur">
                 <div class="flex flex-col gap-6 px-5 py-6 sm:px-8 lg:flex-row lg:items-end lg:justify-between">
                     <div class="max-w-3xl">
                         <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-brand-primary ring-1 ring-inset ring-blue-100">
@@ -125,7 +125,7 @@
         </section>
 
         <section class="mx-auto max-w-[1680px] px-4 sm:px-6 lg:px-8">
-            <details class="group rounded-[28px] border border-slate-200/80 bg-white/90 shadow-[0_18px_50px_-34px_rgba(15,23,42,0.35)]">
+            <details class="group rounded-[28px] border border-slate-200/80 bg-white/90 shadow-card">
                 <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 sm:px-6">
                     <div>
                         <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Secondary toolbar</div>
@@ -184,7 +184,7 @@
         </section>
 
         <section class="mx-auto max-w-[1680px] px-4 py-5 sm:px-6 lg:px-8">
-            <div class="rounded-[32px] border border-slate-200/80 bg-white/90 p-5 shadow-[0_18px_50px_-34px_rgba(15,23,42,0.35)]">
+            <div class="rounded-[32px] border border-slate-200/80 bg-white/90 p-5 shadow-card">
                 <div class="flex items-end justify-between gap-4">
                     <div>
                         <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">DO NOW</div>
@@ -203,7 +203,7 @@
                 <div class="mt-6 grid gap-4 xl:grid-cols-2 2xl:grid-cols-3" x-show="doNowCards.length > 0" x-cloak>
                     <template x-for="order in doNowCards" :key="order.id">
                         <article
-                            class="group flex h-full flex-col rounded-[28px] border border-slate-200/80 bg-white p-5 shadow-[0_16px_36px_-28px_rgba(15,23,42,0.32)] transition hover:-translate-y-0.5 hover:shadow-[0_20px_44px_-30px_rgba(15,23,42,0.35)]"
+                            class="group flex h-full flex-col rounded-[28px] border border-slate-200/80 bg-white p-5 shadow-soft transition hover:-translate-y-0.5 hover:shadow-soft"
                             :class="flashOrderIds.includes(order.id) ? 'ring-2 ring-emerald-200' : ''"
                             @click="openDrawer(order)"
                         >
@@ -266,7 +266,7 @@
         </section>
 
         <section class="mx-auto max-w-[1680px] px-4 py-2 sm:px-6 lg:px-8">
-            <div class="rounded-[32px] border border-slate-200/80 bg-white/90 p-5 shadow-[0_18px_50px_-34px_rgba(15,23,42,0.35)]">
+            <div class="rounded-[32px] border border-slate-200/80 bg-white/90 p-5 shadow-card">
                 <div class="flex items-end justify-between gap-4">
                     <div>
                         <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">NEXT</div>
@@ -327,7 +327,7 @@
         </section>
 
         <section class="mx-auto max-w-[1680px] px-4 py-2 sm:px-6 lg:px-8">
-            <details class="rounded-[32px] border border-slate-200/80 bg-white/90 p-5 shadow-[0_18px_50px_-34px_rgba(15,23,42,0.35)]">
+            <details class="rounded-[32px] border border-slate-200/80 bg-white/90 p-5 shadow-card">
                 <summary class="cursor-pointer list-none">
                     <div class="flex items-end justify-between gap-4">
                         <div>
@@ -394,7 +394,7 @@
                 x-transition:leave="transform transition ease-in duration-150"
                 x-transition:leave-start="translate-x-0"
                 x-transition:leave-end="translate-x-full"
-                class="absolute right-0 top-0 h-full w-[min(100vw-1rem,580px)] overflow-y-auto border-l border-slate-200 bg-white shadow-[0_24px_60px_-24px_rgba(15,23,42,0.32)]"
+                class="absolute right-0 top-0 h-full w-[min(100vw-1rem,580px)] overflow-y-auto border-l border-slate-200 bg-white shadow-raised"
             >
                 <div class="sticky top-0 z-10 border-b border-slate-200 bg-white/95 px-5 py-4 backdrop-blur">
                     <div class="flex items-start justify-between gap-4">

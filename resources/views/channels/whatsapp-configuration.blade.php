@@ -18,7 +18,7 @@
             </div>
         @endif
 
-        <section class="overflow-hidden rounded-[2rem] border border-slate-200/70 bg-[linear-gradient(135deg,rgba(14,165,233,0.12),rgba(22,163,74,0.08)_46%,rgba(255,255,255,1)_84%)] shadow-sm">
+        <section class="overflow-hidden rounded-[2rem] border border-slate-200/70 surface-hero-sky shadow-sm">
             <div class="grid gap-6 px-6 py-8 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
                 <div class="space-y-5">
                     <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary ring-1 ring-inset ring-blue-100">
@@ -173,7 +173,7 @@
             </div>
 
             <aside class="space-y-6">
-                <section class="rounded-[2rem] border border-slate-200/70 bg-[linear-gradient(180deg,rgba(16,185,129,0.08),rgba(255,255,255,1)_76%)] p-6 shadow-sm">
+                <section class="rounded-[2rem] border border-slate-200/70 surface-tint-green p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <div>
                             <h2 class="text-lg font-semibold text-brand-navy">Validation</h2>

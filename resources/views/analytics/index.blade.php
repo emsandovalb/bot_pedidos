@@ -19,7 +19,7 @@
     @endphp
 
     <div class="space-y-10">
-        <section class="rounded-[2rem] border border-slate-200/70 bg-[linear-gradient(135deg,rgba(20,110,219,0.08),rgba(22,163,74,0.06)_40%,rgba(255,255,255,1)_82%)] p-6 shadow-sm sm:p-8">
+        <section class="rounded-[2rem] border border-slate-200/70 surface-hero p-6 shadow-sm sm:p-8">
             <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                 <div class="max-w-3xl">
                     <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary ring-1 ring-inset ring-blue-100">
@@ -54,19 +54,19 @@
         </section>
 
         <section class="grid gap-6 md:grid-cols-2 xl:grid-cols-5">
-            <article class="rounded-2xl border border-[#146EDB]/15 border-l-4 border-l-brand-primary bg-white p-5 shadow-sm">
+            <article class="rounded-2xl border border-brand-primary/15 border-l-4 border-l-brand-primary bg-white p-5 shadow-sm">
                 <div class="text-sm font-medium text-slate-500">Pedidos hoy</div>
                 <div class="mt-3 text-3xl font-semibold tracking-tight text-brand-navy">{{ $ordersTodayCount }}</div>
                 <div class="mt-1 text-sm text-slate-600">Pedidos creados durante el día</div>
             </article>
 
-            <article class="rounded-2xl border border-[#146EDB]/15 border-l-4 border-l-brand-primary bg-white p-5 shadow-sm">
+            <article class="rounded-2xl border border-brand-primary/15 border-l-4 border-l-brand-primary bg-white p-5 shadow-sm">
                 <div class="text-sm font-medium text-slate-500">Pedidos últimos 7 días</div>
                 <div class="mt-3 text-3xl font-semibold tracking-tight text-brand-navy">{{ $ordersLast7DaysCount }}</div>
                 <div class="mt-1 text-sm text-slate-600">Volumen semanal visible</div>
             </article>
 
-            <article class="rounded-2xl border border-[#146EDB]/15 border-l-4 border-l-brand-primary bg-white p-5 shadow-sm">
+            <article class="rounded-2xl border border-brand-primary/15 border-l-4 border-l-brand-primary bg-white p-5 shadow-sm">
                 <div class="text-sm font-medium text-slate-500">Pedidos este mes</div>
                 <div class="mt-3 text-3xl font-semibold tracking-tight text-brand-navy">{{ $ordersThisMonthCount }}</div>
                 <div class="mt-1 text-sm text-slate-600">Acumulado mensual</div>
@@ -147,7 +147,7 @@
                             <div class="text-2xl font-semibold tracking-tight text-brand-navy">{{ $classificationPercentage }}%</div>
                         </div>
                         <div class="mt-3 h-3 overflow-hidden rounded-full bg-slate-100">
-                            <div class="h-full rounded-full bg-gradient-to-r from-[#146EDB] to-emerald-500" style="width: {{ $classificationPercentage }}%"></div>
+                            <div class="h-full rounded-full bg-gradient-to-r from-brand-primary to-emerald-500" style="width: {{ $classificationPercentage }}%"></div>
                         </div>
                         <p class="mt-3 text-sm text-slate-500">
                             {{ $classificationPercentage }}% de los ítems visibles ya quedaron asociados a un producto.
@@ -230,7 +230,7 @@
                     <h2 class="text-lg font-semibold text-brand-navy">Actividad reciente</h2>
                     <p class="mt-1 text-sm text-slate-500">Últimos 10 pedidos visibles en la operación.</p>
                 </div>
-                <a href="{{ route('orders.index') }}" class="text-sm font-medium text-[#146EDB] transition hover:text-[#146EDB]/80">
+                <a href="{{ route('orders.index') }}" class="text-sm font-medium text-brand-primary transition hover:text-brand-primary/80">
                     Ver todos
                 </a>
             </div>

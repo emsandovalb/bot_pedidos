@@ -7,7 +7,7 @@
             $currentStatus = old('status', $setupRequest->status);
         @endphp
 
-        <section class="overflow-hidden rounded-[2rem] border border-slate-200/70 bg-[linear-gradient(135deg,rgba(20,110,219,0.12),rgba(245,158,11,0.10)_46%,rgba(255,255,255,1)_84%)] shadow-sm">
+        <section class="overflow-hidden rounded-[2rem] border border-slate-200/70 surface-hero shadow-sm">
             <div class="grid gap-6 px-6 py-7 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
                 <div class="space-y-4">
                     <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary ring-1 ring-inset ring-blue-100">
@@ -178,7 +178,7 @@
                 </form>
                 @endcan
 
-                <article class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-amber-500 bg-[linear-gradient(180deg,rgba(245,158,11,0.08),rgba(255,255,255,1)_72%)] p-6 shadow-sm">
+                <article class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-amber-500 surface-tint-amber p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <div>
                             <h2 class="text-lg font-semibold text-brand-navy">Lectura rapida</h2>

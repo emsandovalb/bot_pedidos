@@ -23,7 +23,7 @@
             </div>
         @endif
 
-        <section class="overflow-hidden rounded-[2rem] border border-slate-200/80 bg-[linear-gradient(135deg,rgba(20,110,219,0.08),rgba(22,163,74,0.06)_40%,rgba(255,255,255,1)_82%)] shadow-sm">
+        <section class="overflow-hidden rounded-[2rem] border border-slate-200/80 surface-hero shadow-sm">
             <div class="grid gap-6 px-6 py-7 lg:grid-cols-[1.2fr_0.8fr] lg:px-8">
                 <div class="space-y-4">
                     <div class="inline-flex rounded-full bg-brand-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-brand-primary ring-1 ring-inset ring-blue-100">

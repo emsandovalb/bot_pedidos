@@ -15,7 +15,7 @@
         @endif
     </head>
     <body class="overflow-x-hidden font-sans antialiased text-slate-900" style="margin:0;min-height:100vh;background:#08162b;">
-        <main class="min-h-screen overflow-x-hidden bg-[linear-gradient(180deg,#f8fafc_0%,#eef4ff_55%,#f8fafc_100%)]" style="min-height:100vh;background:#08162b;">
+        <main class="min-h-screen overflow-x-hidden surface-page" style="min-height:100vh;background:#08162b;">
             {{ $slot }}
         </main>
     </body>

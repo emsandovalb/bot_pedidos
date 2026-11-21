@@ -4,7 +4,7 @@
         x-data="developerToolkit(@js($formState), @js($examples), @js($providerSpecs))"
         x-init="init()"
     >
-        <section class="overflow-hidden rounded-[2rem] border border-slate-200/80 bg-[linear-gradient(135deg,rgba(20,110,219,0.08),rgba(22,163,74,0.08),#ffffff_72%)] shadow-sm">
+        <section class="overflow-hidden rounded-[2rem] border border-slate-200/80 surface-hero shadow-sm">
             <div class="p-6 sm:p-8">
                 <div class="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
                     <div class="max-w-3xl">

@@ -34,7 +34,7 @@
             $currentStatus = $filters['status'] ?? null;
         @endphp
 
-        <div class="overflow-hidden rounded-[28px] border border-slate-200/70 bg-[linear-gradient(135deg,rgba(20,110,219,0.08),rgba(22,163,74,0.05)_36%,rgba(255,255,255,1)_78%)] shadow-[0_18px_50px_-28px_rgba(15,23,42,0.45)]">
+        <div class="overflow-hidden rounded-[28px] border border-slate-200/70 surface-hero shadow-card">
             <div class="flex flex-col gap-6 p-6 sm:p-8 lg:flex-row lg:items-end lg:justify-between">
                 <div class="max-w-3xl">
                     <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-brand-primary ring-1 ring-inset ring-blue-100">
@@ -84,8 +84,8 @@
                     $rawPreview = \Illuminate\Support\Str::limit($order->raw_message_text ?? 'Sin mensaje original', 180);
                 @endphp
 
-                <article class="overflow-hidden rounded-[28px] border border-slate-200/80 bg-white shadow-[0_18px_50px_-32px_rgba(15,23,42,0.35)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_60px_-34px_rgba(15,23,42,0.42)] {{ $isPending ? 'ring-1 ring-amber-100' : '' }}">
-                    <div class="h-1 {{ $isPending ? 'bg-amber-500' : 'bg-gradient-to-r from-[#146EDB] to-emerald-500' }}"></div>
+                <article class="overflow-hidden rounded-[28px] border border-slate-200/80 bg-white shadow-card transition hover:-translate-y-0.5 hover:shadow-raised {{ $isPending ? 'ring-1 ring-amber-100' : '' }}">
+                    <div class="h-1 {{ $isPending ? 'bg-amber-500' : 'bg-gradient-to-r from-brand-primary to-emerald-500' }}"></div>
 
                     <div class="p-5 sm:p-6">
                         <div class="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">

@@ -86,8 +86,8 @@ const brand = {
 };
 
 const themeVariables = plugin(({ addBase }) => {
-    const light = { '--tw-c-white': '255 255 255' };
-    const dark = { '--tw-c-white': hexToChannels('#141d2f') };
+    const light = { '--tw-c-white': '255 255 255', '--tw-c-shadow': '15 23 42' };
+    const dark = { '--tw-c-white': hexToChannels('#141d2f'), '--tw-c-shadow': '0 0 0' };
 
     for (const [family, darkShades] of Object.entries(themed)) {
         for (const shade of shades) {
@@ -125,6 +125,12 @@ export default {
             fontFamily: {
                 sans: ['"Plus Jakarta Sans"', ...defaultTheme.fontFamily.sans],
                 display: ['"Bricolage Grotesque"', '"Plus Jakarta Sans"', ...defaultTheme.fontFamily.sans],
+            },
+            // Sombras de tarjeta: en oscuro usan negro puro para que se sigan notando.
+            boxShadow: {
+                soft: '0 16px 36px -26px rgb(var(--tw-c-shadow) / 0.35)',
+                card: '0 18px 52px -34px rgb(var(--tw-c-shadow) / 0.42)',
+                raised: '0 24px 64px -36px rgb(var(--tw-c-shadow) / 0.48)',
             },
             colors: {
                 white: channel('white'),

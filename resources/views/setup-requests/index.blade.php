@@ -5,7 +5,7 @@
             $statusClasses = $statusClasses ?? [];
         @endphp
 
-        <section class="overflow-hidden rounded-[2rem] border border-slate-200/70 bg-[linear-gradient(135deg,rgba(245,158,11,0.14),rgba(20,110,219,0.08)_42%,rgba(255,255,255,1)_82%)] shadow-sm">
+        <section class="overflow-hidden rounded-[2rem] border border-slate-200/70 surface-hero-amber shadow-sm">
             <div class="grid gap-6 px-6 py-7 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
                 <div class="space-y-4">
                     <div class="inline-flex items-center rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 ring-1 ring-inset ring-amber-100">

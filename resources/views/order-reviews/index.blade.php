@@ -66,7 +66,7 @@
     @endphp
 
     <div class="space-y-6">
-        <div class="overflow-hidden rounded-[28px] border border-slate-200/70 bg-[linear-gradient(135deg,rgba(20,110,219,0.08),rgba(22,163,74,0.05)_36%,rgba(255,255,255,1)_78%)] shadow-[0_18px_50px_-28px_rgba(15,23,42,0.45)]">
+        <div class="overflow-hidden rounded-[28px] border border-slate-200/70 surface-hero shadow-card">
             <div class="flex flex-col gap-6 p-6 sm:p-8 lg:flex-row lg:items-end lg:justify-between">
                 <div class="max-w-3xl">
                     <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-brand-primary ring-1 ring-inset ring-blue-100">
@@ -160,7 +160,7 @@
                     $notesToShow = $orderNotes->isNotEmpty() ? $orderNotes : $itemNotes;
                 @endphp
 
-                <article class="overflow-hidden rounded-[28px] border border-slate-200/80 bg-white shadow-[0_18px_50px_-34px_rgba(15,23,42,0.38)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_60px_-34px_rgba(15,23,42,0.45)] {{ $tone['border'] }}">
+                <article class="overflow-hidden rounded-[28px] border border-slate-200/80 bg-white shadow-card transition hover:-translate-y-0.5 hover:shadow-raised {{ $tone['border'] }}">
                     <div class="h-1 {{ $tone['accent'] }}"></div>
 
                     <div class="p-5 sm:p-6">
@@ -371,7 +371,7 @@
             @empty
                 <div class="rounded-[28px] border border-dashed border-slate-300 bg-white px-6 py-14 text-center shadow-sm">
                     <div class="mx-auto max-w-md">
-                        <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 text-3xl text-[#146EDB]">
+                        <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 text-3xl text-brand-primary">
                             📦
                         </div>
                         <h2 class="mt-5 text-lg font-semibold text-brand-navy">No hay pedidos pendientes de revisión.</h2>

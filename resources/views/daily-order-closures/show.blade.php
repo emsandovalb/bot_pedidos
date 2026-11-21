@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="space-y-8">
-        <section class="overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white via-slate-50 to-emerald-50 shadow-[0_24px_80px_-40px_rgba(15,23,42,0.35)]">
+        <section class="overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white via-slate-50 to-emerald-50 shadow-raised">
             <div class="px-6 py-8 sm:px-8 lg:px-10">
                 <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                     <div class="max-w-3xl">
@@ -28,57 +28,57 @@
         </section>
 
         <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-            <div class="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_18px_55px_-35px_rgba(15,23,42,0.45)]">
+            <div class="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-card">
                 <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Fecha</div>
                 <div class="mt-2 text-xl font-semibold text-brand-navy">{{ $closure->closure_date?->format('d/m/Y') ?? '-' }}</div>
             </div>
-            <div class="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_18px_55px_-35px_rgba(15,23,42,0.45)]">
+            <div class="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-card">
                 <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Sucursal</div>
                 <div class="mt-2 text-xl font-semibold text-brand-navy">{{ $closure->branch?->name ?? '-' }}</div>
             </div>
-            <div class="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_18px_55px_-35px_rgba(15,23,42,0.45)]">
+            <div class="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-card">
                 <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Total pedidos</div>
                 <div class="mt-2 text-xl font-semibold text-brand-navy">{{ $closure->total_orders ?? 0 }}</div>
             </div>
-            <div class="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_18px_55px_-35px_rgba(15,23,42,0.45)]">
+            <div class="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-card">
                 <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Total ítems</div>
                 <div class="mt-2 text-xl font-semibold text-brand-navy">{{ number_format((float) ($closure->total_items ?? 0), 2, '.', ',') }}</div>
             </div>
-            <div class="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_18px_55px_-35px_rgba(15,23,42,0.45)]">
+            <div class="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-card">
                 <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Cerrado por</div>
                 <div class="mt-2 text-xl font-semibold text-brand-navy">{{ $closure->closedByUser?->name ?? '-' }}</div>
             </div>
         </section>
 
         <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
-            <div class="rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white to-sky-50 p-5 shadow-[0_18px_55px_-35px_rgba(15,23,42,0.45)]">
+            <div class="rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white to-sky-50 p-5 shadow-card">
                 <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Pendientes</div>
                 <div class="mt-2 text-3xl font-semibold text-brand-navy">{{ $closure->pending_review_count ?? 0 }}</div>
             </div>
-            <div class="rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white to-emerald-50 p-5 shadow-[0_18px_55px_-35px_rgba(15,23,42,0.45)]">
+            <div class="rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white to-emerald-50 p-5 shadow-card">
                 <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Confirmados</div>
                 <div class="mt-2 text-3xl font-semibold text-brand-navy">{{ $closure->confirmed_count ?? 0 }}</div>
             </div>
-            <div class="rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white to-amber-50 p-5 shadow-[0_18px_55px_-35px_rgba(15,23,42,0.45)]">
+            <div class="rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white to-amber-50 p-5 shadow-card">
                 <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">En preparación</div>
                 <div class="mt-2 text-3xl font-semibold text-brand-navy">{{ $closure->preparing_count ?? 0 }}</div>
             </div>
-            <div class="rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white to-cyan-50 p-5 shadow-[0_18px_55px_-35px_rgba(15,23,42,0.45)]">
+            <div class="rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white to-cyan-50 p-5 shadow-card">
                 <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Listos para despacho</div>
                 <div class="mt-2 text-3xl font-semibold text-brand-navy">{{ $closure->ready_for_dispatch_count ?? 0 }}</div>
             </div>
-            <div class="rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white to-rose-50 p-5 shadow-[0_18px_55px_-35px_rgba(15,23,42,0.45)]">
+            <div class="rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white to-rose-50 p-5 shadow-card">
                 <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Despachados</div>
                 <div class="mt-2 text-3xl font-semibold text-brand-navy">{{ $closure->dispatched_count ?? 0 }}</div>
             </div>
-            <div class="rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white to-slate-100 p-5 shadow-[0_18px_55px_-35px_rgba(15,23,42,0.45)]">
+            <div class="rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white to-slate-100 p-5 shadow-card">
                 <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Cancelados</div>
                 <div class="mt-2 text-3xl font-semibold text-brand-navy">{{ $closure->cancelled_count ?? 0 }}</div>
             </div>
         </section>
 
         <section class="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
-            <div class="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-[0_18px_55px_-35px_rgba(15,23,42,0.45)]">
+            <div class="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-card">
                 <div class="border-b border-slate-200/70 px-6 py-5">
                     <div class="flex items-center justify-between gap-3">
                         <h2 class="text-lg font-semibold text-brand-navy">Resumen de ítems</h2>
@@ -121,7 +121,7 @@
             </div>
 
             <aside class="space-y-6">
-                <div class="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-[0_18px_55px_-35px_rgba(15,23,42,0.45)]">
+                <div class="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-card">
                     <div class="border-b border-slate-200/70 px-6 py-5">
                         <h2 class="text-lg font-semibold text-brand-navy">Detalle operativo</h2>
                     </div>
@@ -141,7 +141,7 @@
                     </dl>
                 </div>
 
-                <div class="overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-slate-50 to-white shadow-[0_18px_55px_-35px_rgba(15,23,42,0.45)]">
+                <div class="overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-slate-50 to-white shadow-card">
                     <div class="border-b border-slate-200/70 px-6 py-5">
                         <h2 class="text-lg font-semibold text-brand-navy">Indicadores</h2>
                     </div>
@@ -159,7 +159,7 @@
             </aside>
         </section>
 
-        <section class="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-[0_18px_55px_-35px_rgba(15,23,42,0.45)]">
+        <section class="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-card">
             <div class="border-b border-slate-200/70 px-6 py-5">
                 <div class="flex items-center justify-between gap-3">
                     <h2 class="text-lg font-semibold text-brand-navy">Pedidos vinculados</h2>

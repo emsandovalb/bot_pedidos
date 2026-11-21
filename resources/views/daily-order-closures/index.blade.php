@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="space-y-8">
-        <section class="overflow-hidden rounded-3xl border border-slate-200/80 bg-[linear-gradient(135deg,rgba(20,110,219,0.08),rgba(22,163,74,0.08)_38%,rgba(255,255,255,1)_82%)] shadow-[0_24px_80px_-40px_rgba(15,23,42,0.35)]">
+        <section class="overflow-hidden rounded-3xl border border-slate-200/80 surface-hero shadow-raised">
             <div class="px-6 py-8 sm:px-8 lg:px-10">
                 <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                     <div class="max-w-3xl">
@@ -31,7 +31,7 @@
         @if ($closures->isNotEmpty())
             <div class="grid gap-5 xl:grid-cols-2">
                 @foreach ($closures as $closure)
-                    <article class="group overflow-hidden rounded-3xl border border-slate-200/80 border-l-4 border-l-emerald-500 bg-white shadow-[0_18px_55px_-35px_rgba(15,23,42,0.45)] transition hover:-translate-y-0.5 hover:shadow-[0_26px_70px_-35px_rgba(15,23,42,0.55)]">
+                    <article class="group overflow-hidden rounded-3xl border border-slate-200/80 border-l-4 border-l-emerald-500 bg-white shadow-card transition hover:-translate-y-0.5 hover:shadow-raised">
                         <div class="border-b border-slate-200/70 bg-gradient-to-r from-slate-50 to-white px-5 py-4 sm:px-6">
                             <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                                 <div>

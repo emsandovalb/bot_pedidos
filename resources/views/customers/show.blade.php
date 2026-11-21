@@ -24,7 +24,7 @@
             $displayName = $customer->name ?: $customer->phone ?: $customer->external_id ?: 'Cliente sin nombre';
         @endphp
 
-        <section class="overflow-hidden rounded-[28px] border border-slate-200/70 bg-[linear-gradient(135deg,rgba(20,110,219,0.08),rgba(22,163,74,0.06)_38%,rgba(255,255,255,1)_82%)] shadow-[0_18px_50px_-28px_rgba(15,23,42,0.4)]">
+        <section class="overflow-hidden rounded-[28px] border border-slate-200/70 surface-hero shadow-card">
             <div class="flex flex-col gap-6 p-6 sm:p-8 lg:flex-row lg:items-end lg:justify-between">
                 <div class="max-w-3xl">
                     <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary ring-1 ring-inset ring-blue-100">

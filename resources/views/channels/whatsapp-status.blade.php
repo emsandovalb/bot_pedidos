@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="space-y-8">
-        <section class="overflow-hidden rounded-[2rem] border border-slate-200/70 bg-[linear-gradient(135deg,rgba(16,185,129,0.12),rgba(20,110,219,0.07)_40%,rgba(255,255,255,1)_82%)] shadow-sm">
+        <section class="overflow-hidden rounded-[2rem] border border-slate-200/70 surface-hero-green shadow-sm">
             <div class="grid gap-6 px-6 py-7 lg:grid-cols-[1.2fr_0.8fr] lg:px-8">
                 <div class="space-y-4">
                     <div class="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700 ring-1 ring-inset ring-emerald-100">
@@ -102,7 +102,7 @@
                 </div>
             </div>
 
-            <div class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-brand-primary bg-[linear-gradient(180deg,rgba(20,110,219,0.07),rgba(255,255,255,1)_74%)] p-6 shadow-sm">
+            <div class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-brand-primary surface-tint-blue p-6 shadow-sm">
                 <div class="flex items-center justify-between gap-3">
                     <div>
                         <h2 class="text-lg font-semibold text-brand-navy">Cronología demo</h2>

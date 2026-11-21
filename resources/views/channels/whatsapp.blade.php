@@ -39,7 +39,7 @@
             </div>
         @endif
 
-        <section class="overflow-hidden rounded-[2rem] border border-slate-200/70 bg-[linear-gradient(135deg,rgba(22,163,74,0.14),rgba(20,110,219,0.08)_46%,rgba(255,255,255,1)_84%)] shadow-sm">
+        <section class="overflow-hidden rounded-[2rem] border border-slate-200/70 surface-hero-green shadow-sm">
             <div class="grid gap-6 px-6 py-7 lg:grid-cols-[1.2fr_0.8fr] lg:px-8">
                 <div class="space-y-5">
                     <div class="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700 ring-1 ring-inset ring-emerald-100">
@@ -94,7 +94,7 @@
             </div>
 
             <div class="mt-6 h-3 overflow-hidden rounded-full bg-slate-100">
-                <div class="h-full rounded-full bg-[linear-gradient(90deg,#16a34a,#146edb)] transition-all" style="width: {{ $readinessPercentage }}%"></div>
+                <div class="h-full rounded-full bar-brand transition-all" style="width: {{ $readinessPercentage }}%"></div>
             </div>
 
             <div class="mt-6 grid gap-3 md:grid-cols-5">
@@ -283,7 +283,7 @@
             </div>
 
             <aside class="space-y-6">
-                <section class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-emerald-500 bg-[linear-gradient(180deg,rgba(16,185,129,0.08),rgba(255,255,255,1)_74%)] p-6 shadow-sm">
+                <section class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-emerald-500 surface-tint-green p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <div>
                             <h2 class="text-lg font-semibold text-brand-navy">Resumen de preparacion</h2>
@@ -352,7 +352,7 @@
             </aside>
         </form>
 
-        <section class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-amber-500 bg-[linear-gradient(180deg,rgba(245,158,11,0.08),rgba(255,255,255,1)_74%)] p-6 shadow-sm">
+        <section class="rounded-[2rem] border border-slate-200/70 border-l-4 border-l-amber-500 surface-tint-amber p-6 shadow-sm">
             <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div>
                     <h2 class="text-lg font-semibold text-brand-navy">Solicitud asistida</h2>

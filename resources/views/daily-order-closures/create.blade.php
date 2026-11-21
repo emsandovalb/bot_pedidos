@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="space-y-8">
-        <section class="overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white via-slate-50 to-emerald-50 shadow-[0_24px_80px_-40px_rgba(15,23,42,0.35)]">
+        <section class="overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white via-slate-50 to-emerald-50 shadow-raised">
             <div class="px-6 py-8 sm:px-8 lg:px-10">
                 <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                     <div class="max-w-3xl">
@@ -23,7 +23,7 @@
         </section>
 
         <div class="grid gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(280px,0.9fr)]">
-            <section class="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-[0_18px_55px_-35px_rgba(15,23,42,0.45)]">
+            <section class="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-card">
                 <div class="border-b border-slate-200/70 px-6 py-5">
                     <h2 class="text-lg font-semibold text-brand-navy">Datos del cierre</h2>
                     <p class="mt-1 text-sm text-slate-600">Completa la sucursal, la fecha y las notas opcionales.</p>
@@ -77,7 +77,7 @@
             </section>
 
             <aside class="space-y-6">
-                <div class="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-[0_18px_55px_-35px_rgba(15,23,42,0.45)]">
+                <div class="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-card">
                     <div class="border-b border-slate-200/70 px-6 py-5">
                         <h2 class="text-lg font-semibold text-brand-navy">Importante</h2>
                     </div>
@@ -88,7 +88,7 @@
                     </div>
                 </div>
 
-                <div class="overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-slate-50 to-white shadow-[0_18px_55px_-35px_rgba(15,23,42,0.45)]">
+                <div class="overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-slate-50 to-white shadow-card">
                     <div class="border-b border-slate-200/70 px-6 py-5">
                         <h2 class="text-lg font-semibold text-brand-navy">Consejo</h2>
                     </div>

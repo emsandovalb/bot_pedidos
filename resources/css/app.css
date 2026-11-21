@@ -188,6 +188,77 @@
         @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold;
     }
 
+    /*
+    | Fondos con color de marca, hechos con tokens para que funcionen en claro y oscuro.
+    | Reemplazan los degradados que cada vista tenía escritos a mano.
+    */
+
+    /* Bloque de bienvenida de cada pantalla: un toque de color que se funde con la tarjeta. */
+    .surface-hero {
+        background: linear-gradient(135deg, color-mix(in srgb, var(--brand) 10%, transparent), color-mix(in srgb, var(--benditio) 7%, transparent) 42%, var(--card) 84%);
+    }
+
+    .surface-hero-green {
+        background: linear-gradient(135deg, color-mix(in srgb, var(--benditio) 13%, transparent), color-mix(in srgb, var(--brand) 7%, transparent) 44%, var(--card) 84%);
+    }
+
+    .surface-hero-amber {
+        background: linear-gradient(135deg, color-mix(in srgb, var(--warning) 14%, transparent), color-mix(in srgb, var(--brand) 7%, transparent) 42%, var(--card) 82%);
+    }
+
+    .surface-hero-sky {
+        background: linear-gradient(135deg, color-mix(in srgb, #0ea5e9 12%, transparent), color-mix(in srgb, var(--benditio) 7%, transparent) 46%, var(--card) 84%);
+    }
+
+    /* Tarjeta con el borde superior teñido del color de su estado. */
+    .surface-tint-blue {
+        background: linear-gradient(180deg, color-mix(in srgb, var(--brand) 8%, transparent), var(--card) 74%);
+    }
+
+    .surface-tint-green {
+        background: linear-gradient(180deg, color-mix(in srgb, var(--benditio) 9%, transparent), var(--card) 74%);
+    }
+
+    .surface-tint-amber {
+        background: linear-gradient(180deg, color-mix(in srgb, var(--warning) 10%, transparent), var(--card) 73%);
+    }
+
+    .surface-tint-sky {
+        background: linear-gradient(180deg, color-mix(in srgb, #0ea5e9 9%, transparent), var(--card) 68%);
+    }
+
+    /* Tarjeta apenas más oscura hacia abajo (logo del menú, paneles secundarios). */
+    .surface-soft {
+        background: linear-gradient(180deg, var(--card) 0%, var(--card-muted) 100%);
+    }
+
+    /* Elemento activo del menú. */
+    .surface-active {
+        background: linear-gradient(90deg, color-mix(in srgb, var(--brand) 10%, transparent), color-mix(in srgb, var(--benditio) 8%, transparent));
+    }
+
+    /* Fondo de pantallas completas (bienvenida, pantallas sin menú). */
+    .surface-page {
+        background:
+            radial-gradient(circle at top left, color-mix(in srgb, var(--brand) 11%, transparent), transparent 32%),
+            radial-gradient(circle at bottom right, color-mix(in srgb, var(--benditio) 9%, transparent), transparent 28%),
+            var(--page);
+    }
+
+    /* Brillo azul detrás del encabezado de la app; en oscuro no hace falta. */
+    .surface-glow {
+        background: radial-gradient(circle at top, color-mix(in srgb, var(--brand) 12%, transparent), transparent 68%);
+    }
+
+    [data-theme="dark"] .surface-glow {
+        background: none;
+    }
+
+    /* Barra de progreso con los dos colores de la marca. */
+    .bar-brand {
+        background: linear-gradient(90deg, var(--benditio), var(--brand));
+    }
+
     .theme-toggle {
         @apply inline-flex h-10 w-10 items-center justify-center rounded-full border transition;
         border-color: var(--line);
@@ -207,18 +278,11 @@
 }
 
 /*
-| Puente del modo oscuro hasta la fase 2.
+| Excepciones del modo oscuro.
 |
-| Algunas vistas todavía tienen colores escritos a mano (degradados en clases `bg-[linear-gradient(...)]`, bloques
-| oscuros de código) que no leen los tokens. En oscuro se aplanan a la superficie de tarjeta, y los bloques que deben
-| seguir oscuros se fijan. La fase 2 reemplaza esos colores por tokens y este bloque se borra.
+| `white` y la escala de grises cambian con el tema (tailwind.config.js), así que los pocos lugares que necesitan el
+| valor fijo se corrigen aquí: texto blanco sobre botones de color y bloques de código que deben seguir oscuros.
 */
-[data-theme="dark"] [class*="bg-[linear-gradient"],
-[data-theme="dark"] [class*="bg-[radial-gradient"] {
-    background-image: none;
-    background-color: var(--card);
-}
-
 [data-theme="dark"] .text-white,
 [data-theme="dark"] .hover\:text-white:hover {
     color: rgb(255 255 255 / var(--tw-text-opacity, 1));

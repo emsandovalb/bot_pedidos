@@ -18,7 +18,7 @@
     </head>
     <body class="font-sans antialiased text-slate-900">
         <div x-data="{ sidebarOpen: false }" class="brand-shell min-h-screen">
-            <div class="absolute inset-x-0 top-0 h-64 bg-[radial-gradient(circle_at_top,rgba(40,97,244,0.12),transparent_68%)] dark:hidden"></div>
+            <div class="absolute inset-x-0 top-0 h-64 surface-glow dark:hidden"></div>
             <div class="relative flex min-h-screen">
                 <div
                     x-show="sidebarOpen"
@@ -28,11 +28,11 @@
                 ></div>
 
                 <aside
-                    class="fixed inset-y-0 left-0 z-40 flex w-72 -translate-x-full flex-col border-r border-slate-200/80 bg-white text-slate-900 shadow-[0_24px_60px_-28px_rgba(15,23,42,0.18)] transition-transform duration-200 ease-in-out lg:translate-x-0"
+                    class="fixed inset-y-0 left-0 z-40 flex w-72 -translate-x-full flex-col border-r border-slate-200/80 bg-white text-slate-900 shadow-raised transition-transform duration-200 ease-in-out lg:translate-x-0"
                     :class="{ 'translate-x-0': sidebarOpen }"
                 >
                     <div class="px-5 pt-5">
-                        <div class="rounded-[1.75rem] border border-slate-200/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] px-5 py-4 shadow-sm">
+                        <div class="rounded-[1.75rem] border border-slate-200/80 surface-soft px-5 py-4 shadow-sm">
                             <a href="{{ route('dashboard') }}" class="block">
                                 <x-application-logo class="h-20 w-full max-w-[240px]" />
                             </a>
@@ -56,7 +56,7 @@
                             <a
                                 href="{{ route($item['href']) }}"
                                 @class([
-                                    'group relative flex items-center gap-3 rounded-2xl border border-brand-primary bg-[linear-gradient(90deg,rgba(20,110,219,0.10),rgba(22,163,74,0.08))] px-4 py-3 text-sm font-medium text-brand-navy shadow-sm transition' => request()->routeIs($item['active']),
+                                    'group relative flex items-center gap-3 rounded-2xl border border-brand-primary surface-active px-4 py-3 text-sm font-medium text-brand-navy shadow-sm transition' => request()->routeIs($item['active']),
                                     'group relative flex items-center gap-3 rounded-2xl border border-transparent px-4 py-3 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-brand-navy' => ! request()->routeIs($item['active']),
                                 ])
                             >
@@ -86,7 +86,7 @@
                                             'green' => 'border-emerald-300 bg-emerald-50/80 text-emerald-950 shadow-sm',
                                             'rose' => 'border-rose-300 bg-rose-50/80 text-rose-950 shadow-sm',
                                             'emerald' => 'border-emerald-300 bg-emerald-50/70 text-emerald-950 shadow-sm',
-                                            default => 'border-brand-primary bg-[linear-gradient(90deg,rgba(20,110,219,0.10),rgba(22,163,74,0.08))] text-brand-navy shadow-sm',
+                                            default => 'border-brand-primary surface-active text-brand-navy shadow-sm',
                                         };
                                         $inactiveStyles = 'border-transparent text-slate-600 hover:bg-slate-50 hover:text-brand-navy';
                                     @endphp
@@ -126,7 +126,7 @@
                                     href="{{ route('settings.notifications.index') }}"
                                     @class([
                                         'group relative flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-medium transition' => true,
-                                        'border-brand-primary bg-[linear-gradient(90deg,rgba(20,110,219,0.10),rgba(22,163,74,0.08))] text-brand-navy shadow-sm' => request()->routeIs('settings.notifications.*'),
+                                        'border-brand-primary surface-active text-brand-navy shadow-sm' => request()->routeIs('settings.notifications.*'),
                                         'border-transparent text-slate-600 hover:bg-slate-50 hover:text-brand-navy' => ! request()->routeIs('settings.notifications.*'),
                                     ])
                                 >
@@ -142,7 +142,7 @@
                                     href="{{ route('settings.oria.index') }}"
                                     @class([
                                         'group relative flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-medium transition' => true,
-                                        'border-brand-primary bg-[linear-gradient(90deg,rgba(20,110,219,0.10),rgba(22,163,74,0.08))] text-brand-navy shadow-sm' => request()->routeIs('settings.oria.*'),
+                                        'border-brand-primary surface-active text-brand-navy shadow-sm' => request()->routeIs('settings.oria.*'),
                                         'border-transparent text-slate-600 hover:bg-slate-50 hover:text-brand-navy' => ! request()->routeIs('settings.oria.*'),
                                     ])
                                 >

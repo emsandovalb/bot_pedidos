@@ -22,7 +22,7 @@
             ];
         @endphp
 
-        <div class="overflow-hidden rounded-[28px] border border-slate-200/70 bg-gradient-to-br from-white via-white to-slate-50 shadow-[0_18px_50px_-28px_rgba(15,23,42,0.45)]">
+        <div class="overflow-hidden rounded-[28px] border border-slate-200/70 bg-gradient-to-br from-white via-white to-slate-50 shadow-card">
             <div class="flex flex-col gap-5 p-6 sm:p-8 lg:flex-row lg:items-end lg:justify-between">
                 <div class="max-w-3xl">
                     <div class="text-sm font-medium uppercase tracking-wide text-slate-500">Pedido #{{ $order->id }}</div>

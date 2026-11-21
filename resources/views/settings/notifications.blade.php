@@ -7,7 +7,7 @@
 
 <x-app-layout>
     <div class="space-y-8">
-        <section class="overflow-hidden rounded-[2rem] border border-slate-200/70 bg-[linear-gradient(135deg,rgba(20,110,219,0.10),rgba(22,163,74,0.08)_42%,rgba(255,255,255,1)_84%)] shadow-sm">
+        <section class="overflow-hidden rounded-[2rem] border border-slate-200/70 surface-hero shadow-sm">
             <div class="relative px-6 py-7 lg:px-8">
                 <div class="max-w-4xl space-y-4">
                     <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary ring-1 ring-inset ring-blue-100">
