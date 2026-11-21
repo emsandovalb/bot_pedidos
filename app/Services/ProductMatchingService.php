@@ -53,6 +53,23 @@ class ProductMatchingService
             return $containsMatch;
         }
 
+        // Customers write plurals ("2 pinturas blancas") for a product named in singular ("Pintura blanca"),
+        // and the other way around. Compared word by word in singular, both find the product.
+        $singularCandidates = $candidates->map(fn (string $candidate): string => $this->normalizer->singular($candidate))->unique()->values();
+        $singularAliases = $aliases->map(function (ProductAlias $alias): ProductAlias {
+            $copy = clone $alias;
+            $copy->normalized_alias = $this->normalizer->singular($alias->normalized_alias);
+
+            return $copy;
+        });
+
+        $pluralMatch = $this->findExactMatch($singularAliases, $singularCandidates)
+            ?? $this->findContainsMatch($singularAliases, $singularCandidates);
+
+        if ($pluralMatch !== null) {
+            return $pluralMatch;
+        }
+
         return $this->noMatch();
     }
 

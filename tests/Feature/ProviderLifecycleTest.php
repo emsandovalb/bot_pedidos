@@ -237,8 +237,8 @@ class ProviderLifecycleTest extends TestCase
             ->get(route('channels.show', 'telegram'))
             ->assertOk()
             ->assertSeeText('Telegram')
-            ->assertSeeText('Capabilities')
-            ->assertSeeText('Health');
+            ->assertSeeText('Funciones')
+            ->assertSeeText('Estado');
     }
 
     public function test_channel_hub_lists_every_provider(): void

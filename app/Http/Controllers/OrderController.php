@@ -38,10 +38,14 @@ class OrderController extends Controller
         Order::STATUS_REJECTED,
     ];
 
+    private const ORDER_CHANNELS = ['whatsapp', 'telegram', 'instagram'];
+
     public function index(Request $request): View
     {
         $filters = $request->validate([
             'status' => ['nullable', Rule::in(self::ORDER_STATUSES)],
+            'channel' => ['nullable', Rule::in(self::ORDER_CHANNELS)],
+            'q' => ['nullable', 'string', 'max:100'],
         ]);
 
         $query = $this->scopedQuery()
@@ -55,10 +59,36 @@ class OrderController extends Controller
             $query->where('status', $filters['status']);
         }
 
+        if (! empty($filters['channel'])) {
+            $query->where('source_channel', $filters['channel']);
+        }
+
+        // A customer's name or phone, or an order number ("#31" or "31").
+        $search = trim((string) ($filters['q'] ?? ''));
+        if ($search !== '') {
+            $orderNumber = ltrim($search, '#');
+            $digits = preg_replace('/\D+/', '', $search) ?? '';
+            $query->where(function ($query) use ($search, $digits, $orderNumber): void {
+                $query->whereHas('customer', function ($customer) use ($search, $digits): void {
+                    $customer->where('name', 'like', '%'.$search.'%');
+
+                    // Only a search with digits looks at phones (an empty pattern would match them all).
+                    if (strlen($digits) >= 4) {
+                        $customer->orWhere('phone', 'like', '%'.$digits.'%');
+                    }
+                });
+
+                if (ctype_digit($orderNumber)) {
+                    $query->orWhere('id', (int) $orderNumber);
+                }
+            });
+        }
+
         return view('orders.index', [
             'orders' => $query->paginate(25)->withQueryString(),
             'filters' => $filters,
             'statusOptions' => self::ORDER_STATUSES,
+            'channelOptions' => self::ORDER_CHANNELS,
         ]);
     }
 

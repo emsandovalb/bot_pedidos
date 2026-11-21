@@ -193,7 +193,7 @@ class CustomerContextBuilder
     {
         if ($history->isEmpty()) {
             return [
-                'name' => 'Unknown',
+                'name' => 'Sin dato',
                 'percentage' => 0.0,
             ];
         }
@@ -206,7 +206,7 @@ class CustomerContextBuilder
         }
 
         arsort($counts);
-        $favoriteChannel = array_key_first($counts) ?? 'Unknown';
+        $favoriteChannel = array_key_first($counts) ?? 'Sin dato';
 
         return [
             'name' => $favoriteChannel,

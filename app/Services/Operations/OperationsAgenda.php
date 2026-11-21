@@ -96,8 +96,8 @@ class OperationsAgenda
             return $section->toArray();
         }
 
-        $groupedCards = $sorted->groupBy(fn (AgendaCard $card): string => $card->toArray()['time_window_label'] ?? 'Anytime');
-        $timeWindowOrder = ['Morning', 'Before Noon', 'Afternoon', 'Evening', 'Anytime'];
+        $groupedCards = $sorted->groupBy(fn (AgendaCard $card): string => $card->toArray()['time_window_label'] ?? 'Cualquier hora');
+        $timeWindowOrder = ['Temprano', 'Antes del mediodía', 'Tarde', 'Noche', 'Cualquier hora'];
 
         foreach ($timeWindowOrder as $groupLabel) {
             $group = $groupedCards->get($groupLabel, collect());

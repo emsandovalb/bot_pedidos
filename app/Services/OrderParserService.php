@@ -24,9 +24,9 @@ class OrderParserService
         ['regex' => '/\bpara\s+las?\s+\d{1,2}(?::\d{2})?(?:\s*(?:am|pm|a\.m\.|p\.m\.|md))?\b/u', 'note' => null],
         ['regex' => '/\burgente\b/u', 'note' => 'urgente'],
         ['regex' => '/\blo\s+paso\s+recogiendo\b/u', 'note' => 'lo paso recogiendo'],
-        ['regex' => '/\bme\s+lo\s+env(?:ia|ias|ie|ien)\b/u', 'note' => 'me lo envia'],
-        ['regex' => '/\bme\s+lo\s+llev(?:an|a|e|en)\b/u', 'note' => 'me lo llevan'],
-        ['regex' => '/\bme\s+lo\s+tra(?:en|e)\b/u', 'note' => 'me lo traen'],
+        ['regex' => '/\bme\s+l(?:o|a)s?\s+env(?:ia|ias|ie|ien)\b/u', 'note' => 'me lo envia'],
+        ['regex' => '/\bme\s+l(?:o|a)s?\s+llev(?:an|a|e|en)\b/u', 'note' => 'me lo llevan'],
+        ['regex' => '/\bme\s+l(?:o|a)s?\s+tra(?:en|e)\b/u', 'note' => 'me lo traen'],
         ['regex' => '/\byo\s+paso\s+por\s+ell(?:o|a|os|as)\b/u', 'note' => 'yo paso por ellos'],
         ['regex' => '/\bpaso\s+por\s+ell(?:o|a|os|as)\b/u', 'note' => 'paso por ellos'],
         ['regex' => '/\bpago\s+por\s+sinpe\b/u', 'note' => 'pago por sinpe'],
@@ -398,6 +398,8 @@ class OrderParserService
         $candidate = trim($candidate);
 
         $phrases = [
+            // A greeting is not a product: "Hola, ocupo 2 tubos" or "buenas tardes 3 sacos".
+            '/^(?:hola|buenas|buenos|saludos|que\s+tal|hello|hi)\b(?:\s+(?:dias|tardes|noches))?\b\s*/u',
             '/^(?:me\s+)?aparta(?:me|nos|n|s)?\b\s*/u',
             '/^ocupo\b\s*/u',
             '/^necesito\b\s*/u',
@@ -428,7 +430,7 @@ class OrderParserService
     {
         $value = trim($value);
         $value = preg_replace('/^(?:de|del|para|por|con)\s+/u', '', $value) ?? $value;
-        $value = preg_replace('/\s+(?:para\s+(?:manana|hoy)|urgente|sin\s+falta|lo\s+paso\s+recogiendo|me\s+lo\s+env(?:ia|ias|ie|ien)|enviar\s+a\s+domicilio|recoger\s+en\s+tienda)\b.*$/u', '', $value) ?? $value;
+        $value = preg_replace('/\s+(?:para\s+(?:manana|hoy)|urgente|sin\s+falta|lo\s+paso\s+recogiendo|me\s+l(?:o|a)s?\s+env(?:ia|ias|ie|ien)|enviar\s+a\s+domicilio|recoger\s+en\s+tienda)\b.*$/u', '', $value) ?? $value;
         $value = preg_replace('/\s+/u', ' ', $value) ?? $value;
 
         return trim($value);
@@ -492,9 +494,9 @@ class OrderParserService
             '/(?:\s*(?:,|;|\.)\s*|\s+)\bpara\s+las?\s+\d{1,2}(?::\d{2})?(?:\s*(?:am|pm|a\.m\.|p\.m\.|md))?\b\s*$/u',
             '/(?:\s*(?:,|;|\.)\s*|\s+)\burgente\b\s*$/u',
             '/(?:\s*(?:,|;|\.)\s*|\s+)\blo\s+paso\s+recogiendo\b\s*$/u',
-            '/(?:\s*(?:,|;|\.)\s*|\s+)\bme\s+lo\s+env(?:ia|ias|ie|ien)\b\s*$/u',
-            '/(?:\s*(?:,|;|\.)\s*|\s+)\bme\s+lo\s+llev(?:an|a|e|en)\b\s*$/u',
-            '/(?:\s*(?:,|;|\.)\s*|\s+)\bme\s+lo\s+tra(?:en|e)\b\s*$/u',
+            '/(?:\s*(?:,|;|\.)\s*|\s+)\bme\s+l(?:o|a)s?\s+env(?:ia|ias|ie|ien)\b\s*$/u',
+            '/(?:\s*(?:,|;|\.)\s*|\s+)\bme\s+l(?:o|a)s?\s+llev(?:an|a|e|en)\b\s*$/u',
+            '/(?:\s*(?:,|;|\.)\s*|\s+)\bme\s+l(?:o|a)s?\s+tra(?:en|e)\b\s*$/u',
             '/(?:\s*(?:,|;|\.)\s*|\s+)\byo\s+paso\s+por\s+ell(?:o|a|os|as)\b\s*$/u',
             '/(?:\s*(?:,|;|\.)\s*|\s+)\bpaso\s+por\s+ell(?:o|a|os|as)\b\s*$/u',
             '/(?:\s*(?:,|;|\.)\s*|\s+)\bpago\s+por\s+sinpe\b\s*$/u',

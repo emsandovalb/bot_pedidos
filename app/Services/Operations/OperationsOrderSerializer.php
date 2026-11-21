@@ -3,6 +3,7 @@
 namespace App\Services\Operations;
 
 use App\Models\Order;
+use App\Services\OrderConfirmationReadinessService;
 use App\Services\OrderWorkflowActionPresenter;
 use Illuminate\Support\Str;
 
@@ -14,6 +15,7 @@ class OperationsOrderSerializer
     public function __construct(
         private readonly OrderWorkflowActionPresenter $orderWorkflowActionPresenter,
         private readonly OrderDisplayLabels $labels,
+        private readonly OrderConfirmationReadinessService $readiness,
     ) {}
 
     /**
@@ -29,7 +31,7 @@ class OperationsOrderSerializer
             'phone' => $order->customer?->phone ?? 'Sin telefono',
             'total_orders' => 0,
             'favorite_products' => [],
-            'favorite_channel' => ['name' => 'Unknown', 'percentage' => 0.0],
+            'favorite_channel' => ['name' => 'Sin dato', 'percentage' => 0.0],
             'last_order' => null,
             'segment' => 'Inactive',
             'open_notifications' => 0,
@@ -52,6 +54,8 @@ class OperationsOrderSerializer
             'status' => $order->status,
             'status_label' => $this->labels->statusLabel($order->status),
             'status_tone' => $this->labels->statusTone($order->status),
+            // An order awaiting review that can't be confirmed yet (products to resolve) gets "Revisar", not "Confirmar".
+            'can_confirm' => $order->status !== Order::STATUS_PENDING_REVIEW || $this->readiness->canConfirm($order),
             'source_channel' => $order->source_channel,
             'channel' => $this->labels->channelLabel($order->source_channel),
             'channel_key' => $order->source_channel,

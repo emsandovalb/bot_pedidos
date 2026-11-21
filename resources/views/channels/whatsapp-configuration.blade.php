@@ -35,7 +35,7 @@
 
                     <div class="flex flex-wrap gap-3">
                         <a href="{{ route('channels.index') }}" class="brand-btn-secondary justify-center">
-                            Back to hub
+                            Volver a canales
                         </a>
                         <a href="{{ route('channels.whatsapp.status') }}" class="brand-btn-secondary justify-center border-emerald-200 text-emerald-800 hover:border-emerald-300 hover:text-emerald-900">
                             View channel status
@@ -45,7 +45,7 @@
 
                 <div class="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
                     <article class="rounded-2xl border border-slate-200/80 bg-white/95 p-4 shadow-sm">
-                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Configuration</p>
+                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Configuración</p>
                         <p class="mt-2 text-lg font-semibold tracking-tight text-brand-navy">{{ \Illuminate\Support\Str::headline($statusLabel) }}</p>
                     </article>
                     <article class="rounded-2xl border border-emerald-200/80 bg-emerald-50/80 p-4 shadow-sm">
@@ -53,7 +53,7 @@
                         <p class="mt-2 text-lg font-semibold tracking-tight text-brand-navy">{{ $isReadyForWebhook ? 'Ready' : 'Waiting' }}</p>
                     </article>
                     <article class="rounded-2xl border border-slate-200/80 bg-white/95 p-4 shadow-sm">
-                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Validation</p>
+                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Validación</p>
                         <p class="mt-2 text-lg font-semibold tracking-tight text-brand-navy">{{ $lastValidationAt?->format('d/m/Y H:i') ?? 'Never' }}</p>
                     </article>
                 </div>
@@ -176,7 +176,7 @@
                 <section class="rounded-[20px] border border-slate-200/70 surface-tint-green p-6 shadow-sm">
                     <div class="flex items-center justify-between gap-3">
                         <div>
-                            <h2 class="text-lg font-semibold text-brand-navy">Validation</h2>
+                            <h2 class="text-lg font-semibold text-brand-navy">Validación</h2>
                             <p class="mt-1 text-sm text-slate-500">Local checks only. No Meta HTTP requests are sent.</p>
                         </div>
                     </div>
@@ -256,7 +256,7 @@
                             Validate Configuration
                         </button>
                         <button type="submit" name="action" value="save" class="brand-btn-primary justify-center">
-                            Save
+                            Guardar
                         </button>
                         <button type="reset" class="brand-btn-secondary justify-center">
                             Reset

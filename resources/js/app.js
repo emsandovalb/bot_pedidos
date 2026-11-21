@@ -28,7 +28,7 @@ window.operationsCenter = (config) => ({
     liveQueue: null,
     liveConnection: {
         state: 'live',
-        label: 'Live',
+        label: 'En vivo',
         tone: 'green',
         description: 'Conectado',
     },

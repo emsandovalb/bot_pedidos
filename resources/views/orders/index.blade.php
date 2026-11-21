@@ -32,6 +32,9 @@
             ];
 
             $currentStatus = $filters['status'] ?? null;
+            $currentChannel = $filters['channel'] ?? null;
+            $currentSearch = trim((string) ($filters['q'] ?? ''));
+            $channelLabels = ['whatsapp' => 'WhatsApp', 'telegram' => 'Telegram', 'instagram' => 'Instagram'];
         @endphp
 
         <div class="overflow-hidden rounded-[28px] border border-slate-200/70 surface-hero shadow-card">
@@ -65,13 +68,53 @@
                         $pillClass = $isActive
                             ? 'border-brand-primary bg-blue-50 text-brand-primary ring-1 ring-blue-100'
                             : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50';
-                        $query = $statusValue ? ['status' => $statusValue] : [];
+                        // A status tab keeps the channel and the search already chosen.
+                        $query = array_filter([
+                            'status' => $statusValue,
+                            'channel' => $currentChannel,
+                            'q' => $currentSearch,
+                        ], static fn ($value) => $value !== null && $value !== '');
                     @endphp
                     <a href="{{ route('orders.index', $query) }}" class="inline-flex items-center rounded-full border px-4 py-2 text-sm font-medium transition {{ $pillClass }}">
                         {{ $label }}
                     </a>
                 @endforeach
             </div>
+
+            <form method="GET" action="{{ route('orders.index') }}" class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end" role="search">
+                @if ($currentStatus)
+                    <input type="hidden" name="status" value="{{ $currentStatus }}">
+                @endif
+                <label class="flex min-w-0 flex-1 flex-col gap-1 text-sm font-medium text-slate-700">
+                    Buscar
+                    <input type="search" name="q" value="{{ $currentSearch }}" maxlength="100"
+                        placeholder="Nombre o teléfono del cliente, o número de pedido"
+                        class="w-full rounded-2xl border-slate-200 text-sm focus:border-brand-primary focus:ring-brand-primary">
+                </label>
+                <label class="flex flex-col gap-1 text-sm font-medium text-slate-700 sm:w-48">
+                    Canal
+                    <select name="channel" class="rounded-2xl border-slate-200 text-sm focus:border-brand-primary focus:ring-brand-primary">
+                        <option value="">Todos los canales</option>
+                        @foreach ($channelOptions as $channel)
+                            <option value="{{ $channel }}" @selected($currentChannel === $channel)>{{ $channelLabels[$channel] ?? ucfirst($channel) }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <div class="flex gap-2">
+                    <button type="submit" class="inline-flex items-center justify-center rounded-2xl bg-brand-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
+                        Buscar
+                    </button>
+                    @if ($currentChannel || $currentSearch)
+                        <a href="{{ route('orders.index', array_filter(['status' => $currentStatus])) }}" class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                            Limpiar
+                        </a>
+                    @endif
+                </div>
+            </form>
+
+            <p class="mt-3 text-sm text-slate-500" data-orders-total>
+                {{ $orders->total() }} {{ $orders->total() === 1 ? 'pedido' : 'pedidos' }}
+            </p>
         </div>
 
         <div class="space-y-4">

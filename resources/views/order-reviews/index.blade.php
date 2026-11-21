@@ -340,9 +340,11 @@
                                         <a href="{{ route('orders.show', $order) }}" class="inline-flex w-full items-center justify-center rounded-2xl bg-brand-primary px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-700">
                                             Ver pedido
                                         </a>
-                                        <a href="{{ route('orders.edit', $order) }}" class="inline-flex w-full items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">
-                                            Editar pedido
-                                        </a>
+                                        @can('update', $order)
+                                            <a href="{{ route('orders.edit', $order) }}" class="inline-flex w-full items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">
+                                                Editar pedido
+                                            </a>
+                                        @endcan
                                     </div>
                                 </section>
                             </aside>
