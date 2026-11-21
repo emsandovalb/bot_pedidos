@@ -320,6 +320,25 @@
         color: #062b1c;
     }
 
+    /*
+    | Encabezado de pantalla al estilo OriA: título directo sobre la página, sin caja de color.
+    | Lo usan <x-page-header> y los encabezados con contenido propio (estadísticas, buscador) de cada vista.
+    */
+    .page-eyebrow {
+        @apply text-xs font-extrabold uppercase tracking-[0.16em];
+        color: var(--benditio);
+    }
+
+    .page-title {
+        @apply text-[1.75rem] font-extrabold leading-tight tracking-[-0.03em] sm:text-[2rem];
+        color: var(--text);
+    }
+
+    .page-subtitle {
+        @apply max-w-3xl text-[0.95rem] leading-relaxed;
+        color: var(--text-muted);
+    }
+
     /* Acción principal sobre un bloque marino: botón blanco con texto marino, igual en los dos temas. */
     .hero-btn {
         @apply inline-flex items-center justify-center gap-2.5 rounded-xl px-5 py-3 text-[0.95rem] font-extrabold transition;

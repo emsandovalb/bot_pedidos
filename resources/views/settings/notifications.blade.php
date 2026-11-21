@@ -7,17 +7,15 @@
 
 <x-app-layout>
     <div class="space-y-8">
-        <section class="overflow-hidden rounded-[20px] border border-slate-200/70 surface-hero shadow-sm">
-            <div class="relative px-6 py-7 lg:px-8">
+        <section class="page-intro">
+            <div class="relative">
                 <div class="max-w-4xl space-y-4">
-                    <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary">
-                        Configuración
-                    </div>
+                    <p class="page-eyebrow">Configuración</p>
                     <div class="space-y-3">
-                        <h1 class="text-3xl font-semibold tracking-tight text-brand-navy sm:text-4xl">
+                        <h1 class="page-title mt-1">
                             Configuración de notificaciones
                         </h1>
-                        <p class="max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
+                        <p class="page-subtitle mt-2">
                             Define qué eventos envían mensajes automáticos a tus clientes.
                         </p>
                         <p class="max-w-3xl text-sm leading-6 text-slate-600">

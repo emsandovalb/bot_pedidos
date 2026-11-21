@@ -1,25 +1,23 @@
 <x-app-layout>
     <div class="space-y-8">
-        <section class="overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white via-slate-50 to-emerald-50 shadow-raised">
-            <div class="px-6 py-8 sm:px-8 lg:px-10">
+        <section class="page-intro">
+            <div class="">
                 <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                     <div class="max-w-3xl">
-                        <div class="inline-flex items-center rounded-full border border-brand-primary/10 bg-brand-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-brand-primary">
-                            Cierres diarios
-                        </div>
-                        <h1 class="mt-4 text-3xl font-semibold tracking-tight text-brand-navy sm:text-4xl">
+                        <p class="page-eyebrow">Cierres diarios</p>
+                        <h1 class="page-title mt-1">
                             Cierre diario
                         </h1>
-                        <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+                        <p class="page-subtitle mt-2">
                             {{ $closure->branch?->name ?? 'Sucursal no disponible' }} · {{ $closure->closure_date?->format('d/m/Y') ?? '-' }}
                         </p>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-3">
-                        <a href="{{ route('daily-order-closures.export', $closure) }}" class="inline-flex items-center justify-center rounded-xl bg-brand-primary px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-primary/20 transition hover:-translate-y-0.5 hover:bg-brand-primary/90">
+                        <a href="{{ route('daily-order-closures.export', $closure) }}" class="brand-btn-primary">
                             Exportar CSV
                         </a>
-                        <a href="{{ route('daily-order-closures.index') }}" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-brand-primary/30 hover:text-brand-primary">
+                        <a href="{{ route('daily-order-closures.index') }}" class="brand-btn-secondary">
                             Volver
                         </a>
                     </div>

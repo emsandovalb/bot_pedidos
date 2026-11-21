@@ -22,11 +22,11 @@
             ];
         @endphp
 
-        <div class="overflow-hidden rounded-[20px] border border-slate-200/70 bg-gradient-to-br from-white via-white to-slate-50 shadow-card">
-            <div class="flex flex-col gap-5 p-6 sm:p-8 lg:flex-row lg:items-end lg:justify-between">
+        <div class="page-intro">
+            <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
                 <div class="max-w-3xl">
-                    <div class="text-sm font-medium uppercase tracking-wide text-slate-500">Pedido #{{ $order->id }}</div>
-                    <h1 class="mt-2 text-3xl font-semibold tracking-tight text-brand-navy sm:text-4xl">Editar pedido #{{ $order->id }}</h1>
+                    <p class="page-eyebrow">Pedido #{{ $order->id }}</p>
+                    <h1 class="page-title mt-1">Editar pedido #{{ $order->id }}</h1>
                     <div class="mt-4 flex flex-wrap items-center gap-3">
                         <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $statusBadgeClasses[$order->status] ?? 'bg-slate-100 text-slate-700' }}">
                             {{ $statusLabels[$order->status] ?? str_replace('_', ' ', $order->status) }}
@@ -41,10 +41,10 @@
                 </div>
 
                 <div class="flex flex-wrap items-center gap-3">
-                    <a href="{{ route('orders.show', $order) }}" class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">
+                    <a href="{{ route('orders.show', $order) }}" class="brand-btn-secondary">
                         Volver al detalle
                     </a>
-                    <a href="{{ route('orders.index') }}" class="inline-flex items-center justify-center rounded-2xl bg-brand-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
+                    <a href="{{ route('orders.index') }}" class="brand-btn-primary">
                         Pedidos
                     </a>
                 </div>

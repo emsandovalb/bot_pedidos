@@ -39,17 +39,15 @@
             </div>
         @endif
 
-        <section class="overflow-hidden rounded-[20px] border border-slate-200/70 surface-hero-green shadow-sm">
-            <div class="grid gap-6 px-6 py-7 lg:grid-cols-[1.2fr_0.8fr] lg:px-8">
+        <section class="page-intro">
+            <div class="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
                 <div class="space-y-5">
-                    <div class="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
-                        Configuracion de WhatsApp Business
-                    </div>
+                    <p class="page-eyebrow">Configuración de WhatsApp Business</p>
                     <div class="max-w-3xl space-y-3">
-                        <h1 class="text-3xl font-semibold tracking-tight text-brand-navy sm:text-4xl">
+                        <h1 class="page-title mt-1">
                             Onboarding real para dejar listo el canal
                         </h1>
-                        <p class="max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+                        <p class="page-subtitle mt-2">
                             Completa el checklist, registra el numero y deja guardada la preparacion del negocio en
                             <span class="font-semibold text-brand-navy">ChannelConnection.metadata_json</span> sin tocar la integracion de Meta todavia.
                         </p>

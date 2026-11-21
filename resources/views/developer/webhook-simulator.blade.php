@@ -4,15 +4,15 @@
         x-data="developerToolkit(@js($formState), @js($examples), @js($providerSpecs))"
         x-init="init()"
     >
-        <section class="overflow-hidden rounded-[20px] border border-slate-200/80 surface-hero shadow-sm">
-            <div class="p-6 sm:p-8">
+        <section class="page-intro">
+            <div class="">
                 <div class="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
                     <div class="max-w-3xl">
-                        <div class="brand-badge bg-cyan-100 text-cyan-800">Developer only</div>
-                        <h1 class="mt-3 text-3xl font-semibold tracking-tight text-brand-navy sm:text-4xl">
+                        <p class="page-eyebrow">Solo desarrollo</p>
+                        <h1 class="page-title mt-1">
                             Business Scenario Simulator
                         </h1>
-                        <p class="mt-2 max-w-2xl text-sm text-slate-600 sm:text-base">
+                        <p class="page-subtitle mt-2">
                             Local business day simulator for QA, demonstrations and operational testing. It reuses the real ingestion path and stays hidden outside local or debug environments.
                         </p>
                     </div>
@@ -119,7 +119,7 @@
 
                         <div class="mt-4 flex flex-wrap gap-3">
                             @if (! empty($result['order_url']))
-                                <a href="{{ $result['order_url'] }}" class="inline-flex items-center justify-center rounded-2xl bg-brand-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-700">
+                                <a href="{{ $result['order_url'] }}" class="brand-btn-primary">
                                     View latest order
                                 </a>
                             @endif

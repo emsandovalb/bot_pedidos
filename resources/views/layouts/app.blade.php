@@ -92,7 +92,10 @@
         $isActive = fn (array $item): bool => request()->routeIs($item['active'])
             && (! isset($item['provider']) || request()->route('provider') === $item['provider']);
 
-        $currentLabel = collect($navGroups)->pluck('items')->flatten(1)->first($isActive)['label'] ?? null;
+        // Pantallas que no están en el menú también muestran su nombre en la ruta.
+        $extraLabels = ['channels.index' => 'Canales', 'profile.*' => 'Perfil'];
+        $currentLabel = collect($navGroups)->pluck('items')->flatten(1)->first($isActive)['label']
+            ?? collect($extraLabels)->first(fn ($label, $pattern) => request()->routeIs($pattern));
 
         $authUser = auth()->user();
         $initials = collect(preg_split('/\s+/', trim($authUser->name)))->filter()->take(2)->map(fn ($part) => mb_strtoupper(mb_substr($part, 0, 1)))->implode('');
@@ -216,6 +219,17 @@
                                 </button>
                                 <a href="{{ route('operations.index') }}" class="brand-btn-primary hidden sm:inline-flex">
                                     Pedidos pendientes
+                                </a>
+                                {{-- En celular no cabe el texto: el mismo acceso como botón con ícono. --}}
+                                <a
+                                    href="{{ route('operations.index') }}"
+                                    class="brand-btn-primary h-10 w-10 px-0 sm:hidden"
+                                    aria-label="Pedidos pendientes"
+                                    title="Pedidos pendientes"
+                                >
+                                    <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5" aria-hidden="true">
+                                        <path d="M3.5 7.5h17M6 4.5h12M6 10.5h12M6 15.5h12M6 20.5h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
                                 </a>
                                 <a href="{{ route('profile.edit') }}" class="hidden items-center gap-2 rounded-full border border-slate-200 py-1 pl-1 pr-3.5 text-sm font-bold text-brand-navy transition hover:border-slate-300 xl:inline-flex">
                                     <span class="avatar h-8 w-8">{{ $initials }}</span>

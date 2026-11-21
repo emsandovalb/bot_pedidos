@@ -23,15 +23,12 @@
             </div>
         @endif
 
-        <section class="overflow-hidden rounded-[20px] border border-slate-200/80 surface-hero shadow-sm">
-            <div class="grid gap-6 px-6 py-7 lg:grid-cols-[1.2fr_0.8fr] lg:px-8">
+        <section class="page-intro">
+            <div class="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
                 <div class="space-y-4">
-                    <div class="inline-flex rounded-full bg-brand-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-brand-primary ring-1 ring-inset ring-blue-100">
-                        Catálogo de productos
-                    </div>
                     <div class="max-w-3xl space-y-3">
-                        <h1 class="text-3xl font-semibold tracking-tight text-brand-navy sm:text-4xl">Catálogo de productos</h1>
-                        <p class="max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+                        <h1 class="page-title mt-1">Catálogo de productos</h1>
+                        <p class="page-subtitle mt-2">
                             Administra los productos que Benditio puede reconocer automáticamente.
                         </p>
                     </div>

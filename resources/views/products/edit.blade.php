@@ -14,15 +14,12 @@
             </div>
         @endif
 
-        <section class="overflow-hidden rounded-[20px] border border-slate-200/80 bg-gradient-to-br from-white via-slate-50 to-blue-50/50 shadow-sm">
-            <div class="grid gap-6 px-6 py-7 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
+        <section class="page-intro">
+            <div class="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
                 <div class="space-y-4">
-                    <div class="inline-flex rounded-full bg-brand-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-brand-primary">
-                        Editar producto
-                    </div>
                     <div class="max-w-3xl space-y-3">
-                        <h1 class="text-3xl font-semibold tracking-tight text-brand-navy sm:text-4xl">Editar producto</h1>
-                        <p class="max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+                        <h1 class="page-title mt-1">Editar producto</h1>
+                        <p class="page-subtitle mt-2">
                             Actualiza la ficha del producto, revisa sus alias y confirma como lo reconocera Benditio.
                         </p>
                     </div>

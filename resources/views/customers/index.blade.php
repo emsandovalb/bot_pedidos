@@ -14,14 +14,11 @@
             $currentSearch = $filters['search'] ?? '';
         @endphp
 
-        <section class="overflow-hidden rounded-[20px] border border-slate-200/70 surface-hero shadow-card">
-            <div class="flex flex-col gap-6 p-6 sm:p-8 lg:flex-row lg:items-end lg:justify-between">
+        <section class="page-intro">
+            <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                 <div class="max-w-3xl">
-                    <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary">
-                        Benditio Customer Identity
-                    </div>
-                    <h1 class="mt-4 text-3xl font-semibold tracking-tight text-brand-navy sm:text-4xl">Clientes</h1>
-                    <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+                    <h1 class="page-title mt-1">Clientes</h1>
+                    <p class="page-subtitle mt-2">
                         Unifica clientes y canales para entender quién compra en tu negocio.
                     </p>
                 </div>
@@ -34,15 +31,15 @@
                             name="search"
                             value="{{ $currentSearch }}"
                             placeholder="Buscar por nombre, teléfono o usuario"
-                            class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10"
+                            class="brand-input h-11 w-full rounded-xl px-4 text-sm"
                         >
                     </div>
                     <div class="flex gap-2">
-                        <button type="submit" class="inline-flex items-center justify-center rounded-2xl bg-brand-primary px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-700">
+                        <button type="submit" class="brand-btn-primary">
                             Buscar
                         </button>
                         @if ($currentSearch !== '')
-                            <a href="{{ route('customers.index') }}" class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50">
+                            <a href="{{ route('customers.index') }}" class="brand-btn-secondary">
                                 Limpiar
                             </a>
                         @endif

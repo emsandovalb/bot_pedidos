@@ -24,19 +24,17 @@
             $displayName = $customer->name ?: $customer->phone ?: $customer->external_id ?: 'Cliente sin nombre';
         @endphp
 
-        <section class="overflow-hidden rounded-[20px] border border-slate-200/70 surface-hero shadow-card">
-            <div class="flex flex-col gap-6 p-6 sm:p-8 lg:flex-row lg:items-end lg:justify-between">
+        <section class="page-intro">
+            <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                 <div class="max-w-3xl">
-                    <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary">
-                        Benditio Customer Identity
-                    </div>
-                    <h1 class="mt-4 text-3xl font-semibold tracking-tight text-brand-navy sm:text-4xl">Cliente</h1>
-                    <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+                    <p class="page-eyebrow">Clientes</p>
+                    <h1 class="page-title mt-1">Cliente</h1>
+                    <p class="page-subtitle mt-2">
                         Vista unificada de pedidos, canales e identidades.
                     </p>
                 </div>
 
-                <a href="{{ route('customers.index') }}" class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50">
+                <a href="{{ route('customers.index') }}" class="brand-btn-secondary">
                     Volver a clientes
                 </a>
             </div>

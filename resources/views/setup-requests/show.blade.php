@@ -7,15 +7,13 @@
             $currentStatus = old('status', $setupRequest->status);
         @endphp
 
-        <section class="overflow-hidden rounded-[20px] border border-slate-200/70 surface-hero shadow-sm">
-            <div class="grid gap-6 px-6 py-7 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
+        <section class="page-intro">
+            <div class="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
                 <div class="space-y-4">
-                    <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary">
-                        Configuracion WhatsApp
-                    </div>
+                    <p class="page-eyebrow">Configuración de WhatsApp</p>
                     <div class="space-y-3">
-                        <h1 class="text-3xl font-semibold tracking-tight text-brand-navy sm:text-4xl">Configuracion WhatsApp</h1>
-                        <p class="max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+                        <h1 class="page-title mt-1">Configuracion WhatsApp</h1>
+                        <p class="page-subtitle mt-2">
                             Gestion operativa de una solicitud asistida para preparar el canal sin tocar la integracion final.
                         </p>
                     </div>

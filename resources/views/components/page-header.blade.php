@@ -11,11 +11,11 @@
 <header {{ $attributes->class('flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between') }}>
     <div class="min-w-0">
         @if ($eyebrow)
-            <p class="text-xs font-extrabold uppercase tracking-[0.16em] text-emerald-700">{{ $eyebrow }}</p>
+            <p class="page-eyebrow">{{ $eyebrow }}</p>
         @endif
-        <h1 class="mt-1 text-[1.75rem] font-extrabold leading-tight tracking-[-0.03em] text-brand-navy sm:text-[2rem]">{{ $title }}</h1>
+        <h1 class="page-title mt-1">{{ $title }}</h1>
         @if ($subtitle)
-            <p class="mt-1.5 max-w-3xl text-[0.95rem] text-slate-500">{{ $subtitle }}</p>
+            <p class="page-subtitle mt-1.5">{{ $subtitle }}</p>
         @endif
     </div>
     @isset($actions)

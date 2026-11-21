@@ -19,16 +19,14 @@
     @endphp
 
     <div class="space-y-10">
-        <section class="rounded-[20px] border border-slate-200/70 surface-hero p-6 shadow-sm sm:p-8">
+        <section class="page-intro">
             <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                 <div class="max-w-3xl">
-                    <div class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-primary">
-                        Benditio analytics v1
-                    </div>
-                    <h1 class="mt-4 text-3xl font-semibold tracking-tight text-brand-navy sm:text-4xl">
+                    <p class="page-eyebrow">Analítica</p>
+                    <h1 class="page-title mt-1">
                         Lectura rápida de ventas, clasificación y seguimiento
                     </h1>
-                    <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+                    <p class="page-subtitle mt-2">
                         Vista operativa para entender el ritmo de pedidos, la calidad de la clasificación automática y la actividad reciente sin salir del panel.
                     </p>
                 </div>

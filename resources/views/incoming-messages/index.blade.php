@@ -1,9 +1,9 @@
 <x-app-layout>
     <div class="space-y-6">
         <div>
-            <div class="brand-badge bg-brand-primary/10 text-brand-primary">Bandeja de mensajes</div>
-            <h1 class="mt-3 text-3xl font-semibold tracking-tight text-brand-navy">Mensajes entrantes</h1>
-            <p class="mt-1 text-sm text-slate-600">Últimos mensajes capturados para el ámbito visible.</p>
+            <p class="page-eyebrow">Bandeja de mensajes</p>
+            <h1 class="page-title mt-1">Mensajes entrantes</h1>
+            <p class="page-subtitle mt-2">Últimos mensajes capturados para el ámbito visible.</p>
         </div>
 
         <div class="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm">

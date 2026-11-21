@@ -1,16 +1,14 @@
 <x-app-layout>
     <div class="space-y-8">
-        <section class="overflow-hidden rounded-[20px] border border-slate-200/70 surface-hero-green shadow-sm">
-            <div class="grid gap-6 px-6 py-7 lg:grid-cols-[1.2fr_0.8fr] lg:px-8">
+        <section class="page-intro">
+            <div class="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
                 <div class="space-y-4">
-                    <div class="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
-                        Estado de WhatsApp
-                    </div>
+                    <p class="page-eyebrow">Estado de WhatsApp</p>
                     <div class="max-w-3xl space-y-3">
-                        <h1 class="text-3xl font-semibold tracking-tight text-brand-navy sm:text-4xl">
+                        <h1 class="page-title mt-1">
                             Dashboard de salud y actividad del canal
                         </h1>
-                        <p class="max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+                        <p class="page-subtitle mt-2">
                             Vista ejecutiva para revisar conexión, mensajes en espera y el rendimiento esperado del canal principal.
                         </p>
                     </div>
